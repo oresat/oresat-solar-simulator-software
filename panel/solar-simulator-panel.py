@@ -1,25 +1,29 @@
-import Adafruit_BBIO.PWM as PWM # Used for demo validation
 from Adafruit_I2C import Adafruit_I2C
 import adafruit_mcp4728
+import socketio
+import argparse
+import json
 from debugdata import fake_photo, fake_temp
 
-import socketio
+with open('panel-options.conf', 'r') as jsonfile:
+    data = json.load(jsonfile)
 
+
+# Setup SocketIO
 global client_connected
 client_connected = False
 sio = socketio.Client(logger=True)
 
-# TODO: Read from file
-server_address = '192.168.6.1'
-server_port = '8000'
-client_id = 2
+# Initialize ArgParse
+parser = argparse.ArgumentParser(prog='solar-sim-client', description='oresat-solar-simulator client node', 
+                                 epilog='https://github.com/oresat/oresat-solar-simulator')
 
+parser.add_argument('-i', '--ipaddress',type=str, help='ip-address of the server', 
+                    required=False, default=data['server-ip'], metavar='192.168.X.2')
+parser.add_argument('-c', '--clientid', type=int, help='id the client will report to server', 
+                    required=False, default=data['client-id'], choices=range(0,4))
 
-### PWM Demo Remove for Final Code
-BB_FREQ = 250e3
-LED_PIN = "P9_16"
-PWM.start(LED_PIN, 0, BB_FREQ)
-###
+args = parser.parse_args()
 
 @sio.event
 def connect():
@@ -52,7 +56,6 @@ def pwm_comm(msg):
     '''
     LEDPWM = msg
     print(f'my LED is at {LEDPWM}')
-    PWM.set_duty_cycle(LED_PIN, LEDPWM) # Remove for final
     sio.emit('sim_response', [client_id, fake_temp[client_id], fake_photo[client_id]])
 
 def notificationLED():
@@ -69,7 +72,7 @@ def notificationLED():
         sio.sleep(5)
 
 # Connect to the server
-sio.connect(f'http://{server_address}:{server_port}')
+sio.connect(f'http://{args.ipaddress}:{8000}')
 
 # thread = sio.start_background_task(notificationLED)
 
