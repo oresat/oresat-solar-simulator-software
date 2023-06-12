@@ -2,50 +2,44 @@ import getopt
 import sys
 import socketio
 import eventlet
-
+import argparse
+import json
 from debugdata import pwm_vals
 
+# Load Config File
+with open('options.conf', 'r') as jsonfile:
+    data = json.load(jsonfile)
+    # print('config loaded')
+
+# Initialize ArgParse
+parser = argparse.ArgumentParser(prog='solar-sim-server', description='oresat-solar-simulator server node', 
+                                 epilog='https://github.com/oresat/oresat-solar-simulator')
+
+
+parser.add_argument('-r', '--refresh',type=float, help='sets refresh rate in seconds', 
+                    required=False, default=data['refresh-rate'])
+parser.add_argument('clients', type=int, help='number of simulator clients connected',
+                    choices=range(1,5), default=4)
+parser.add_argument('-v', '--verbose', help='verbose mode',
+                    action='store_true')
+parser.add_argument('-s', '--simple', help='uses simple rotation rather than basilisk model',
+                    action='store_true')
+
+args = parser.parse_args()
+
+# Setup SocketIO
 sio = socketio.Server(logger=False, async_mode= 'eventlet')
 verbose = False
-
 port = 8000 #port to listen on
 
-print(pwm_vals)
-
 # Dictionary to store client identifiers and corresponding sids
-global client_sids #dictionary to hold the PB_ID and their sid
+global client_sids 
 client_sids = {}
 
-command_list = [''] #list to store the command
-PB_ID = [] #array to store the id of the PB
-try:
-        opts, args = getopt.getopt(sys.argv[1:], "ho:vc:i:", ["help", "output=","command=", "ID="])
-except getopt.GetoptError as err:
-        # print help information and exit:
-        print(err)  # will print something like "option -a not recognized"
-        sys.exit(2)
 output = None
-verbose = False
-for o, a in opts:
-    if o == "-v":
-        verbose = True
-    elif o in ("-h", "--help"):
-        #usage()
-        sys.exit()
-    elif o in ("-c", "--command"):
-        command = a
-        print('Arg is:',a)
-        command_list[0] = a #adding the command to a list
-        print("CMD",command_list)
-    elif o in ("-i","--ID"):
-        ID = a #for PB number
-        PB_ID = a
-        print("PB ID: ",PB_ID[0])
-    elif o in ("-o", "--output"):
-        output = a
-    else:
-        assert False, "unhandled option"
-
+verbose = args.verbose
+if verbose:
+    print('Verbose Mode Enabled!')
 def ping_in_intervals():
     '''
     Primary server loop. Reads data from the source and emits a message to each client to set their PWM value.
@@ -84,7 +78,6 @@ def disconnect(sid):
     '''
     global client_sids
     print('Client disconnected:', sid)
-    command_list = '' #clean up
     client_sids = {key:val for key, val in client_sids.items() if val != sid}
 
     
