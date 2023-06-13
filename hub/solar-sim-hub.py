@@ -1,5 +1,3 @@
-import getopt
-import sys
 import socketio
 import eventlet
 import argparse
@@ -15,7 +13,8 @@ with open('options.conf', 'r') as jsonfile:
 parser = argparse.ArgumentParser(prog='solar-sim-server', description='oresat-solar-simulator server node', 
                                  epilog='https://github.com/oresat/oresat-solar-simulator')
 
-
+parser.add_argument('-p', '--port', type=int, help='port hub is listening on',
+                     required=False, default=data['port'])
 parser.add_argument('-r', '--refresh',type=float, help='sets refresh rate in seconds', 
                     required=False, default=data['refresh-rate'])
 parser.add_argument('clients', type=int, help='number of simulator clients connected',
@@ -29,8 +28,6 @@ args = parser.parse_args()
 
 # Setup SocketIO
 sio = socketio.Server(logger=False, async_mode= 'eventlet')
-verbose = False
-port = 8000 #port to listen on
 
 # Dictionary to store client identifiers and corresponding sids
 global client_sids 
@@ -40,6 +37,8 @@ output = None
 verbose = args.verbose
 if verbose:
     print('Verbose Mode Enabled!')
+
+
 def ping_in_intervals():
     '''
     Primary server loop. Reads data from the source and emits a message to each client to set their PWM value.
@@ -54,7 +53,6 @@ def ping_in_intervals():
         i += 1
         if i >= len(pwm_vals):
             i = 0
-        # print(i)
         print(f'\nsending: {pwm_vals[i]}')
         print('received:')
         sio.sleep(1)
@@ -96,6 +94,9 @@ def set_sid(sid, client_id):
 def sim_response(sid, data):
     '''
     Message sent by client with photodiode and thermister data.
+
+    :param sid: session id sending the message
+    :param data: list containing client_id of sender, temp data, and photo data 
     TODO: Will need to do processing here.
     '''
     print(data)
@@ -103,5 +104,5 @@ def sim_response(sid, data):
 if __name__ == '__main__':
     app = socketio.WSGIApp(sio)
     thread = sio.start_background_task(ping_in_intervals)
-    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', port)), app) 
+    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', args.port)), app) 
     
