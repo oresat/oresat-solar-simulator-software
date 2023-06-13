@@ -4,6 +4,7 @@ import socketio
 import argparse
 import json
 import os
+global system_halt
 
 with open('panel-options.conf', 'r') as jsonfile:
     data = json.load(jsonfile)
@@ -75,17 +76,39 @@ def pwm_comm(level):
 
     :param level: power level
     '''
-    LEDPWM = level
-    print(f'my LED is at {LEDPWM}')
+    if system_halt:
+        LEDPWM = level
+        print(f'my LED is at {LEDPWM}')
     # update to actually do stuff
     
     sio.emit('panel_response', [args.clientid, 'temp', 'photo'])
     os.system(f'echo 1 > {led2}/brightness')
     os.system(f'echo 0 > {led2}/brightness')
 
+@sio.event
+def panel_halt():
+    '''
+    halts operation on over temp
+    '''
+    global system_halt #TODO: check this
+    system_halt = True
+    os.system(f'echo none > {led0}/trigger')
+    os.system(f'echo 1 > {led0}/brightness')
+    os.system(f'echo 1 > {led1}/brightness')
+
+@sio.event
+def panel_clear():
+    '''
+    resumes funciton after temperature returns to normal
+    '''
+    system_halt = False
+    os.system(f'echo 0 > {led0}/brightness')
+    os.system(f'echo 0 > {led1}/brightness')
+    os.system(f'echo heartbeat > {led0}/trigger')
+
+
 # Connect to the server
 sio.connect(f'http://{args.ipaddress}:{8000}')
-
 
 # Wait for events
 sio.wait()

@@ -33,7 +33,7 @@ sio = socketio.Server(logger=False, async_mode= 'eventlet')
 global client_sids 
 client_sids = {}
 
-output = None
+simulators_running = False
 verbose = args.verbose
 if verbose:
     print('Verbose Mode Enabled!')
@@ -45,7 +45,7 @@ def ping_in_intervals():
     '''
     i = 0
     while True:
-        if len(client_sids) == 4:
+        if simulators_running:
             for client in client_sids:
                 sio.emit('pwm_comm', pwm_vals[i][client], room=client_sids[client])
         else:
@@ -65,18 +65,22 @@ def ping_in_intervals():
 @sio.event
 def connect(sid, environ):
     '''
-    Executred upon client connect.
+    Executed upon client connect
     '''
+    global simulators_running
     print('Client connected:', sid)
+    if len(client_sids) == 4:
+        simulators_running = True
 
 @sio.event
 def disconnect(sid):    
     '''
     Executred upon client disconnect.
     '''
-    global client_sids
+    global client_sids; simulators_running
     print('Client disconnected:', sid)
     client_sids = {key:val for key, val in client_sids.items() if val != sid}
+    simulators_running = False
 
     
 @sio.event
@@ -91,7 +95,7 @@ def set_sid(sid, client_id):
         
     
 @sio.event
-def sim_response(sid, data):
+def panel_response(sid, data):
     '''
     Message sent by client with photodiode and thermister data.
 
