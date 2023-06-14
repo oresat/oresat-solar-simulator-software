@@ -77,7 +77,7 @@ def disconnect(sid):
     '''
     Executred upon client disconnect.
     '''
-    global client_sids; simulators_running
+    global client_sids, simulators_running
     print('Client disconnected:', sid)
     client_sids = {key:val for key, val in client_sids.items() if val != sid}
     simulators_running = False

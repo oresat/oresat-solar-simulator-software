@@ -7,6 +7,7 @@ import os
 import busio
 import Adafruit_BBIO.PWM as PWM
 from numpy import linspace, uint16
+global system_state
 system_state = 0
 
 with open('panel-options.conf', 'r') as jsonfile:
@@ -73,7 +74,7 @@ def connect():
     Executed upon client connecting to server. 
     Client emits a 'set_sid' message so that the server assigns it the correct session.
     '''
-    global client_connected; system_state
+    global client_connected, system_state
     print('Connected to server')
     # Set the sid for the client upon reconnection
     sio.emit('set_sid', args.clientid)
