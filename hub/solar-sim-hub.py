@@ -5,7 +5,7 @@ import json
 from debugdata import pwm_vals
 
 # Load Config File
-with open('options.conf', 'r') as jsonfile:
+with open('hub-options.conf', 'r') as jsonfile:
     data = json.load(jsonfile)
     # print('config loaded')
 
@@ -45,16 +45,17 @@ def ping_in_intervals():
     '''
     i = 0
     while True:
-        if simulators_running:
+        if len(client_sids) == args.clients:
             for client in client_sids:
                 sio.emit('pwm_comm', pwm_vals[i][client], room=client_sids[client])
         else:
             print(f'{len(client_sids)} connected')
+
+        print(f'\nsending: {pwm_vals[i]}')
+        print('received:')
         i += 1
         if i >= len(pwm_vals):
             i = 0
-        print(f'\nsending: {pwm_vals[i]}')
-        print('received:')
         sio.sleep(1)
             # with open('output_file', 'r') as f:
             #     pwm_data = f.readline()
