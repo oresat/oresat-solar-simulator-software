@@ -69,7 +69,7 @@ def connect(sid, environ):
     '''
     global simulators_running
     print('Client connected:', sid)
-    if len(client_sids) == 4:
+    if len(client_sids) == args.clients:
         simulators_running = True
 
 @sio.event

@@ -4,7 +4,10 @@ import socketio
 import argparse
 import json
 import os
-global system_halt
+import busio
+import Adafruit_BBIO.PWM as PWM
+from numpy import linspace, uint16
+system_state = 0
 
 with open('panel-options.conf', 'r') as jsonfile:
     data = json.load(jsonfile)
@@ -43,18 +46,40 @@ parser.add_argument('-c', '--clientid', type=int, help='id the client will repor
 
 args = parser.parse_args()
 
+
+# Setup I2C
+i2c = busio.I2C('I2C1_SCL', 'I2C1_SDA')
+mcp4728 = adafruit_mcp4728.MCP4728(i2c)
+
+# Setup PWM
+BB_FREQ = 250e3
+PWM_PIN = "P2_1"
+
+# Load Calibration
+max_voltage = int(65535)
+red_start = 10756
+grn_start = 10140
+blu_start = 10620
+UV_start  = 10620
+red_steps = linspace(red_start, max_voltage, num=100, dtype=uint16)
+grn_steps = linspace(grn_start, max_voltage, num=100, dtype=uint16)
+blu_steps = linspace(blu_start, max_voltage, num=100, dtype=uint16)
+UV_steps = linspace(UV_start, max_voltage, num=100, dtype=uint16)
+
+
 @sio.event
 def connect():
     '''
     Executed upon client connecting to server. 
     Client emits a 'set_sid' message so that the server assigns it the correct session.
     '''
-    global client_connected
+    global client_connected; system_state
     print('Connected to server')
     # Set the sid for the client upon reconnection
     sio.emit('set_sid', args.clientid)
     client_connected = True
     os.system(f'echo 1 > {led3}/brightness')
+    system_state = 1
     
     
 @sio.event
@@ -76,9 +101,13 @@ def pwm_comm(level):
 
     :param level: power level
     '''
-    if system_halt:
-        LEDPWM = level
-        print(f'my LED is at {LEDPWM}')
+    if system_state > 0:
+        level
+        print(f'my LED is at {level}')
+        mcp4728.channel_a.value = red_steps[level]
+        # mcp4728.channel_b.value = red_steps[level]
+        # mcp4728.channel_c.value = red_steps[level]
+        # mcp4728.channel_d.value = red_steps[level]
     # update to actually do stuff
     
     sio.emit('panel_response', [args.clientid, 'temp', 'photo'])
