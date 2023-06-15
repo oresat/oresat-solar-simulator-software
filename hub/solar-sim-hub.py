@@ -40,14 +40,15 @@ def ping_in_intervals():
     '''
     Primary server loop. Reads data from the source and emits a message to each client to set their PWM value.
     '''
-    current_state = running_mode
+    current_state = -1
     i = 0
     while True:
+        if new_state != current_state:
+            current_state = new_state
+            sio.emit('set_state', current_state, room=any)
         if len(client_sids) == args.clients:
-            if system_halt:
-                current_state = 0
             for client in client_sids:
-                sio.emit('pwm_comm', [current_state, pwm_vals[f'{client}'][i]], room=client_sids[client])
+                sio.emit('pwm_comm', pwm_vals[f'{client}'][i], room=client_sids[client])
                 if verbose:
                     print(f"\nsending: 0:{pwm_vals['0'][i]} 1:{pwm_vals['1'][i]} 2:{pwm_vals['2'][i]} 3:{pwm_vals['3'][i]}")
                     print('received:')
@@ -102,10 +103,12 @@ def panel_response(sid, data):
     :param data: list containing client_id of sender, temp data, and photo data 
     TODO: Will need to do processing here.
     '''
-    global system_halt
+    global new_state
+    bad_state = False
     if verbose:
         print(data)
-    sio.emit('set_state', 1, room=any)
+    if bad_state:
+        new_state = 0
 
 if __name__ == '__main__':
     system_halt = False
@@ -114,6 +117,7 @@ if __name__ == '__main__':
         running_mode = 2
     else:
         running_mode = 1
+    new_state = running_mode
     if verbose:
         print('Verbose Mode Enabled!')
 
