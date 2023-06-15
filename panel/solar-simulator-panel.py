@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import busio
+import time
 import Adafruit_BBIO.PWM as PWM
 from numpy import linspace, uint16
 global system_state
@@ -114,22 +115,26 @@ def set_state(msg):
     new_state = msg
 
 def state_mon():
-    global system_state, new_state
+    global steps, new_state, system_state
     while True:
         if system_state != new_state:
             system_state = new_state
+            print(f'Changing state to {new_state}')
             if system_state == 0:
                 os.system(f'echo none > {led0}/trigger')
                 os.system(f'echo 1 > {led0}/brightness')
                 os.system(f'echo 1 > {led1}/brightness')
+                steps = calc_steps(0)
             elif system_state == 1:                
                 os.system(f'echo 0 > {led0}/brightness')
                 os.system(f'echo 0 > {led1}/brightness')
                 os.system(f'echo heartbeat > {led0}/trigger')
+                steps = calc_steps(1)
             elif system_state == 2:
                 os.system(f'echo 0 > {led0}/brightness')
                 os.system(f'echo 1 > {led1}/brightness')
                 os.system(f'echo heartbeat > {led0}/trigger')
+                steps = calc_steps(0.3)
  
                 
 def calc_steps(limiter):
@@ -149,14 +154,23 @@ def calc_steps(limiter):
         
 
 
-# Load Calibration
-steps = calc_steps(1)
 
-# Connect to the server
-sio.connect(f'http://{args.ipaddress}:{8000}')
-
-# Monitor State
-thread = sio.start_background_task(state_mon)
 
 # Wait for events
 sio.wait()
+while True:
+    try:
+        # Connect to the server
+        sio.connect(f'http://{args.ipaddress}:{8000}') 
+    except Exception as e:
+        print(e)
+    else:
+        # Monitor State
+        thread = sio.start_background_task(state_mon)
+        # Load Calibration
+        steps = calc_steps(1)
+        sio.wait()
+
+    print("Attempting to connect...")
+    time.sleep(5)
+    
