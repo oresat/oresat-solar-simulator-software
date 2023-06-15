@@ -56,18 +56,6 @@ mcp4728 = adafruit_mcp4728.MCP4728(i2c)
 BB_FREQ = 250e3
 PWM_PIN = "P2_1"
 
-# Load Calibration
-max_voltage = int(65535)
-red_start = 10756
-grn_start = 10140
-blu_start = 10620
-UV_start  = 10620
-red_steps = linspace(red_start, max_voltage, num=100, dtype=uint16)
-grn_steps = linspace(grn_start, max_voltage, num=100, dtype=uint16)
-blu_steps = linspace(blu_start, max_voltage, num=100, dtype=uint16)
-UV_steps = linspace(UV_start, max_voltage, num=100, dtype=uint16)
-
-
 @sio.event
 def connect():
     '''
@@ -95,7 +83,7 @@ def disconnect():
 
 
 @sio.event
-def pwm_comm(level):
+def set_panel(level):
     '''
     Message received from the server that sets the client's PWM value.
     Client responds with a message containing its client_id, and data from photodiode and thermistor.
@@ -105,40 +93,70 @@ def pwm_comm(level):
     if system_state > 0:
         level
         print(f'my LED is at {level}')
-        mcp4728.channel_a.value = red_steps[level]
-        # mcp4728.channel_b.value = red_steps[level]
-        # mcp4728.channel_c.value = red_steps[level]
-        # mcp4728.channel_d.value = red_steps[level]
-    # update to actually do stuff
+        mcp4728.channel_a.value = steps[0][level]
+        # mcp4728.channel_b.value = steps[1][level]
+        # mcp4728.channel_c.value = steps[2][level]
+        # mcp4728.channel_d.value = steps[3][level]
     
     sio.emit('panel_response', [args.clientid, 'temp', 'photo'])
     os.system(f'echo 1 > {led2}/brightness')
     os.system(f'echo 0 > {led2}/brightness')
 
 @sio.event
-def panel_halt():
+def set_state(msg):
     '''
-    halts operation on over temp
+    sets the running state that the panel is in
+    0 - halt, all lamps off
+    1 - normal, lamps can accept normal values
+    2 - safe, lamps are limited to 30% power and UV is off
     '''
-    global system_halt #TODO: check this
-    system_halt = True
-    os.system(f'echo none > {led0}/trigger')
-    os.system(f'echo 1 > {led0}/brightness')
-    os.system(f'echo 1 > {led1}/brightness')
+    global new_state
+    new_state = msg
 
-@sio.event
-def panel_clear():
-    '''
-    resumes funciton after temperature returns to normal
-    '''
-    system_halt = False
-    os.system(f'echo 0 > {led0}/brightness')
-    os.system(f'echo 0 > {led1}/brightness')
-    os.system(f'echo heartbeat > {led0}/trigger')
+def state_mon():
+    global system_state, new_state
+    while True:
+        if system_state != new_state:
+            system_state = new_state
+            if system_state == 0:
+                os.system(f'echo none > {led0}/trigger')
+                os.system(f'echo 1 > {led0}/brightness')
+                os.system(f'echo 1 > {led1}/brightness')
+            elif system_state == 1:                
+                os.system(f'echo 0 > {led0}/brightness')
+                os.system(f'echo 0 > {led1}/brightness')
+                os.system(f'echo heartbeat > {led0}/trigger')
+            elif system_state == 2:
+                os.system(f'echo 0 > {led0}/brightness')
+                os.system(f'echo 1 > {led1}/brightness')
+                os.system(f'echo heartbeat > {led0}/trigger')
+ 
+                
+def calc_steps(limiter):
+    max_voltage = int(65535 * limiter)
+    red_start = 10756
+    grn_start = 10140
+    blu_start = 10620
+    UV_start  = 10620
+    red_steps = linspace(red_start, max_voltage, num=101, dtype=uint16)
+    grn_steps = linspace(grn_start, max_voltage, num=101, dtype=uint16)
+    blu_steps = linspace(blu_start, max_voltage, num=101, dtype=uint16)
+    if system_state == 2:
+        UV_steps = [0] * 101
+    else:
+        UV_steps = linspace(UV_start, max_voltage, num=101, dtype=uint16)
+    return [red_steps, grn_steps, blu_steps, UV_steps]
+        
 
+
+# Load Calibration
+steps = calc_steps(1)
 
 # Connect to the server
 sio.connect(f'http://{args.ipaddress}:{8000}')
+
+# Monitor State
+thread = sio.start_background_task(state_mon)
 
 # Wait for events
 sio.wait()
