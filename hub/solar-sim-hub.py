@@ -2,7 +2,6 @@ import socketio
 import eventlet
 import argparse
 import json
-from debugdata import pwm_vals
 
 # Load Config File
 with open('hub-options.conf', 'r') as jsonfile:
@@ -13,6 +12,8 @@ with open('hub-options.conf', 'r') as jsonfile:
 parser = argparse.ArgumentParser(prog='solar-sim-server', description='oresat-solar-simulator server node', 
                                  epilog='https://github.com/oresat/oresat-solar-simulator')
 
+parser.add_argument('-f', '--file', type=str, help='uses simple rotation rather than basilisk model',
+                    required=False, default='out.json')
 parser.add_argument('-p', '--port', type=int, help='port hub is listening on',
                      required=False, default=data['port'])
 parser.add_argument('-r', '--refresh',type=float, help='sets refresh rate in seconds', 
@@ -21,7 +22,7 @@ parser.add_argument('clients', type=int, help='number of simulator clients conne
                     choices=range(1,5), default=4)
 parser.add_argument('-v', '--verbose', help='verbose mode',
                     action='store_true')
-parser.add_argument('-s', '--simple', help='uses simple rotation rather than basilisk model',
+parser.add_argument('-s', '--safe', help='engages safe mode, limits output and turns UV off',
                     action='store_true')
 
 args = parser.parse_args()
@@ -33,10 +34,6 @@ sio = socketio.Server(logger=False, async_mode= 'eventlet')
 global client_sids 
 client_sids = {}
 
-simulators_running = False
-verbose = args.verbose
-if verbose:
-    print('Verbose Mode Enabled!')
 
 
 def ping_in_intervals():
@@ -47,41 +44,36 @@ def ping_in_intervals():
     while True:
         if len(client_sids) == args.clients:
             for client in client_sids:
-                sio.emit('pwm_comm', pwm_vals[i][client], room=client_sids[client])
+                sio.emit('pwm_comm', pwm_vals[f'{client}'][i], room=client_sids[client])
+                if verbose:
+                    print(f"\nsending: 0:{pwm_vals['0'][i]} 1:{pwm_vals['1'][i]} 2:{pwm_vals['2'][i]} 3:{pwm_vals['3'][i]}")
+                    print('received:')
         else:
-            print(f'{len(client_sids)} connected')
+            if verbose:
+                print(f'{len(client_sids)} connected, waiting for {args.clients}')
 
-        print(f'\nsending: {pwm_vals[i]}')
-        print('received:')
         i += 1
-        if i >= len(pwm_vals):
+        if i >= len(pwm_vals['0']):
             i = 0
         sio.sleep(1)
-            # with open('output_file', 'r') as f:
-            #     pwm_data = f.readline()
-            #     print(pwm_data)
-            #     sio.emit('pwm_comm', pwm_data)
-            #     sio.sleep(0.1)
 
 @sio.event
 def connect(sid, environ):
     '''
     Executed upon client connect
     '''
-    global simulators_running
-    print('Client connected:', sid)
-    if len(client_sids) == args.clients:
-        simulators_running = True
+    if verbose:
+        print('Client connected:', sid)
 
 @sio.event
 def disconnect(sid):    
     '''
     Executred upon client disconnect.
     '''
-    global client_sids, simulators_running
-    print('Client disconnected:', sid)
+    global client_sids
+    if verbose:
+        print('Client disconnected:', sid)
     client_sids = {key:val for key, val in client_sids.items() if val != sid}
-    simulators_running = False
 
     
 @sio.event
@@ -89,10 +81,11 @@ def set_sid(sid, client_id):
     '''
     Message sent by client to set its client_id.
     '''
-    print('Setting sid for client:', client_id)
+    if verbose:
+        print('Setting sid for client:', client_id)
     client_sids[client_id] = sid
     # print(client_sids)
-    sio.emit('response',f'User {client_id} was added succesfully!!', room=sid)
+    sio.emit('response',f'User {client_id} added', room=sid)
         
     
 @sio.event
@@ -104,9 +97,22 @@ def panel_response(sid, data):
     :param data: list containing client_id of sender, temp data, and photo data 
     TODO: Will need to do processing here.
     '''
-    print(data)
+    if verbose:
+        print(data)
+    sio.emit('set_state', 1, room=any)
 
 if __name__ == '__main__':
+    simulators_running = False
+    verbose = args.verbose
+    if verbose:
+        print('Verbose Mode Enabled!')
+
+    # Load data    
+    with open(args.file, 'r') as jsonfile:
+        pwm_vals = json.load(jsonfile)
+        if verbose:
+            print(f"Loaded data from {args.file}")
+        
     app = socketio.WSGIApp(sio)
     thread = sio.start_background_task(ping_in_intervals)
     eventlet.wsgi.server(eventlet.listen(('0.0.0.0', args.port)), app) 
