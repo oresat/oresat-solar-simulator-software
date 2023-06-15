@@ -93,11 +93,11 @@ def set_panel(level):
     '''
     if system_state > 0:
         level
-        print(f'my LED is at {level}')
+        print(f'my power level is at {level}')
         mcp4728.channel_a.value = steps[0][level]
-        # mcp4728.channel_b.value = steps[1][level]
-        # mcp4728.channel_c.value = steps[2][level]
-        # mcp4728.channel_d.value = steps[3][level]
+        mcp4728.channel_b.value = steps[1][level]
+        mcp4728.channel_c.value = steps[2][level]
+        mcp4728.channel_d.value = steps[3][level]
     
     sio.emit('panel_response', [args.clientid, 'temp', 'photo'])
     os.system(f'echo 1 > {led2}/brightness')
@@ -166,6 +166,7 @@ while True:
         print(e)
     else:
         # Monitor State
+        new_state = 1
         thread = sio.start_background_task(state_mon)
         # Load Calibration
         steps = calc_steps(1)
