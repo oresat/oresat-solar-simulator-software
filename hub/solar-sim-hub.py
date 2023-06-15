@@ -45,10 +45,10 @@ def ping_in_intervals():
     while True:
         if new_state != current_state:
             current_state = new_state
-            sio.emit('set_panel', current_state, room=any)
+            sio.emit('set_state', current_state, room=any)
         if len(client_sids) == args.clients:
             for client in client_sids:
-                sio.emit('pwm_comm', pwm_vals[f'{client}'][i], room=client_sids[client])
+                sio.emit('set_panel', pwm_vals[f'{client}'][i], room=client_sids[client])
                 if verbose:
                     print(f"\nsending: 0:{pwm_vals['0'][i]} 1:{pwm_vals['1'][i]} 2:{pwm_vals['2'][i]} 3:{pwm_vals['3'][i]}")
                     print('received:')

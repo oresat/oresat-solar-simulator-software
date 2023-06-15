@@ -56,6 +56,7 @@ mcp4728 = adafruit_mcp4728.MCP4728(i2c)
 # Setup PWM
 BB_FREQ = 250e3
 PWM_PIN = "P2_1"
+PWM.start(PWM_PIN, 0, BB_FREQ)
 
 @sio.event
 def connect():
@@ -92,12 +93,12 @@ def set_panel(level):
     :param level: power level
     '''
     if system_state > 0:
-        level
         print(f'my power level is at {level}')
         mcp4728.channel_a.value = steps[0][level]
         mcp4728.channel_b.value = steps[1][level]
         mcp4728.channel_c.value = steps[2][level]
         mcp4728.channel_d.value = steps[3][level]
+        PWM.set_duty_cycle(PWM_PIN, level)
     
     sio.emit('panel_response', [args.clientid, 'temp', 'photo'])
     os.system(f'echo 1 > {led2}/brightness')
