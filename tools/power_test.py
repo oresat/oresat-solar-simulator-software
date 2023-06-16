@@ -46,4 +46,3 @@ mcp4728.channel_c.value = 0 # min_voltage to turn off. steps[i] to sweep
 PWM.stop(PWM_PIN)
 PWM.cleanup()
 
-$ ping github.com
