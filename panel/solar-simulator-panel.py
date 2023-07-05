@@ -154,9 +154,6 @@ def calc_steps(limiter):
     return [red_steps, grn_steps, blu_steps, UV_steps]
         
 
-
-
-
 # Wait for events
 sio.wait()
 while True:
