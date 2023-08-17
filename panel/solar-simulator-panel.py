@@ -97,19 +97,29 @@ def set_panel(level):
     '''
     if system_state > 0:
         print(f'my power level is at {level}')
-        mcp4728.channel_a.value = steps[0][level]
-        mcp4728.channel_b.value = steps[1][level]
-        mcp4728.channel_c.value = steps[2][level]
-        mcp4728.channel_d.value = steps[3][level]
-        PWM.set_duty_cycle(PWM_PIN, level)
-        values = [0] * 4
-        for i in range(4):
-        # Read the specified ADC channel using the previously set gain value.
-            values[i] = adc.read_adc(i, gain=GAIN)
-
-        print(values)
-        temp_values = (values[0], values[1], values[2])
-        photo_value = values[3]
+        try:
+            mcp4728.channel_a.value = steps[0][level]
+            mcp4728.channel_b.value = steps[1][level]
+            mcp4728.channel_c.value = steps[2][level]
+            mcp4728.channel_d.value = steps[3][level]
+            PWM.set_duty_cycle(PWM_PIN, level)
+        except:
+            print('Failed to set light levels')
+            
+        try:
+            values = [0] * 4
+            for i in range(4):
+            # Read the specified ADC channel using the previously set gain value.
+                values[i] = adc.read_adc(i, gain=GAIN)
+        except:
+            print('Failed to get temperature data')
+            temp_values = (0, 0, 0)
+            photo_value = 0
+        else:
+            # print(values)
+            temp_values = (values[0], values[1], values[2])
+            photo_value = values[3]
+            
     sio.emit('panel_response', [args.clientid, temp_values, photo_value])
     os.system(f'echo 1 > {led2}/brightness')
     os.system(f'echo 0 > {led2}/brightness')
