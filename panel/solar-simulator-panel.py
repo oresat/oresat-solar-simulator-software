@@ -102,8 +102,9 @@ def set_panel(level):
             mcp4728.channel_b.value = steps[1][level]
             mcp4728.channel_c.value = steps[2][level]
             mcp4728.channel_d.value = steps[3][level]
-            PWM.set_duty_cycle(PWM_PIN, level)
-        except:
+            PWM.set_duty_cycle(PWM_PIN, steps[4][level])
+        except Exception as e:
+            print(e)
             print('Failed to set light levels')
             
         try:
@@ -111,7 +112,8 @@ def set_panel(level):
             for i in range(4):
             # Read the specified ADC channel using the previously set gain value.
                 values[i] = adc.read_adc(i, gain=GAIN)
-        except:
+        except Exception as e:
+            print(e)
             print('Failed to get temperature data')
             temp_values = (0, 0, 0)
             photo_value = 0
@@ -159,19 +161,32 @@ def state_mon():
  
                 
 def calc_steps(limiter):
+    '''
+    Calculates the light steps for the LEDs based on calibrated
+    mins/max and any specified limiter
+
+    params limiter: float between 0-1 to scale the power for safety
+    '''
     max_voltage = int(65535 * limiter)
-    red_start = 10756
-    grn_start = 10140
-    blu_start = 10620
-    UV_start  = 10620
-    red_steps = linspace(red_start, max_voltage, num=101, dtype=uint16)
-    grn_steps = linspace(grn_start, max_voltage, num=101, dtype=uint16)
-    blu_steps = linspace(blu_start, max_voltage, num=101, dtype=uint16)
+    red_start = data['red_start']
+    grn_start = data['grn_start']
+    blu_start = data['blu_start']
+    UV_start  = data['UV_start']
+    PWM_start = data['PWM_start']
+    red_max = int(data['red_max'] * limiter)
+    grn_max = int(data['grn_max'] * limiter)
+    blu_max = int(data['blu_max'] * limiter)
+    UV_max  = int(data['UV_max'] * limiter)
+    PWM_max = int(data['PWM_max'] * limiter)
+    red_steps = linspace(red_start, red_max, num=101, dtype=uint16)
+    grn_steps = linspace(grn_start, grn_max, num=101, dtype=uint16)
+    blu_steps = linspace(blu_start, blu_max, num=101, dtype=uint16)
+    PWM_steps = linspace(PWM_start, PWM_max, num=101, dtype=uint16)
     if system_state == 2:
         UV_steps = [0] * 101
     else:
-        UV_steps = linspace(UV_start, max_voltage, num=101, dtype=uint16)
-    return [red_steps, grn_steps, blu_steps, UV_steps]
+        UV_steps = linspace(UV_start, UV_max, num=101, dtype=uint16)
+    return [red_steps, grn_steps, blu_steps, UV_steps, PWM_steps]
         
 
 # Wait for events
