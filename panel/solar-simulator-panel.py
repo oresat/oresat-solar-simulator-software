@@ -7,7 +7,8 @@ import json
 import os
 import busio
 import time
-import Adafruit_BBIO.PWM as PWM
+#import Adafruit_BBIO.PWM as PWM
+from periphery import PWM
 from numpy import linspace, uint16
 GAIN = 1
 global system_state
@@ -54,12 +55,15 @@ args = parser.parse_args()
 # Setup I2C
 i2c = busio.I2C('I2C1_SCL', 'I2C1_SDA')
 mcp4728 = adafruit_mcp4728.MCP4728(i2c)
-adc = Adafruit_ADS1x15.ADS1015()
+adc = Adafruit_ADS1x15.ADS1015(busnum=1)
 
 # Setup PWM
 BB_FREQ = 250e3
 PWM_PIN = "P2_1"
-PWM.start(PWM_PIN, 0, BB_FREQ)
+#PWM.start(PWM_PIN, 0, BB_FREQ)
+pwm = PWM(0, 1)
+pwm.frequency = BB_FREQ
+pwm.duty_cycle = 0
 
 @sio.event
 def connect():
@@ -102,7 +106,8 @@ def set_panel(level):
             mcp4728.channel_b.value = steps[1][level]
             mcp4728.channel_c.value = steps[2][level]
             mcp4728.channel_d.value = steps[3][level]
-            PWM.set_duty_cycle(PWM_PIN, steps[4][level])
+            #PWM.set_duty_cycle(PWM_PIN, steps[4][level])
+            pwm.duty_cycle = steps[4][level] / 100
         except Exception as e:
             print(e)
             print('Failed to set light levels')
