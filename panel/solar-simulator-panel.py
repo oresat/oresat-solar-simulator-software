@@ -62,7 +62,7 @@ PWM_PATH = '/dev/bone/pwm/1/a'
 
 os.system(f'echo {BB_PER} >> {PWM_PATH}/period')
 os.system(f'echo 1 >> {PWM_PATH}/enable')
-os.system(f'echo 0 >> {PWM_PATH}/duty_cyle')
+os.system(f'echo 0 >> {PWM_PATH}/duty_cycle')
 
 
 @sio.event
@@ -123,7 +123,7 @@ def set_panel(level):
             temp_values = (0, 0, 0)
             photo_value = 0
         else:
-            # print(values)
+            print(values)
             temp_values = (values[0], values[1], values[2])
             photo_value = values[3]
             
