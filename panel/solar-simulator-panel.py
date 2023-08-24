@@ -56,12 +56,13 @@ mcp4728 = adafruit_mcp4728.MCP4728(i2c)
 adc = Adafruit_ADS1x15.ADS1015(busnum=1)
 
 # Setup PWM
-BB_PER = 2e3
+BB_PER = 1000
 PWM_PIN = "P2_1"
 PWM_PATH = '/dev/bone/pwm/1/a'
 
 os.system(f'echo {BB_PER} >> {PWM_PATH}/period')
-os.system(f'echo 1 >> {PWM_PATH}/enable')
+if os.system(f'cat {PWM_PATH}/enable') == 0:
+    os.system(f'echo 1 >> {PWM_PATH}/enable')
 os.system(f'echo 0 >> {PWM_PATH}/duty_cycle')
 
 
@@ -106,8 +107,8 @@ def set_panel(level):
             mcp4728.channel_b.value = steps[1][level]
             mcp4728.channel_c.value = steps[2][level]
             mcp4728.channel_d.value = steps[3][level]
-            #PWM.set_duty_cycle(PWM_PIN, steps[4][level])
-            os.system(f'echo {steps[4][level]} >> {PWM_PATH}/duty_cycle')
+            
+            os.system(f'echo {steps[4][level] * 10} >> {PWM_PATH}/duty_cycle')
         except Exception as e:
             print(e)
             print('Failed to set light levels')
