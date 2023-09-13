@@ -71,16 +71,16 @@ print(f'Setting LEDs')
 
 print(args.red)
 try:
-    print(f'Red = {steps[0][args.red]}')
+    print(f'Red = {steps[0][args.red]} ({args.red}%)')
     mcp4728.channel_a.value = steps[0][args.red]
-    print(f'Green = {steps[0][args.green]}')
+    print(f'Green = {steps[0][args.green]} ({args.green}%)')
     mcp4728.channel_b.value = steps[1][args.green]
-    print(f'Blue = {steps[0][args.blue]}')
+    print(f'Blue = {steps[0][args.blue]} ({args.blue}%)')
     mcp4728.channel_c.value = steps[2][args.blue]
-    print(f'UV = {steps[0][args.uv]}')
+    print(f'UV = {steps[0][args.uv]} ({args.uv}%)')
     mcp4728.channel_d.value = steps[3][args.uv]
     
-    print(f'PWM = {steps[4][args.pwm]}ns on of {BB_PER}ns period')
+    print(f'PWM = {steps[4][args.pwm]}ns on of {BB_PER}ns period ({args.pwm}%)')
     os.system(f'echo {steps[4][args.pwm]} >> {PWM_PATH}/duty_cycle')
 except Exception as e:
     print(e)
