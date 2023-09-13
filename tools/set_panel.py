@@ -18,9 +18,16 @@ parser.add_argument('-g', '--green', type=int, help='set green LED', required=Fa
 parser.add_argument('-b', '--blue', type=int, help='set blue LED', required=False, default=0)
 parser.add_argument('-u', '--uv', type=int, help='set UV LED', required=False, default=0)
 parser.add_argument('-p', '--pwm', type=int, help='set PWM', required=False, default=0)
+parser.add_argument('-a', '--all', type=int, help='set all', required=False, default=0)
 
 args = parser.parse_args()
 
+if args.all > 0:
+    args.red = args.all
+    args.green = args.all
+    args.blue = args.all
+    args.uv = args.all
+    args.pwm = args.all
 
 # Setup I2C
 i2c = busio.I2C('I2C1_SCL', 'I2C1_SDA')
