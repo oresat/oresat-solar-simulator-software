@@ -2,10 +2,9 @@
 
 The OreSat live / DxWiFi Card has an NTC thermistor on it. How do we use that?
 
-
 ## The Sensor
 
-We’re using the [Murata NXFT15XV103FEAB050](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/5339/NXFT15XV103FEAB050_DS.pdf) (Digi-Key 490-NXFT15XV103FEAB050-ND) 10 kΩ ± 1% leaded bead Negative Temperature Coefficient (NTC) thermistor rated -40 to 125 °C. ꞵ , or just “B” value is  B25/85 = 3977 K ± 1%. Digi-Key also has B25/50 = 3936 K, but not sure where that came from and we can ignore it.
+We’re using the [Murata NXFT15XV103FEAB050 thermistor](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/5339/NXFT15XV103FEAB050_DS.pdf) rated -40 to 125 °C. ꞵ , or just “B” value is  B25/85 = 3977 K ± 1%. Digi-Key also has B25/50 = 3936 K, but not sure where that came from and we can ignore it.
 
 ## The Schematic
 
@@ -35,7 +34,6 @@ R<sub>TH</sub> = V<sub>OUT</sub> * R / (V<sub>IN</sub> - V<sub>OUT</sub>)
 
 That last equation is all we really need, and implementing it should be pretty straight forward. The outcome is the resistance in ohms.
 
-
 # Second, Find the Temperature
 
 Now we convert R<sub>TH</sub> to a temperature, which is a bit trickier. Taken from [NTC Thermistors: General technical information](https://www.tdk-electronics.tdk.com/download/531116/19643b7ea798d7c4670141a88cd993f9/pdf-general-technical-information.pdf):
@@ -50,12 +48,12 @@ Here:
 
 So in our case:
 
-R<sub>T</sub> = 10 kΩ * e^(3435 K * (1 / T - 1 / 298.15 K))
+**R<sub>T</sub> = 10 kΩ * e^(3435 K * (1 / T - 1 / 298.15 K))**
 
 Well calculating R<sub>T</sub> based on T is exactly the opposite of what we want, so now solve that equation for T. That’s handily done on [this website](https://www.giangrandi.org/electronics/ntc/ntc.shtml), including calculators to check your work.
 
 Plugging in our standard values and using R<sub>TH</sub> calculated from [1] above:
 
-**T = 1 / ( (ln (R<sub>TH</sub> / 10000 Ω) / 3435 K ) + (1 / 298.15 K)                [2]**
+**T = 1 / ( (ln (R<sub>TH</sub> / 10000 Ω) / 3435 K ) + (1 / 298.15 K)) [2]**
 
 That’s in Kelvin, so subtract 273.15 to get that in ° C.
