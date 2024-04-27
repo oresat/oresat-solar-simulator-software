@@ -12,11 +12,11 @@ The OreSat Solar Simulator is a benchtop simulator for hardware-in-the-loop test
 
 The original work for this was done as an MCECS Capstone Project from January to June of 2023 by Bendjy Faurestal, Adam Martinez, Cesar Ordaz-Coronel, and Charles Nasser. Andrew Greenberg was both representing PSAS as the Industry Sponsor and the Faculty Advisor to the students.
 
-The continuation of this project is to convert the OreSat Solar Simulator Software from using the Beaglebone microcontroller to the Raspberry Pi Pico. The maintainers are OreSat engineers Charlene de la Paz, John Albert Abed, and Angeline Vu with the assistance of Industry Advisor Jake Taylor.
+The continuation of this project is to convert the OreSat Solar Simulator Software from using the Beaglebone microcontroller to the Raspberry Pi Pico. The maintainers are OreSat engineers Charlene de la Paz, John Albert Abed, Angeline Vu, and Rose Edington with the assistance of Industry Advisor Jake Taylor.
 
 ## Software
 
-The software consists of a hub and client modules, both written in CircuitPython 9.0.1. The hub utilizes the [Basilisk Simulation Framework](http://hanspeterschaub.info/basilisk/) to determine which sides of the CubeSat would be exposed to light.
+The software consists of a hub and client modules, both written in CircuitPython 8.2.10. The hub utilizes the [Basilisk Simulation Framework](http://hanspeterschaub.info/basilisk/) to determine which sides of the CubeSat would be exposed to light.
 
 ## Libraries
 
@@ -28,6 +28,10 @@ The software consists of a hub and client modules, both written in CircuitPython
 ## Installation
 
 TODO: include installation steps
+
+## Usage
+
+TODO: include usage
 
 ## License
 
