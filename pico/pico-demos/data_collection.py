@@ -1,4 +1,7 @@
 # Manual data collection code
+# THE COMBINATION FOR RGBUH IF THE WARNING DOESN'T MEAN ANYTHING
+# R:10, G:75, B:25, UV:25, H:72 .. while the spectrometer is at 30nm measurements
+
 # Import dependencies
 from ulab import numpy as np
 import adafruit_mcp4728 as MCP  # 12-bit DAC
@@ -10,14 +13,14 @@ import board
 import busio
 
 # Serial console logging settings
-SERIAL_LOG  = False
-PORT_SCAN = False
-PRETTY = True
+SERIAL_LOG = False
+PORT_SCAN  = False
+PRETTY     = True
 
 # Light step calculations
 MAX_VALUE = 65535
-PWM_FREQ = 50000
-LIMITER = 1
+PWM_FREQ  = 50000
+LIMITER   = 1
 
 # Set the debug LED
 led = dio.DigitalInOut(board.LED)
@@ -129,7 +132,6 @@ while True:
             if item[0] in valid_inputs and item[1] <= 100 and item[1] >= 0:
                 led_buf[item[0][0]] = item[1]
 
-    if PRETTY: print()
     # Keywords to clear LED buffer
     if 'reset' in data or 'clear' in data:
         led_buf['r'] = 0
@@ -157,4 +159,5 @@ while True:
     # Set the LEDs and bulb
     setLEDs(red,grn,blu,uv,hal)
 
+    if PRETTY: print()
     sleep(0.01)
