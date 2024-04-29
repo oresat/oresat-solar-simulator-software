@@ -1,5 +1,4 @@
 # Thermal safety code test
-
 # Import dependencies
 from ulab import numpy as np
 import adafruit_mcp4728 as MCP  # 12-bit DAC
@@ -35,7 +34,7 @@ mcp = MCP.MCP4728(i2c)
 print("I2C devices initialized, running state machine")
 
 def setLEDs(r: int = 0, g: int = 0, b: int = 0, u: int = 0, h: int = 0) -> None:
-    delay = 0.05
+    delay = 0.1
     # Set the value of the R, G, B, UV, and Halogen lights (docs coming soon :tm:)
     if mcp.channel_a.value != r:
         mcp.channel_a.value = r
@@ -83,10 +82,15 @@ setLEDs()
 led.value = False
 
 # Set the LEDs and bulb
-r = steps[0][-5]
-g = steps[1][-5]
-b = steps[2][-5]
-h = steps[4][0]
+red = 100
+grn = 100
+blu = 100
+hal = 80
+
+r = steps[0][red]
+g = steps[1][grn]
+b = steps[2][blu]
+h = steps[4][int(hal/2.1)]
 
 setLEDs(r, g, b, 0, h)
 #setLEDs(steps[0][10], steps[0][10], steps[0][10], 0, steps[0][10])
@@ -107,12 +111,18 @@ NS_OFFSET = monotonic_ns()
 def getCurrentTime() -> int:
     return int((monotonic_ns()-NS_OFFSET)/1000000)
 
+# Thermal check timing
 therm_timer = 0
 THRM_CHECK  = 500
-THRM_SHTDN  = 45
-THRM_RSM    = 40
-lights_en = False
-light_stat = lights_en
+# Thermal shutdown and resume thresholds
+THRM_LEDS_SHTDN = 100
+THRM_HTSK_SHTDN = 60
+THRM_CELL_SHTDN = 80
+THRM_RSM     = 45
+lights_en    = False
+light_status = lights_en
+
+# Random other task
 led_timer   = 0
 LED_TGL     = 150
 led_value   = False
@@ -123,20 +133,25 @@ while True:
         print()
         print(f"Thermal readings:")
         channels = checkThermals()
+        
+        if (channels[0][2] > THRM_LEDS_SHTDN) \
+        or (channels[1][2] > THRM_HTSK_SHTDN) \
+        or (channels[2][2] > THRM_CELL_SHTDN):
+            lights_en = False
+            setLEDs()
+        
+        resume = True
         for i in range(len(channels)):
-            if i > 0: continue
-
+            if i > 2: continue
+            
             temp_c = channels[i][2]
-            print(temp_c)
-
-            if temp_c > THRM_SHTDN:
-                lights_en = False
-                setLEDs()
-            elif temp_c <= THRM_RSM:
-                lights_en = True
-
-        if lights_en != light_stat: setLEDs(r, g, b, 0, h)
-        light_stat = lights_en
+            if temp_c > THRM_RSM: resume = False
+            print(f"{temp_c:0.2f}C")
+        
+        if resume: lights_en = True
+        
+        if lights_en != light_status: setLEDs(r, g, b, 0, h)
+        light_status = lights_en
         therm_timer = getCurrentTime()
 
     if c_time - led_timer > LED_TGL:
@@ -145,4 +160,4 @@ while True:
         led_timer = getCurrentTime()
 
     #print(c_time)
-    sleep(0.01)
+    #sleep(0.01)
