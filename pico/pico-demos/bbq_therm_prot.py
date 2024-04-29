@@ -1,4 +1,4 @@
-# Manual data collection code
+# BBQ mode with thermal safety
 # Import dependencies
 from ulab import numpy as np
 import adafruit_mcp4728 as MCP  # 12-bit DAC
@@ -34,7 +34,7 @@ i2c = busio.I2C(board.GP27, board.GP26)
 # Init I2C devices
 ads = ADS.ADS1015(i2c)
 mcp = MCP.MCP4728(i2c) # Default address = 0x60
-print("MCP4728 initialized, running sine dimming")
+print("MCP4728 initialized, running safe BBQ mode")
 
 def setLEDs(r: int = 0, g: int = 0, b: int = 0, u: int = 0, h: int = 0) -> None:
     # Set the value of the R, G, B, UV, and Halogen lights (docs coming soon :tm:)
