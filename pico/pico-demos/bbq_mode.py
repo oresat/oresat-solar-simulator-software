@@ -1,4 +1,4 @@
-# Manual data collection code
+# BBQ mode (to simulate a spinning satellite)
 # Import dependencies
 from ulab import numpy as np
 import adafruit_mcp4728 as MCP  # 12-bit DAC
