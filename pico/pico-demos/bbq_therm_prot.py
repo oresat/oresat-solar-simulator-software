@@ -130,10 +130,10 @@ while True:
         
         cold = True
         for i in range(len(channels)):
-            if i > 1: continue
+            if i > 2: continue
             
             temp_c = channels[i][2]
-            cold = True if temp_c < THRM_RSM else False
+            cold = cold if temp_c < THRM_RSM else False
             print(f"CH{i}: {temp_c:0.2f}C")
         
         if not lights_en and cold: lights_en = True
