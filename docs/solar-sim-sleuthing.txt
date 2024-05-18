@@ -1,0 +1,45 @@
+Daniel Monahan dmonahan@pdx.edu
+
+Basilisk notes::
+I've spent some time looking through the old oresat solar simulator software branch in hopes I could
+find some use in their scripts, perhaps use their basilisk modules, and hopefull determine what we
+can depricate or use in the pico conversion.
+
+My goal is to provide supplementary documentation for the current solar sim team. 
+
+**** File sleuthing by file ****
+oresat-solar-simulator-software/hub/
+ 1. Basilisk scripts*:
+ 	1.1. BSK-LEOrbit.py 
+ 		- A solar sim using CSS sensors (and spoofed data, I presume)
+ 	1.2.1 oresatStream.py 
+ 		- The same solar sim, now with the magnetic field data included.
+ 		  it seems they attempted to create an oresat 'hub' that could carry out
+		  both HC sim and solar sim
+	1.2.2 out.json
+		- This is an output file for the basilisk script, oresatStream.py.
+		  supposedly this contains solar data from the CSS script
+note: for reference refer to the following  basilisk demos:
+ scenarioBasicOrbit.py, scenerioCSS.py, scenerioMagneticFieldCenteredDipole.py
+
+ 2. Solar Sim Hub:
+ 	2.1. solar-sim-hub.py
+ 		- NOT a basilisk script. This program seems to be intended as a host client used to
+ 		  control the solar simulator and HC magnetic simulators. Uses socketio to communicate
+ 		  with the pocket beagle.
+ 	2.2. hub-options.conf
+ 		- config file used by the solar-sim-hub.py. Provides inputs for the arguments...
+ 		  Args:
+ 		  -f, --file    : 'uses simple rotation rather than basilisk model' DEFAULT: out.json
+ 		  -p, --port    : 'port hub is listening on' (beagle port) DEFAULT: 
+ 		  -r, --refresh : 'sets refresh rate in seconds' DEFAULT:
+ 		  clients       : 'number of simulator clients connected' DEFAULT: 4
+ 		  -v, --verbose : 'verbose mode'
+ 		  -s, -safe     : 'engages safe mode, limits output and turns UV off'
+ 	2.3. requirements.txt
+ 		- Module requirements for solar-sim-hub. cat requirements.txt gives,
+ 		  python-engineio==4.3.*
+		  python-socketio==5.8.*
+		  eventlet==0.33.*
+		- found that I also needed the package: dnspython==2.2.1
+			installed using : pip install dnspython==2.2.1
