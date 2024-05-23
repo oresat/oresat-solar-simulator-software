@@ -1,4 +1,5 @@
-# BBQ mode (to simulate a spinning satellite)
+# BBQ mode (to simulate a spinning satellite) NOW COLORIZED
+# REQUIRES : Basilisk coarse sun sensor sim data as 'out.json'
 # Import dependencies
 from ulab import numpy as np
 import adafruit_mcp4728 as MCP  # 12-bit DAC
@@ -7,6 +8,7 @@ import digitalio as dio
 import pwmio
 import board
 import busio
+import json
 
 # Serial console logging settings
 SERIAL_LOG  = False
@@ -58,7 +60,7 @@ def calcSteps(LIMITER: float) -> list:
     grn_steps = np.linspace(grn_min, grn_max, num=101, dtype=np.uint16)
     blu_steps = np.linspace(blu_min, blu_max, num=101, dtype=np.uint16)
     pwm_steps = np.linspace(pwm_min, pwm_max, num=101, dtype=np.uint16)
-    uv_steps  = np.linspace( uv_min,  uv_max, num=101, dtype=np.uint16)
+    uv_steps  = (np.linspace(uv_min, uv_max, num=101, dtype=np.uint16))
 
     return [red_steps, grn_steps, blu_steps, uv_steps, pwm_steps]
 
@@ -67,22 +69,40 @@ steps = calcSteps(LIMITER)
 
 level = 0
 intensity = 0
-wave = np.sin(np.linspace(0, np.pi, 360))
+# wave = np.sin(np.linspace(0, np.pi, 360)) # bbq mode
 
 # Reset any active lights
 setLEDs()
 led.value = False
 
+# Import basilisk data
+with open('out.json', 'r') as jsonfile:
+    bsk_dict = json.load(jsonfile)
+    
+bsk_data = np.array(bsk_data['0'])
+
 while True:
     # Calculate a 0-100 value from the wave
-    intensity = int(100*wave[level])
+    intensity = int(bsk_data[level])
 
+    print(intensity)
     # Gets LED brightness values at the appropriate level
-    red = steps[0][intensity]
-    grn = steps[1][intensity]
-    blu = steps[2][intensity]
-    uv  = steps[3][intensity]
-    hal = steps[4][int(intensity/2.1)]
+    # From Charlene: Did some testing and calibration and looks like 80 is a magic number where
+    # From Charlene: Did some testing and calibration and looks like 80 is a magic number where
+    # hal seemed to occupy most of the high spectrum, and blue was able to cover all of the bottom spectrum
+    if intensity < 80:
+        red = steps[0][0]
+        grn = steps[1][(intensity//3)]
+        blu = steps[2][(intensity//5)+2]
+        uv  = steps[3][intensity]
+        hal = steps[4][int(intensity)]
+        #hal = steps[4][int(intensity/2.1)]
+    if (intensity == 80 or intensity > 80):
+        red = 0
+        grn = steps[1][100]
+        blu = steps[1][10]
+        uv  = steps[3][intensity]
+        hal = steps[4][int(intensity)]
 
     # Set LEDs and bulbs
     uv = 0 # Disable UV for safety
@@ -92,5 +112,5 @@ while True:
 
     # Increment and overflow the level every iteration
     level += 1
-    if level > len(wave)-1: level = 0
-    sleep(0.01)
+    if level > len(bsk_data)-1: level = 0
+    sleep(0.1)
