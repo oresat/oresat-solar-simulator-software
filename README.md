@@ -14,6 +14,23 @@ The original work for this was done as an MCECS Capstone Project from January to
 
 The continuation of this project is to convert the OreSat Solar Simulator Software from using the Beaglebone microcontroller to the Raspberry Pi Pico. The maintainers are OreSat engineers Charlene de la Paz, John Albert Abed, Angeline Vu, and Rose Edington with the assistance of Industry Advisor Jake Taylor.
 
+## Planned Architecture
+Hardware Stack
+```mermaid
+graph TD
+    A[MDC] --> B[Basilisk]
+    B -->|Solar Data| C[Pico]
+    C -->|PWM| H[Halogen]
+    E[ADS1015] -->|I2C| C
+    C -->|I2C| F[MCP4728]
+    T1[Thermistors 0-2] --> E
+    PD[Photodiode] --> E
+    F -->|A| R[Red]
+    F -->|B| G[Green]
+    F -->|C| L[Blue]
+    F -->|D| UV[UV]
+```
+
 ## Software
 
 The software consists of a hub and client modules, both written in CircuitPython 8.2.10. The hub utilizes the [Basilisk Simulation Framework](http://hanspeterschaub.info/basilisk/) to determine which sides of the CubeSat would be exposed to light.
