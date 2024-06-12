@@ -8,6 +8,8 @@ from busio import I2C
 from pwmio import PWMOut
 import board
 
+MAX_VALUE = 65535
+
 class SolarSimulator:
     # Initializes the Solar Simulator module
     def __init__(self, pwm_freq: int = 50000, verbose: int = 0):
@@ -33,22 +35,16 @@ class SolarSimulator:
         self.therm_safe = True
         if verbose: print("Solar Simulator initialized")
 	
-    # Sets the LEDs brightness as a 16-bit integer value
-    def setLEDs(self, r: int = 0, g: int = 0, b: int = 0, uv: int = 0):
+    # Sets the LEDs and halogen brightness as a 16-bit integer value
+    def setLEDs(self, r: int = 0, g: int = 0, b: int = 0, uv: int = 0, h: int = 0):
         self.mcp.channel_a.value = r
         self.mcp.channel_b.value = g
         self.mcp.channel_c.value = b
         self.mcp.channel_d.value = uv * (not self.uv_safe)
-        if self.verbose >= 2: print(f"RED: {self.mcp.channel_a.value}, GRN: {self.mcp.channel_b.value}, BLU: {self.mcp.channel_c.value}, UV: {self.mcp.channel_d.value}")
-        elif self.verbose >= 1: print(f"RED: {self.mcp.channel_a.value // 655}%, GRN: {self.mcp.channel_b.value // 655}%, BLU: {self.mcp.channel_c.value // 655}%, UV: {self.mcp.channel_d.value // 655}%")
-    
-    # Sets the Halogens brightness as a 16-bit integer value
-    # Optionally set the PWM frequency with a 16-bit integer value
-    def setHalogen(self, freq: int | None = None, duty_cycle: int = 0):
-        if freq is not None: self.hal.frequency = freq
-        self.hal.duty_cycle = duty_cycle
-        if self.verbose >= 2: print(f"HAL: {self.hal.frequency}Hz, {self.hal.duty_cycle}, {self.hal.duty_cycle // 655}%")
-        elif self.verbose >= 1: print(f"HAL: {self.hal.duty_cycle // 655}%")
+        self.hal.duty_cycle = h
+
+        if self.verbose >= 2: print(f"RED: {self.mcp.channel_a.value}, GRN: {self.mcp.channel_b.value}, BLU: {self.mcp.channel_c.value}, UV: {self.mcp.channel_d.value}, HAL: {self.hal.duty_cycle}")
+        elif self.verbose >= 1: print(f"RED: {self.mcp.channel_a.value // 655}%, GRN: {self.mcp.channel_b.value // 655}%, BLU: {self.mcp.channel_c.value // 655}%, UV: {self.mcp.channel_d.value // 655}%, HAL: {self.hal.duty_cycle // 655}%")
     
     # Returns a list of thermal values per thermistor channel in Celsius
     def checkThermals(self) -> list:
@@ -56,8 +52,9 @@ class SolarSimulator:
         thermistors = self.__readThermistors()
         for chan, i in zip(thermistors, range(3)):
             thermals.append(chan[2])
-            if self.verbose ==1: print(f"Channel[{i}]: {chan[2]}C")
+            if self.verbose == 1: print(f"Channel[{i}]: {chan[2]}C")
         return thermals
+
 
     # Helper function that prints all available I2C devices
     def __portScan(self) -> list:
@@ -65,7 +62,6 @@ class SolarSimulator:
         found = self.i2c.scan()
         self.i2c.unlock()
         return [hex(i) for i in found]
-
 
     # Helper function that reads all of the thermistors and returns a list of lists of data for each channel
     # Output: [[CHAN0 binary data, voltage, celsius temp], [CHAN1 binary data, voltage, celsius temp], [CHAN2 binary data, voltage, celsius temp]]
@@ -83,3 +79,26 @@ class SolarSimulator:
         rth = (10000) * (3.3 / adc) - 10000
         therm = 1 / ((np.log(rth/10000) / 3977) + (1/298.15))
         return therm - 273.15
+
+
+def calcSteps(limiter: float = 1) -> list:
+    # Calculate the interpolation steps from a set intensity limiter (docs coming soon :tm:)
+    red_min = 10756
+    grn_min = 10140
+    blu_min = 10620
+    uv_min  = 10620
+    pwm_min = 0
+    red_max = int(MAX_VALUE * limiter)
+    grn_max = int(MAX_VALUE * limiter)
+    blu_max = int(MAX_VALUE * limiter)
+    uv_max  = int(MAX_VALUE * limiter)
+    pwm_max = int(MAX_VALUE * limiter)
+    
+    # Calculate steps between minimum and maximum values
+    red_steps = np.linspace(red_min, red_max, num=101, dtype=np.uint16)
+    grn_steps = np.linspace(grn_min, grn_max, num=101, dtype=np.uint16)
+    blu_steps = np.linspace(blu_min, blu_max, num=101, dtype=np.uint16)
+    uv_steps  = np.linspace( uv_min,  uv_max, num=101, dtype=np.uint16)
+    pwm_steps = np.linspace(pwm_min, pwm_max, num=101, dtype=np.uint16)
+
+    return [red_steps, grn_steps, blu_steps, uv_steps, pwm_steps]
