@@ -50,7 +50,7 @@ class SolarSimulator:
     def checkThermals(self) -> list:
         thermals = []
         thermistors = self.__readThermistors()
-        for chan, i in zip(thermistors, range(3)):
+        for i, chan in zip(range(3), thermistors):
             thermals.append(chan[2])
             if self.verbose == 1: print(f"Channel[{i}]: {chan[2]}C")
         return thermals
@@ -69,17 +69,17 @@ class SolarSimulator:
         therm_values = []
         for i in range(0,3):
             chan = AnalogIn(self.ads, i)
-            therm_values.append([chan.value>>4, chan.voltage, self.__calculateTemp(chan.voltage)])
-            if self.verbose >= 2: print(f"Channel[{i}]: {chan.value>>4}, {chan.voltage}v, {self.__calculateTemp(chan.voltage)}C")
+            therm_values.append([chan.value>>4, chan.voltage, calcTemp(chan.voltage)])
+            if self.verbose >= 2: print(f"Channel[{i}]: {chan.value>>4}, {chan.voltage}v, {calcTemp(chan.voltage)}C")
         return therm_values
 
-    # Helper function that takes a thermistor's voltage and returns it's temperature in Celsius
-    def __calculateTemp(self, adc: float) -> float:
-        if adc == 0: return None
-        rth = (10000) * (3.3 / adc) - 10000
-        therm = 1 / ((np.log(rth/10000) / 3977) + (1/298.15))
-        return therm - 273.15
 
+# Helper function that takes a thermistor's voltage and returns it's temperature in Celsius
+def calcTemp(adc: float) -> float | None:
+    if adc == 0: return None
+    rth = (10000) * (3.3 / adc) - 10000
+    therm = 1 / ((np.log(rth/10000) / 3977) + (1/298.15))
+    return therm - 273.15
 
 def calcSteps(limiter: float = 1) -> list:
     # Calculate the interpolation steps from a set intensity limiter (docs coming soon :tm:)
