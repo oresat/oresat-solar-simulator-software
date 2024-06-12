@@ -13,7 +13,6 @@ sim.uv_safe = True # Set this to False if you want to use the UV LEDs
 
 # Reset any active lights
 sim.setLEDs()
-sim.setHalogen()
 
 while True:
     print("Setting red")
@@ -33,13 +32,11 @@ while True:
     sleep(SPEED)
 
     print("Setting halogen")
-    sim.setLEDs()
-    sim.setHalogen(duty_cycle=MAX_VALUE // 4)
+    sim.setLEDs(hal=MAX_VALUE//4)
     sleep(SPEED)
 
     print("Clearing lights")
     sim.setLEDs()
-    sim.setHalogen()
     sleep(SPEED)
 
     print("Reading thermal data")
