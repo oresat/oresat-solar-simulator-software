@@ -3,8 +3,14 @@
 from lib import solar_simulator as ss
 from ulab import numpy as np
 from time import sleep, monotonic_ns
+import supervisor as sup
+
+# Set to False if editing scripts
+sup.runtime.autoreload = True
 
 # Set up constants
+SERIAL_LOG = True
+THERM_LOG = True
 THERM_SAFE_EN = True # TODO: Enable/disable flag for thermal protection
 
 # Create the simulator
@@ -25,12 +31,12 @@ def getCurrentTime() -> int:
     return int((monotonic_ns()-NS_OFFSET)/1000000)
 
 # Thermal check timing
-therm_timer     = 0
 THRM_CHECK      = 50  # Elapsed time before checking thermals
 THRM_LEDS_SHTDN = 100 # In Celsius, thermistor temperature shutoff value at RGBUv LEDs (under PCB)
 THRM_HTSK_SHTDN = 60  # In Celsius, thermistor temperature shutoff value at heatsinks
 THRM_CELL_SHTDN = 80  # In Celsius, thermistor temperature shutoff value at solar cell (bottom plate)
 THRM_RSM        = 45  # In Celsius, all thermistors must be at or below this value before lights are enabled again
+therm_timer     = 0
 lights_en       = True
 lights_upd      = True
 
@@ -50,11 +56,11 @@ while True:
     
     # Check if the elapsed time is longer than the thermal check interval
     c_time = getCurrentTime()
-    if c_time - therm_timer > THRM_CHECK:
+    if (c_time - therm_timer > THRM_CHECK) and THERM_SAFE_EN:
         channels = sim.checkThermals()
         if (channels[0] > THRM_LEDS_SHTDN) \
         or (channels[1] > THRM_HTSK_SHTDN) \
-        or (channels[2] > THRM_CELL_SHTDN):
+        or (channels[2] > THRM_CELL_SHTDN): # TODO: Try except block for returning NoneType
             lights_en = False
             sim.setLEDs()
         
@@ -66,17 +72,17 @@ while True:
             
             temp_c = channels[i]
             cold = cold if temp_c < THRM_RSM else False
-            if not sim.verbose: print(f"CH{i}: {temp_c:0.2f}C")
-        
+            if not sim.verbose and THERM_LOG: print(f"CH{i}: {temp_c:0.2f}C")
+
         # Disable lights if hot
         if not lights_en and cold: lights_en = True
         therm_timer = getCurrentTime()
     
     if lights_en: sim.setLEDs(red, grn, blu, uv, hal)
 
-    if not sim.verbose: print(f"Intensity: {intensity}, Level: {level}")
+    if not sim.verbose and lights_en and SERIAL_LOG: print(f"Intensity: {intensity}, Level: {level}")
 
     # Increment and overflow the level every iteration
     if lights_en: level += 1
     if level > len(wave)-1: level = 0
-    sleep(0.02)
+    sleep(0.05)
