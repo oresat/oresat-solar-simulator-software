@@ -9,7 +9,7 @@ SPEED = 1
 
 # Create the Solar Simulator object
 sim = SolarSimulator(verbose=0)
-sim.uv_safe = True # Set this to False if you want to use the UV LEDs
+sim.uv_safety = True # Set this to False if you want to use the UV LEDs
 
 # Reset any active lights
 sim.setLEDs()

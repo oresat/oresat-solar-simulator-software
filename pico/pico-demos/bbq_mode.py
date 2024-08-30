@@ -5,8 +5,7 @@ from ulab import numpy as np
 from time import sleep, monotonic_ns
 import supervisor as sup
 
-# Set to False if editing scripts
-sup.runtime.autoreload = True
+sup.runtime.autoreload = False
 
 # Set up constants
 SERIAL_LOG = True
@@ -15,7 +14,7 @@ THERM_SAFE_EN = True # TODO: Enable/disable flag for thermal protection
 
 # Create the simulator
 sim = ss.SolarSimulator()
-sim.uv_safe = True
+sim.uv_safety = True
 
 # Calculate LED interpolated brightness steps
 steps = ss.calcSteps()
@@ -58,11 +57,14 @@ while True:
     c_time = getCurrentTime()
     if (c_time - therm_timer > THRM_CHECK) and THERM_SAFE_EN:
         channels = sim.checkThermals()
-        if (channels[0] > THRM_LEDS_SHTDN) \
-        or (channels[1] > THRM_HTSK_SHTDN) \
-        or (channels[2] > THRM_CELL_SHTDN): # TODO: Try except block for returning NoneType
-            lights_en = False
-            sim.setLEDs()
+        try:
+            if (channels[0] > THRM_LEDS_SHTDN) \
+            or (channels[1] > THRM_HTSK_SHTDN) \
+            or (channels[2] > THRM_CELL_SHTDN):
+                lights_en = False
+                sim.setLEDs()
+        except TypeError:
+            print("Unable to read thermistor value")
         
         # Set cold to False if any of the thermistors are above their respective thresholds
         # Or set cold to True if all of the thermistors are below the resume temperature threshold
@@ -71,8 +73,11 @@ while True:
             if i > 2: continue
             
             temp_c = channels[i]
-            cold = cold if temp_c < THRM_RSM else False
-            if not sim.verbose and THERM_LOG: print(f"CH{i}: {temp_c:0.2f}C")
+            try:
+                cold = cold if temp_c < THRM_RSM else False
+                if not sim.verbose and THERM_LOG: print(f"CH{i}: {temp_c:0.2f}C")
+            except TypeError:
+                print(f"Unable to read thermistor channel {i}")
 
         # Disable lights if hot
         if not lights_en and cold: lights_en = True

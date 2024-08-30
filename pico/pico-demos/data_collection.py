@@ -20,7 +20,7 @@ led.value = True
 
 # Create the solar simulator
 sim = ss.SolarSimulator()
-sim.uv_safe = True
+sim.uv_safety = True
 
 # Calculate steps
 steps = ss.calcSteps()

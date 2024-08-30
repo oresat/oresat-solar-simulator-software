@@ -31,7 +31,7 @@ class SolarSimulator:
         self.hal = PWMOut(board.GP28, frequency=self.PWM_FREQ, duty_cycle=0, variable_frequency=True)
         if verbose: print(f"Initialized PWM at {self.PWM_FREQ}Hz")
         
-        self.uv_safe = True
+        self.uv_safety = True
         self.therm_safe = True
         if verbose: print("Solar Simulator initialized")
 	
@@ -40,7 +40,7 @@ class SolarSimulator:
         self.mcp.channel_a.value = r
         self.mcp.channel_b.value = g
         self.mcp.channel_c.value = b
-        self.mcp.channel_d.value = uv * (not self.uv_safe)
+        self.mcp.channel_d.value = uv * (not self.uv_safety)
         self.hal.duty_cycle = h
 
         if self.verbose >= 2: print(f"RED: {self.mcp.channel_a.value}, GRN: {self.mcp.channel_b.value}, BLU: {self.mcp.channel_c.value}, UV: {self.mcp.channel_d.value}, HAL: {self.hal.duty_cycle}")

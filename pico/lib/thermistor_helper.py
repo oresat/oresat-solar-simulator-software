@@ -1,5 +1,4 @@
 # Thermistor conversion helper
-# TODO: Compile to `.mpy`
 import ulab.numpy as np
 
 # Takes a thermistor's voltage and returns it's temperature in Celsius
