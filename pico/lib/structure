@@ -1,0 +1,10 @@
+├── code.py        # main.py
+└── lib/
+    ├── utils.py
+    ├── app.py
+    ├── solar_simulator.py
+    └── modes/
+        ├── __init__.py
+        ├── auto_mode.py
+        ├── manual_mode.py
+        └── basilisk_mode.py

@@ -1,0 +1,9 @@
+{
+    "lights": {
+        "hal": ["0-100"]
+    },
+    "base_dir": "data",
+    "base_intensity": {
+        "hal": "100"
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "lights": {
+        "red": ["23-50"]
+    },
+    "base_dir": "data",
+    "base_intensity": {
+        "red": "100"
+    }
+}
