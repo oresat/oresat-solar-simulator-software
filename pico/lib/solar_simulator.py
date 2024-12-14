@@ -42,6 +42,11 @@ class SolarSimulator:
             'uv': 0,
             'h': 0
         }
+        self.enable_therm_monitoring = True
+        self.therm_led_shutdown = 100
+        self.therm_heatsink_shutdown = 60
+        self.therm_cell_shutdown = 80
+        self.therm_resume_temp = 45
 
         if verbose: print("Solar Simulator initialized")
 

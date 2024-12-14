@@ -3,11 +3,8 @@
 import time
 import sys
 import supervisor
-from solar_simulator import SolarSimulator as sim
+from .solar_simulator import SolarSimulator as sim
 # Constants and Configurations
-global ENABLE_THERM_MONITORING, THERM_LED_SHUTDOWN, THERM_HEATSINK_SHUTDOWN, THERM_CELL_SHUTDOWN, THERM_RESUME_TEMP
-
-
 def calculate_light_intensity(factor):
     """
     Calculate the light intensity values for 5 types of lights.
@@ -78,7 +75,7 @@ def check_temperature(sim):
     """
     Check the temperature and handle thermal shutdown and resume.
     """
-    if not ENABLE_THERM_MONITORING:
+    if not sim.enable_therm_monitoring:
         return True
 
     thermals = sim.checkThermals()
@@ -92,18 +89,18 @@ def check_temperature(sim):
     cell_temp = cell_temp or 0
 
     if (
-        led_temp > THERM_LED_SHUTDOWN
-        or heatsink_temp > THERM_HEATSINK_SHUTDOWN
-        or cell_temp > THERM_CELL_SHUTDOWN
+        led_temp > sim.therm_led_shutdown
+        or heatsink_temp > sim.therm_heatsink_shutdown
+        or cell_temp > sim.therm_cell_shutdown
     ):
         previous_light_settings = sim.current_light_settings
         sim.setLEDs(0, 0, 0, 0, 0)
         print("Temperature too high! Turning off lights for safety.")
 
         while (
-            led_temp > THERM_RESUME_TEMP
-            or heatsink_temp > THERM_RESUME_TEMP
-            or cell_temp > THERM_RESUME_TEMP
+            led_temp > sim.therm_resume_temp
+            and heatsink_temp > sim.therm_resume_temp
+            and cell_temp > sim.therm_resume_temp
         ):
             time.sleep(1)
             thermals = sim.checkThermals()

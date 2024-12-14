@@ -5,12 +5,6 @@ from .modes.auto_mode import AutoMode
 from .modes.manual_mode import ManualMode
 from .modes.basilisk_mode import BasiliskMode
 
-THERM_LED_SHUTDOWN = 100
-THERM_HEATSINK_SHUTDOWN = 60
-THERM_CELL_SHUTDOWN = 80
-THERM_RESUME_TEMP = 45
-ENABLE_THERM_MONITORING = True
-
 
 class SolarSimulatorApp:
     """
@@ -19,52 +13,71 @@ class SolarSimulatorApp:
 
     def __init__(self, sim):
         self.sim = sim
-        self.enable_therm_monitoring = "yes"
+        # Thermal monitoring settings
 
     def run(self):
         self.setup()
         self.mode_selection()
 
     def setup(self):
-        global ENABLE_THERM_MONITORING, THERM_LED_SHUTDOWN, THERM_HEATSINK_SHUTDOWN, THERM_CELL_SHUTDOWN, THERM_RESUME_TEMP
-
         # Thermal monitoring setting
-        enable_therm_monitoring_input = input_with_default(
-            "Would you like to enable thermal monitoring? (yes/no, default is yes): ",
-            default_value="yes",
-            valid_values=["yes", "no"]
+            
+        default_settings_summary = (
+            "\nDefault settings are:\n"
+            "  - Thermal Monitoring: " + ("Enabled" if self.sim.enable_therm_monitoring else "Disabled") + "\n" +
+            "  - UV Light: " + ("Disabled" if self.sim.uv_safety else "Enabled") + "\n" +
+            "  - LED Shutdown Temperature: " + str(self.sim.therm_led_shutdown) + "°C\n" +
+            "  - Heatsink Shutdown Temperature: " + str(self.sim.therm_heatsink_shutdown) + "°C\n" +
+            "  - Cell Shutdown Temperature: " + str(self.sim.therm_cell_shutdown) + "°C\n" +
+            "  - Resume Operation Temperature: " + str(self.sim.therm_resume_temp) + "°C\n"
         )
-        ENABLE_THERM_MONITORING = enable_therm_monitoring_input == "yes"
 
-        # UV light setting
-        enable_uv_input = input_with_default(
-            "Would you like to enable the UV light? (yes/no, default is no): ",
+        change_settings = input_with_default(
+            "Would you like to change the default settings? (yes/no, default is no): " + default_settings_summary,
             default_value="no",
             valid_values=["yes", "no"]
         )
-        self.sim.uv_safety = not (enable_uv_input == "yes")
 
-        THERM_LED_SHUTDOWN = input_with_default(
-            "Set LED shutdown temperature (default is 100°C): ",
-            default_value=100,
-            value_type=int
-        )
-        THERM_HEATSINK_SHUTDOWN = input_with_default(
-            "Set Heatsink shutdown temperature (default is 60°C): ",
-            default_value=60,
-            value_type=int
-        )
-        THERM_CELL_SHUTDOWN = input_with_default(
-            "Set Cell shutdown temperature (default is 80°C): ",
-            default_value=80,
-            value_type=int
-        )
-        THERM_RESUME_TEMP = input_with_default(
-            "Set temperature to resume operation (default is 45°C): ",
-            default_value=45,
-            value_type=int
-        )
+        if change_settings == "yes":
+            # Thermal monitoring setting
+            enable_therm_monitoring_input = input_with_default(
+                "Would you like to enable thermal monitoring? (yes/no, default is yes): ",
+                default_value="yes",
+                valid_values=["yes", "no"]
+            )
+            self.sim.enable_therm_monitoring = enable_therm_monitoring_input == "yes"
 
+            # UV light setting
+            enable_uv_input = input_with_default(
+                "Would you like to enable the UV light? (yes/no, default is no): ",
+                default_value="no",
+                valid_values=["yes", "no"]
+            )
+            self.sim.uv_safety = not (enable_uv_input == "yes")
+
+            # Thermal shutdown temperatures
+            self.sim.therm_led_shutdown = input_with_default(
+                "Set LED shutdown temperature (default is 100°C): ",
+                default_value=100,
+                value_type=int
+            )
+            self.sim.therm_heatsink_shutdown = input_with_default(
+                "Set Heatsink shutdown temperature (default is 60°C): ",
+                default_value=60,
+                value_type=int
+            )
+            self.sim.therm_cell_shutdown = input_with_default(
+                "Set Cell shutdown temperature (default is 80°C): ",
+                default_value=80,
+                value_type=int
+            )
+            self.sim.therm_resume_temp = input_with_default(
+                "Set temperature to resume operation (default is 45°C): ",
+                default_value=45,
+                value_type=int
+            )
+        else:
+            print("Using default settings. No changes were made.")
     def mode_selection(self):
         print("Please choose your mode")
         print("1. Auto Mode")
