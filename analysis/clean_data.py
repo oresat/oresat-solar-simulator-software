@@ -10,7 +10,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 
-# 动态滤波函数
+# adaptive bandpass filter
 def dynamic_bandpass_filter(wavelengths, intensities, drop_ratio=0.01):
     max_intensity = np.max(intensities)
     peak_index = np.argmax(intensities)
@@ -18,19 +18,19 @@ def dynamic_bandpass_filter(wavelengths, intensities, drop_ratio=0.01):
 
     threshold = max_intensity * drop_ratio
 
-    # 找到下界
+    # find the lower bound
     lower_bound_index = peak_index
     while lower_bound_index > 0 and intensities[lower_bound_index] > threshold:
         lower_bound_index -= 1
     lower_bound = wavelengths[lower_bound_index]
 
-    # 找到上界
+    # find upper bound
     upper_bound_index = peak_index
     while upper_bound_index < len(wavelengths) - 1 and intensities[upper_bound_index] > threshold:
         upper_bound_index += 1
     upper_bound = wavelengths[upper_bound_index]
 
-    # 滤波：保留上下界内的值
+    # filter
     filtered_intensities = np.where(
         (wavelengths >= lower_bound) & (wavelengths <= upper_bound),
         intensities,
@@ -39,7 +39,7 @@ def dynamic_bandpass_filter(wavelengths, intensities, drop_ratio=0.01):
     return filtered_intensities, (lower_bound, upper_bound, peak_wavelength)
 
 
-# 插值函数
+# interpolate
 def interpolate_data(wavelengths, intensities, min_wavelength=350, max_wavelength=1100, interval=1):
     target_wavelengths = np.arange(min_wavelength, max_wavelength + interval, interval)
     interp_func = interp1d(wavelengths, intensities, kind="linear", fill_value="extrapolate")
@@ -47,7 +47,7 @@ def interpolate_data(wavelengths, intensities, min_wavelength=350, max_wavelengt
     return target_wavelengths, interpolated_intensities
 
 
-# WebPlotDigitizer 插值细节补全
+# WebPlotDigitizer refine
 def refine_webplot_data(wavelengths, intensities):
     # 使用小步长补全
     min_wavelength = max(350, wavelengths.min())
@@ -58,21 +58,21 @@ def refine_webplot_data(wavelengths, intensities):
     return small_step_wavelengths, refined_intensities
 
 
-# 加载 .irr 文件
+#  .irr
 def load_irr_file(file_path):
     data = pd.read_csv(file_path, skiprows=2, sep='\s+', header=None)
     data.columns = ["Wavelength", "Intensity"]
     return data["Wavelength"].values, data["Intensity"].values
 
 
-# 加载 WebPlotDigitizer 的 CSV 文件
+# load WebPlotDigitizer CSV
 def load_webplotdigitizer_file(file_path):
     data = pd.read_csv(file_path, header=None)
     data.columns = ["Wavelength", "Intensity"]
     return data["Wavelength"].values, data["Intensity"].values
 
 
-# 主窗口类
+# main view
 class SpectrumApp(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -82,18 +82,18 @@ class SpectrumApp(QMainWindow):
         self.initUI()
 
     def initUI(self):
-        # 主布局
+        # main
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
         layout = QVBoxLayout(self.central_widget)
 
-        # 显示区域
+        # view the area
         self.figure = Figure(figsize=(10, 6))
         self.canvas = FigureCanvas(self.figure)
         self.ax = self.figure.add_subplot(111)
         layout.addWidget(self.canvas)
 
-        # 加载按钮
+        # load button
         button_layout = QHBoxLayout()
         load_irr_button = QPushButton("Load from .irr File")
         load_irr_button.clicked.connect(self.load_irr_data)
@@ -104,7 +104,7 @@ class SpectrumApp(QMainWindow):
         button_layout.addWidget(load_webplot_button)
         layout.addLayout(button_layout)
 
-        # 设置窗口属性
+
         self.setWindowTitle("Spectrum Processor with Refinement")
         self.resize(1200, 800)
 
@@ -118,16 +118,16 @@ class SpectrumApp(QMainWindow):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select a WebPlotDigitizer CSV File", "", "CSV Files (*.csv)")
         if file_path:
             wavelengths, intensities = load_webplotdigitizer_file(file_path)
-            # 先补全细节
+            # fix
             refined_wavelengths, refined_intensities = refine_webplot_data(wavelengths, intensities)
             self.process_and_save(refined_wavelengths, refined_intensities, file_path)
 
     def process_and_save(self, wavelengths, intensities, file_path):
-        # 插值和动态滤波
+        #
         interp_wavelengths, interp_intensities = interpolate_data(wavelengths, intensities)
         filtered_intensities, band_info = dynamic_bandpass_filter(interp_wavelengths, interp_intensities)
 
-        # 绘制结果
+        # plot
         self.ax.clear()
         self.ax.plot(interp_wavelengths, interp_intensities, label="Interpolated Spectrum", color="blue")
         self.ax.plot(interp_wavelengths, filtered_intensities, label="Filtered Spectrum", color="green")
@@ -141,11 +141,11 @@ class SpectrumApp(QMainWindow):
         self.ax.grid()
         self.canvas.draw()
 
-        # 保存结果
+        # save
         output_dir = "data/csv"
         os.makedirs(output_dir, exist_ok=True)  # 确保目录存在
 
-        # 确保替换扩展名为 _processed.csv
+        # _processed.csv
         file_name = os.path.basename(file_path)
         if file_name.endswith(".irr"):
             output_file = os.path.join(output_dir, file_name.replace(".irr", "_processed.csv"))
@@ -154,13 +154,13 @@ class SpectrumApp(QMainWindow):
         else:
             output_file = os.path.join(output_dir, file_name + "_processed.csv")  # 默认添加 _processed.csv 后缀
 
-        # 构建 DataFrame
+        # DataFrame
         processed_data = pd.DataFrame({
             "Wavelength": interp_wavelengths,
             "Intensity": filtered_intensities
         })
 
-        # 保存为 CSV
+        # CSV
         try:
             processed_data.to_csv(output_file, index=False)
             QMessageBox.information(self, "Success", f"Processed data saved to:\n{output_file}")

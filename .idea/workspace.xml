@@ -4,17 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="56449465-69a1-4e19-a6c9-9f01c885e322" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analysis/real-time-data-test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/clean_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/clean_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/find_the_right_light.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/find_the_right_light.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pico/lib/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/pico/lib/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pico/lib/solar_simulator.py" beforeDir="false" afterPath="$PROJECT_DIR$/pico/lib/solar_simulator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pico/lib/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/pico/lib/utils.py" afterDir="false" />
-    </list>
+    <list default="true" id="56449465-69a1-4e19-a6c9-9f01c885e322" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -69,7 +59,7 @@
       <updated>1733984409476</updated>
       <workItem from="1733984410558" duration="2212000" />
       <workItem from="1733986652706" duration="1569000" />
-      <workItem from="1734155187930" duration="10408000" />
+      <workItem from="1734155187930" duration="10999000" />
     </task>
     <servers />
   </component>
