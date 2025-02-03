@@ -1,61 +1,63 @@
 # lib/modes/basilisk_mode.py
 
 import time
-import json
-from ulab import numpy as np
-from manual_mode import check_for_interrupt, check_temperature, display_status
+import supervisor
+import sys
+from lib.modes.manual_mode import check_for_interrupt, check_temperature, display_status
 from ..utils import calculate_light_intensity
-
 
 
 class BasiliskMode:
     """
-    Implements the Basilisk Mode functionality.
+    Implements the Basilisk Mode functionality with UART communication for CircuitPython.
     """
+
     def __init__(self, sim):
         self.sim = sim
-        self.bsk_data = None
-        self.current_level = 0
 
     def run(self):
-        print("Entering Basilisk Mode")
-
-        with open('pico-demos/bsk_data_example/out.json', 'r') as jsonfile:
-            bsk_dict = json.load(jsonfile)
-
-        self.bsk_data = np.array(bsk_dict['0'])
-
+        print("Entering Basilisk Mode, wait for data input")
+        pre_data = None
+        data = None
+        buffer = ""
         try:
             while True:
-                intensity = int(self.bsk_data[self.current_level])
+                if supervisor.runtime.serial_bytes_available:
+                    data = sys.stdin.read(1)
+                    # print(f"data received: {repr(data)}")
+                    buffer += data
 
-                intensity_values = calculate_light_intensity(intensity)
-                red = int(intensity_values["Red"] * 655)
-                green = int(intensity_values["Green"] * 655)
-                blue = int(intensity_values["Blue"] * 655)
-                halogen = int(intensity_values["Halogen"] * 655)
-                uv = int(intensity_values["UV"] * 655)
+                    if "\n" in buffer:
+                        line, buffer = buffer.split("\n", 1)
+                        line = line.replace("\x00", "").strip()
+                        # print(f"Raw data received: {line}")
+                        intensity = int(line)
 
-                self.sim.setLEDs(r=red, g=green, b=blue, uv=uv, h=halogen)
-                self.sim.current_light_settings = {
-                    'r': red,
-                    'g': green,
-                    'b': blue,
-                    'uv': uv,
-                    'h': halogen
-                }
+                        if 0 <= intensity <= 100:
+                            intensity_values = calculate_light_intensity(intensity / 100)
+                            red = int(intensity_values["Red"] * 655)
+                            green = int(intensity_values["Green"] * 655)
+                            blue = int(intensity_values["Blue"] * 655)
+                            halogen = int(intensity_values["Halogen"] * 655)
+                            uv = int(intensity_values["UV"] * 655)
 
-                print(f"BasiliskMode: Intensity={intensity}, Level={self.current_level}", end="\n")
+                            self.sim.setLEDs(r=red, g=green, b=blue, uv=uv, h=halogen)
+                            self.sim.current_light_settings = {
+                                'r': red,
+                                'g': green,
+                                'b': blue,
+                                'uv': uv,
+                                'h': halogen
+                            }
 
-                check_for_interrupt()
-                check_temperature(self.sim)
-                display_status(self.sim)
+                            print(f"BasiliskMode: Intensity={intensity}", end="\n")
+                            check_temperature(self.sim)
+                            display_status(self.sim)
+                        else:
+                            print(f"Invalid intensity value received: {intensity}")
 
-                self.current_level += 1
-                if self.current_level >= len(self.bsk_data):
-                    self.current_level = 0
-
-                time.sleep(0.1)
+                        time.sleep(0.1)
+                        buffer = ""
 
         except KeyboardInterrupt:
             print("Keyboard interrupt caught, exiting Basilisk Mode loop.")

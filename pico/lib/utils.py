@@ -11,14 +11,18 @@ def calculate_light_intensity(factor):
     """
     if not (0 <= factor <= 1):
         raise ValueError("Scaling factor must be between 0 and 1.")
-
-    # Calculating intensities for each light source
-    red_intensity = -1.5066 * factor + 22.6663
-    green_intensity = 32.3521 * factor + 16.3331
-    blue_intensity = 10.2647 * factor + 20.9998
-    halogen_intensity = 89.1446 * factor + 9.0003
-    uv_intensity = 16.7591 * factor + 22.0008
-
+    if factor == 0:
+        red_intensity = 0
+        green_intensity = 0
+        blue_intensity = 0
+        halogen_intensity = 0
+        uv_intensity = 0
+    elif 0 < factor <= 1:
+        red_intensity = -1.5066 * factor + 22.6663
+        green_intensity = 32.3521 * factor + 16.3331
+        blue_intensity = 10.2647 * factor + 20.9998
+        halogen_intensity = 89.1446 * factor + 9.0003
+        uv_intensity = 16.7591 * factor + 22.0008
     # Storing the intensities in a dictionary
     intensities = {
         "Red": red_intensity,

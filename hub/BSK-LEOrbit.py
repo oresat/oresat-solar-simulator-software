@@ -483,10 +483,11 @@ def run(show_plots, orbitCase, useSphericalHarmonics, planetCase, useCSSConstell
     # set the simulation time
     n = np.sqrt(mu / oe.a / oe.a / oe.a)
     P = 2. * np.pi / n
+    print(f"Orbit Period P = {P} seconds")
     if useSphericalHarmonics:
         simulationTime = macros.sec2nano(3. * P)
     else:
-        simulationTime = macros.sec2nano(10 * P)
+        simulationTime = macros.sec2nano(P)
 
     # Setup data logging before the simulation is initialized
     if useSphericalHarmonics:
