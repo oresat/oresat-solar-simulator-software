@@ -8,6 +8,7 @@ from ..utils import (
     check_temperature,
     check_for_interrupt
 )
+
 class AutoMode:
     """
     Implements the Auto Mode functionality.
@@ -42,19 +43,19 @@ class AutoMode:
                     intensity_values = calculate_light_intensity(intensity_factor)
 
                     # Scale values to PWM range (0 to 65535)
-                    red = int(intensity_values["Red"] * 655)
-                    green = int(intensity_values["Green"] * 655)
-                    blue = int(intensity_values["Blue"] * 655)
+                    violet = int(intensity_values["Violet"] * 655)
+                    white = int(intensity_values["White"] * 655)
+                    cyan = int(intensity_values["Cyan"] * 655)
                     halogen = int(intensity_values["Halogen"] * 655)
-                    uv = int(intensity_values["UV"] * 655)
+                    uv = int(intensity_values["UV"] * 655)  # (**abandon**)
 
                     # Set LED intensities
-                    self.sim.setLEDs(r=red, g=green, b=blue, uv=uv, h=halogen)
+                    self.sim.setLEDs(v=violet, w=white, c=cyan, uv=uv, h=halogen)
                     self.sim.current_light_settings = {
-                        'r': red,
-                        'g': green,
-                        'b': blue,
-                        'uv': uv,
+                        'v': violet,
+                        'w': white,
+                        'c': cyan,
+                        'uv': uv,  # (**abandon**)
                         'h': halogen
                     }
                     # Update level index for sine wave

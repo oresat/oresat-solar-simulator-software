@@ -1,9 +1,8 @@
-# lib/utils.py
-
 import time
 import sys
 import supervisor
 from .solar_simulator import SolarSimulator as sim
+
 # Constants and Configurations
 def calculate_light_intensity(factor):
     """
@@ -12,24 +11,24 @@ def calculate_light_intensity(factor):
     if not (0 <= factor <= 1):
         raise ValueError("Scaling factor must be between 0 and 1.")
     if factor == 0:
-        red_intensity = 0
-        green_intensity = 0
-        blue_intensity = 0
+        violet_intensity = 0
+        white_intensity = 0
+        cyan_intensity = 0
         halogen_intensity = 0
         uv_intensity = 0
     elif 0 < factor <= 1:
-        red_intensity = -1.5066 * factor + 22.6663
-        green_intensity = 32.3521 * factor + 16.3331
-        blue_intensity = 10.2647 * factor + 20.9998
+        violet_intensity = -1.5066 * factor + 22.6663
+        white_intensity = 32.3521 * factor + 16.3331
+        cyan_intensity = 10.2647 * factor + 20.9998
         halogen_intensity = 89.1446 * factor + 9.0003
-        uv_intensity = 16.7591 * factor + 22.0008
+        uv_intensity = 16.7591 * factor + 22.0008  # (**abandon**)
     # Storing the intensities in a dictionary
     intensities = {
-        "Red": red_intensity,
-        "Green": green_intensity,
-        "Blue": blue_intensity,
+        "Violet": violet_intensity,
+        "White": white_intensity,
+        "Cyan": cyan_intensity,
         "Halogen": halogen_intensity,
-        "UV": uv_intensity
+        "UV": uv_intensity  # (**abandon**)
     }
 
     return intensities
@@ -51,7 +50,7 @@ def display_status(sim):
     # Get current light settings
     current_settings = sim.current_light_settings
     try:
-        light_info = f"RED:{current_settings['r'] // 655}% GRN:{current_settings['g'] // 655}% BLU:{current_settings['b'] // 655}% UV:{(current_settings['uv'] // 655) if not sim.uv_safety else 0}% HAL:{current_settings['h'] // 655}%"
+        light_info = f"VIOLET:{current_settings['v'] // 655}% WHITE:{current_settings['w'] // 655}% CYAN:{current_settings['c'] // 655}% UV:{(current_settings['uv'] // 655) if not sim.uv_safety else 0}% HAL:{current_settings['h'] // 655}%"
     except Exception:
         light_info = "Light data unavailable"
 
@@ -121,10 +120,10 @@ def check_temperature(sim):
         print("Temperature back to safe levels. Resuming operation.")
         if previous_light_settings:
             sim.setLEDs(
-                r=previous_light_settings['r'],
-                g=previous_light_settings['g'],
-                b=previous_light_settings['b'],
-                uv=previous_light_settings['uv'],
+                v=previous_light_settings['v'],
+                w=previous_light_settings['w'],
+                c=previous_light_settings['c'],
+                uv=previous_light_settings['uv'],  # (**abandon**)
                 h=previous_light_settings['h']
             )
         return True

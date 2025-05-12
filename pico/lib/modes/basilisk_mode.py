@@ -35,18 +35,18 @@ class BasiliskMode:
 
                         if 0 <= intensity <= 100:
                             intensity_values = calculate_light_intensity(intensity / 100)
-                            red = int(intensity_values["Red"] * 655)
-                            green = int(intensity_values["Green"] * 655)
-                            blue = int(intensity_values["Blue"] * 655)
+                            violet = int(intensity_values["Violet"] * 655)
+                            white = int(intensity_values["White"] * 655)
+                            cyan = int(intensity_values["Cyan"] * 655)
                             halogen = int(intensity_values["Halogen"] * 655)
-                            uv = int(intensity_values["UV"] * 655)
+                            uv = int(intensity_values["UV"] * 655)  # (**abandon**)
 
-                            self.sim.setLEDs(r=red, g=green, b=blue, uv=uv, h=halogen)
+                            self.sim.setLEDs(v=violet, w=white, c=cyan, uv=uv, h=halogen)
                             self.sim.current_light_settings = {
-                                'r': red,
-                                'g': green,
-                                'b': blue,
-                                'uv': uv,
+                                'v': violet,
+                                'w': white,
+                                'c': cyan,
+                                'uv': uv,  # (**abandon**)
                                 'h': halogen
                             }
 

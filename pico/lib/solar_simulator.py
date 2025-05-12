@@ -15,7 +15,7 @@ MAX_VALUE = 65535
 
 class SolarSimulator:
     # Initializes the Solar Simulator module
-    def __init__(self, pwm_freq: int = 50000, verbose: int = 0):
+    def __init__(self, pwm_freq: int = 5000, verbose: int = 0):
         # Initialize constants
         if verbose: print("Initializing simulator...")
         self.PWM_FREQ = pwm_freq
@@ -36,10 +36,10 @@ class SolarSimulator:
         self.therm_safe = True
         # Initialize current light settings to zero
         self.current_light_settings = {
-            'r': 0,
-            'g': 0,
-            'b': 0,
-            'uv': 0,
+            'v': 0,
+            'w': 0,
+            'c': 0,
+            'uv': 0,  # (**abandon**)
             'h': 0
         }
         self.enable_therm_monitoring = True
@@ -51,27 +51,27 @@ class SolarSimulator:
         if verbose: print("Solar Simulator initialized")
 
     # Sets the LEDs and halogen brightness as a 16-bit integer value
-    def setLEDs(self, r: int = 0, g: int = 0, b: int = 0, uv: int = 0, h: int = 0):
-        self.mcp.channel_a.value = r
-        self.mcp.channel_b.value = g
-        self.mcp.channel_c.value = b
+    def setLEDs(self, v: int = 0, w: int = 0, c: int = 0, uv: int = 0, h: int = 0):
+        self.mcp.channel_a.value = v
+        self.mcp.channel_b.value = w
+        self.mcp.channel_c.value = c
         self.mcp.channel_d.value = uv * (not self.uv_safety)
         self.hal.duty_cycle = h
 
         # Update current settings
         self.current_light_settings = {
-            'r': r,
-            'g': g,
-            'b': b,
-            'uv': uv if not self.uv_safety else 0,  # Set UV to 0 if safety is enabled
+            'v': v,
+            'w': w,
+            'c': c,
+            'uv': uv if not self.uv_safety else 0,  # (**abandon**)
             'h': h
         }
         if self.verbose >= 2:
             print(
-                f"RED: {self.mcp.channel_a.value}, GRN: {self.mcp.channel_b.value}, BLU: {self.mcp.channel_c.value}, UV: {self.mcp.channel_d.value}, HAL: {self.hal.duty_cycle}")
+                f"VIOLET: {self.mcp.channel_a.value}, WHITE: {self.mcp.channel_b.value}, CYAN: {self.mcp.channel_c.value}, UV: {self.mcp.channel_d.value}, HAL: {self.hal.duty_cycle}")
         elif self.verbose >= 1:
             print(
-                f"RED: {self.mcp.channel_a.value // 655}%, GRN: {self.mcp.channel_b.value // 655}%, BLU: {self.mcp.channel_c.value // 655}%, UV: {self.mcp.channel_d.value // 655}%, HAL: {self.hal.duty_cycle // 655}%")
+                f"VIOLET: {self.mcp.channel_a.value // 655}%, WHITE: {self.mcp.channel_b.value // 655}%, CYAN: {self.mcp.channel_c.value // 655}%, UV: {self.mcp.channel_d.value // 655}%, HAL: {self.hal.duty_cycle // 655}%")
 
     #65535，percentage just do that
     # Returns a list of thermal values per thermistor channel in Celsius
@@ -103,37 +103,56 @@ class SolarSimulator:
 
 
 # Helper function that takes a thermistor's voltage and returns it's temperature in Celsius
-def calcTemp(adc: float) -> float | None:
-    if adc == 0: return None
-    rth = (10000) * (3.3 / adc) - 10000
-    therm = 1 / ((np.log(rth / 10000) / 3977) + (1 / 298.15))
-    return therm - 273.15
+import math
+
+def calcTemp(v_adc: float, vcc: float = 3.3, r_fixed: float = 10000.0) -> float | None:
+    """
+    Convert ADC voltage reading to temperature in Celsius using:
+    - Voltage divider formula
+    - Beta parameter equation (simplified Steinhart-Hart)
+    """
+
+    # Edge case: prevent divide-by-zero
+    if v_adc <= 0 or v_adc >= vcc:
+        return None
+
+    # [1] Compute thermistor resistance
+    r_therm = r_fixed * v_adc / (vcc - v_adc)
+
+    # [2] Compute temperature using beta equation
+    beta = 3977  # From datasheet (B25/85)
+    t0 = 298.15  # Reference temperature in Kelvin (25°C)
+    r0 = 10000.0  # Resistance at t0 (25°C)
+
+    try:
+        temp_k = 1.0 / ((math.log(r_therm / r0) / beta) + (1.0 / t0))
+        temp_c = temp_k - 273.15
+        return temp_c
+    except ValueError:
+        return None  # math domain error if log input is negative
 
 
 def calcSteps(limiter: float = 1) -> list:
-    # Define the sun spectrum proportions????, to be done
+    # Define the sun spectrum proportions
     SUN_SPECTRUM = {
-        "red": 1,
-        "green": 1,
-        "blue": 1,
-        "uv": 1,
+        "violet": 1,
+        "white": 1,
+        "cyan": 1,
+        "uv": 1,  # (**abandon**)
         "halogen": 1
     }
 
-    # normalize it
     max_value = max(SUN_SPECTRUM.values())
     normalized_spectrum = {key: value / max_value for key, value in SUN_SPECTRUM.items()}
 
     total_min = 0
     total_max = int(MAX_VALUE * limiter)
     total_steps = np.linspace(total_min, total_max, num=101, dtype=np.uint16)
-    # Convert to integers using np.array with dtype
-    red_steps = np.array(total_steps * normalized_spectrum["red"], dtype=np.uint16)
-    grn_steps = np.array(total_steps * normalized_spectrum["green"], dtype=np.uint16)
-    blu_steps = np.array(total_steps * normalized_spectrum["blue"], dtype=np.uint16)
-    uv_steps = np.array(total_steps * normalized_spectrum["uv"], dtype=np.uint16)
+
+    violet_steps = np.array(total_steps * normalized_spectrum["violet"], dtype=np.uint16)
+    white_steps = np.array(total_steps * normalized_spectrum["white"], dtype=np.uint16)
+    cyan_steps = np.array(total_steps * normalized_spectrum["cyan"], dtype=np.uint16)
+    uv_steps = np.array(total_steps * normalized_spectrum["uv"], dtype=np.uint16)  # (**abandon**)
     pwm_steps = np.array(total_steps * normalized_spectrum["halogen"], dtype=np.uint16)
 
-    return [red_steps, grn_steps, blu_steps, uv_steps, pwm_steps]
-
-    # Restores the previously saved LED and halogen settings
+    return [violet_steps, white_steps, cyan_steps, uv_steps, pwm_steps]
