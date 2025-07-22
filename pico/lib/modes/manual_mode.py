@@ -127,9 +127,6 @@ class ManualMode:
                 cyan_input = input("Enter Cyan light intensity (%): ")
                 if cyan_input.lower() == 'exit':
                     break
-                uv_input = input("Enter UV light intensity (%):(**abandon**) ")
-                if uv_input.lower() == 'exit':
-                    break
                 halogen_input = input("Enter halogen light intensity (%): ")
                 if halogen_input.lower() == 'exit':
                     break
@@ -137,7 +134,7 @@ class ManualMode:
                 violet_percent = float(violet_input)
                 white_percent = float(white_input)
                 cyan_percent = float(cyan_input)
-                uv_percent = float(uv_input)
+                uv_percent = 0
                 halogen_percent = float(halogen_input)
 
                 if not (0 <= violet_percent <= 100 and 0 <= white_percent <= 100 and

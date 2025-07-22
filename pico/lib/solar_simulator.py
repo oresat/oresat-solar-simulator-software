@@ -102,24 +102,16 @@ class SolarSimulator:
         return therm_values
 
 
-# Helper function that takes a thermistor's voltage and returns it's temperature in Celsius
+
+
 import math
 
 def calcTemp(v_adc: float, vcc: float = 3.3, r_fixed: float = 10000.0) -> float | None:
-    """
-    Convert ADC voltage reading to temperature in Celsius using:
-    - Voltage divider formula
-    - Beta parameter equation (simplified Steinhart-Hart)
-    """
 
-    # Edge case: prevent divide-by-zero
-    if v_adc <= 0 or v_adc >= vcc:
-        return None
-
-    # [1] Compute thermistor resistance
+    # Compute thermistor resistance
     r_therm = r_fixed * v_adc / (vcc - v_adc)
 
-    # [2] Compute temperature using beta equation
+    # Compute temperature using beta equation
     beta = 3977  # From datasheet (B25/85)
     t0 = 298.15  # Reference temperature in Kelvin (25°C)
     r0 = 10000.0  # Resistance at t0 (25°C)
@@ -130,6 +122,7 @@ def calcTemp(v_adc: float, vcc: float = 3.3, r_fixed: float = 10000.0) -> float 
         return temp_c
     except ValueError:
         return None  # math domain error if log input is negative
+
 
 
 def calcSteps(limiter: float = 1) -> list:

@@ -77,10 +77,9 @@ class SolarSimulatorApp:
         print("3. Basilisk Mode")
         print("4. Thermal setup, if you need")
         while True:
-            mode = input("Your mode (input 1, 2, or 3): ")
-            if mode in ["1", "2", "3"]:
+            mode = input("Your mode (input 1, 2, 3 or 4 if you need change default): ")
+            if mode in ["1", "2", "3","4"]:
                 mode = int(mode)
-                break
             else:
                 print("Invalid input. Please enter 1, 2, or 3.")
 

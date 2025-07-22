@@ -50,7 +50,7 @@ def display_status(sim):
     # Get current light settings
     current_settings = sim.current_light_settings
     try:
-        light_info = f"VIOLET:{current_settings['v'] // 655}% WHITE:{current_settings['w'] // 655}% CYAN:{current_settings['c'] // 655}% UV:{(current_settings['uv'] // 655) if not sim.uv_safety else 0}% HAL:{current_settings['h'] // 655}%"
+        light_info = f"VIOLET:{current_settings['v'] // 655}% WHITE:{current_settings['w'] // 655}% CYAN:{current_settings['c'] // 655}%  HAL:{current_settings['h'] // 655}%"
     except Exception:
         light_info = "Light data unavailable"
 
