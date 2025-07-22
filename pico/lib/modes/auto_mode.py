@@ -30,9 +30,14 @@ class AutoMode:
             return
 
         # Generate a sine wave pattern
+        period = int(input("please enter desired period of sinusoid (in seconds)"))
+        if not (period > 1):
+            print("invalid period, must be greater than one second")
+            return
+
         wave = np.sin(np.linspace(0, np.pi, 101))
         level = 0  # Initialize wave level index
-
+        sleep_time = period/len(wave)
         try:
             while True:
                 if check_temperature(self.sim):
@@ -63,7 +68,7 @@ class AutoMode:
 
                     check_for_interrupt()
                     display_status(self.sim)
-                    time.sleep(1)
+                    time.sleep(sleep_time)
                 else:
                     print("Temperature too high! Lights turned off for safety.")
                     break
