@@ -37,7 +37,7 @@ class AutoMode:
 
         wave = np.sin(np.linspace(0, np.pi, 101))
         level = 0  # Initialize wave level index
-        sleep_time = period/len(wave)
+        sleep_time = period/len(wave) * 2
         try:
             while True:
                 if check_temperature(self.sim):
