@@ -36,7 +36,7 @@ class AutoMode:
             return
 
         # Generate a sine wave pattern
-        wave = 0.5 * (1 - np.cos(np.linspace(0, 2*np.pi, 101))) # link to wave graph: https://drive.google.com/file/d/1pBCDHLPe66w9Sz-vmo2WGRSglDFunR8E/view?usp=sharing
+        wave = np.sin(np.linspace(0, np.pi, 101))
         level = 0  # Initialize wave level index
         loop_time = period/len(wave) # average loop repetition time to get correct period
 
