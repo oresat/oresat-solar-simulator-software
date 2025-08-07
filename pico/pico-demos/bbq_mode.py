@@ -14,7 +14,6 @@ THERM_SAFE_EN = True # TODO: Enable/disable flag for thermal protection
 
 # Create the simulator
 sim = ss.SolarSimulator()
-sim.uv_safety = True
 
 # Calculate LED interpolated brightness steps
 steps = ss.calcSteps()
@@ -31,7 +30,7 @@ def getCurrentTime() -> int:
 
 # Thermal check timing
 THRM_CHECK      = 50  # Elapsed time before checking thermals
-THRM_LEDS_SHTDN = 100 # In Celsius, thermistor temperature shutoff value at RGBUv LEDs (under PCB)
+THRM_LEDS_SHTDN = 100 # In Celsius, thermistor temperature shutoff value at RGB LEDs (under PCB)
 THRM_HTSK_SHTDN = 60  # In Celsius, thermistor temperature shutoff value at heatsinks
 THRM_CELL_SHTDN = 80  # In Celsius, thermistor temperature shutoff value at solar cell (bottom plate)
 THRM_RSM        = 45  # In Celsius, all thermistors must be at or below this value before lights are enabled again
@@ -50,8 +49,7 @@ while True:
     red = steps[0][intensity]
     grn = steps[1][intensity]
     blu = steps[2][intensity]
-    uv  = steps[3][intensity]
-    hal = steps[4][intensity]
+    hal = steps[3][intensity]
     
     # Check if the elapsed time is longer than the thermal check interval
     c_time = getCurrentTime()
@@ -83,7 +81,7 @@ while True:
         if not lights_en and cold: lights_en = True
         therm_timer = getCurrentTime()
     
-    if lights_en: sim.setLEDs(red, grn, blu, uv, hal)
+    if lights_en: sim.setLEDs(red, grn, blu, hal)
 
     if not sim.verbose and lights_en and SERIAL_LOG: print(f"Intensity: {intensity}, Level: {level}")
 

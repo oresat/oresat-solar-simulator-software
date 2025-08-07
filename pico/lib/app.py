@@ -24,7 +24,6 @@ class SolarSimulatorApp:
         default_settings_summary = (
                 "\nDefault settings are:\n"
                 "  - Thermal Monitoring: " + ("Enabled" if self.sim.enable_therm_monitoring else "Disabled") + "\n" +
-                "  - UV Light (**abandon**): " + ("Disabled" if self.sim.uv_safety else "Enabled") + "\n" +
                 "  - LED Shutdown Temperature: " + str(self.sim.therm_led_shutdown) + "°C\n" +
                 "  - Heatsink Shutdown Temperature: " + str(self.sim.therm_heatsink_shutdown) + "°C\n" +
                 "  - Cell Shutdown Temperature: " + str(self.sim.therm_cell_shutdown) + "°C\n" +

@@ -25,9 +25,6 @@ for i in steps:
 
     # Blue LED
     mcp4728.channel_c.value = steps[i]# min_voltage to turn off. steps[i] to sweep
-
-    # # UV LED
-    # mcp4728.channel_d.value = steps[i]
     
     # Halogen PWM
     PWM.set_duty_cycle(PWM_PIN, i)#0 to turn off, 100 to turn on. i to sweep

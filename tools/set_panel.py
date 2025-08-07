@@ -16,7 +16,6 @@ parser = argparse.ArgumentParser(prog='solar-sim-client', description='oresat-so
 parser.add_argument('-r', '--red', type=int, help='set red LED', required=False, default=0)
 parser.add_argument('-g', '--green', type=int, help='set green LED', required=False, default=0)
 parser.add_argument('-b', '--blue', type=int, help='set blue LED', required=False, default=0)
-parser.add_argument('-u', '--uv', type=int, help='set UV LED', required=False, default=0)
 parser.add_argument('-p', '--pwm', type=int, help='set PWM', required=False, default=0)
 parser.add_argument('-a', '--all', type=int, help='set all', required=False, default=0)
 
@@ -26,7 +25,6 @@ if args.all > 0:
     args.red = args.all
     args.green = args.all
     args.blue = args.all
-    args.uv = args.all
     args.pwm = args.all
 
 # Setup I2C
@@ -57,20 +55,17 @@ def calc_steps(limiter):
     red_start = 10756
     grn_start = 10140
     blu_start = 10620
-    UV_start  = 10620
     PWM_start = 0 * BB_PER / 100
     red_max = 65535
     grn_max = 65535
     blu_max = 65535
-    UV_max  = 65535
     PWM_max = int(75 * limiter * BB_PER / 100)
     red_steps = linspace(red_start, red_max, num=101, dtype=uint16)
     grn_steps = linspace(grn_start, grn_max, num=101, dtype=uint16)
     blu_steps = linspace(blu_start, blu_max, num=101, dtype=uint16)
     PWM_steps = linspace(PWM_start, PWM_max, num=101, dtype=uint16)
 
-    UV_steps = linspace(UV_start, UV_max, num=101, dtype=uint16)
-    return [red_steps, grn_steps, blu_steps, UV_steps, PWM_steps]
+    return [red_steps, grn_steps, blu_steps, PWM_steps]
 
 
 steps = calc_steps(1)
@@ -84,8 +79,6 @@ try:
     mcp4728.channel_b.value = steps[1][args.green]
     print(f'Blue = {steps[0][args.blue]} ({args.blue}%)')
     mcp4728.channel_c.value = steps[2][args.blue]
-    print(f'UV = {steps[0][args.uv]} ({args.uv}%)')
-    mcp4728.channel_d.value = steps[3][args.uv]
     
     print(f'PWM = {steps[4][args.pwm]}ns on of {BB_PER}ns period ({args.pwm}%)')
     os.system(f'echo {steps[4][args.pwm]} >> {PWM_PATH}/duty_cycle')

@@ -15,20 +15,17 @@ def calculate_light_intensity(factor):
         white_intensity = 0
         cyan_intensity = 0
         halogen_intensity = 0
-        uv_intensity = 0
     elif 0 < factor <= 1:
         violet_intensity = -1.5066 * factor + 22.6663
         white_intensity = 32.3521 * factor + 16.3331
         cyan_intensity = 10.2647 * factor + 20.9998
         halogen_intensity = 89.1446 * factor + 9.0003
-        uv_intensity = 16.7591 * factor + 22.0008  # (**abandon**)
     # Storing the intensities in a dictionary
     intensities = {
         "Violet": violet_intensity,
         "White": white_intensity,
         "Cyan": cyan_intensity,
         "Halogen": halogen_intensity,
-        "UV": uv_intensity  # (**abandon**)
     }
 
     return intensities
@@ -97,7 +94,7 @@ def check_temperature(sim):
         or cell_temp > sim.therm_cell_shutdown
     ):
         previous_light_settings = sim.current_light_settings
-        sim.setLEDs(0, 0, 0, 0, 0)
+        sim.setLEDs(0, 0, 0, 0)
         print("Temperature too high! Turning off lights for safety.")
 
         while (
@@ -123,7 +120,6 @@ def check_temperature(sim):
                 v=previous_light_settings['v'],
                 w=previous_light_settings['w'],
                 c=previous_light_settings['c'],
-                uv=previous_light_settings['uv'],  # (**abandon**)
                 h=previous_light_settings['h']
             )
         return True
@@ -136,7 +132,7 @@ def check_for_interrupt():
         input_char = sys.stdin.read(1)
         if input_char == '\x03': #Ctrl-C (ASCII 3)
             print("\nCtrl-C detected. Turning off LEDs...")
-            sim.setLEDs(0, 0, 0, 0, 0)
+            sim.setLEDs(0, 0, 0, 0)
             raise KeyboardInterrupt
         else:
             print(f"Ignored input: {repr(input_char)}")

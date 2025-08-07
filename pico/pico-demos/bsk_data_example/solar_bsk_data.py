@@ -22,7 +22,6 @@ led.value = True
 
 # Create the simulator
 sim = ss.SolarSimulator()
-sim.uv_safe = True
 
 # Calculate steps
 steps = ss.calcSteps()
@@ -53,19 +52,16 @@ while True:
         red = steps[0][0]
         grn = steps[1][(intensity//3)]
         blu = steps[2][(intensity//5)+2]
-        uv  = steps[3][intensity]
-        hal = steps[4][int(intensity)]
+        hal = steps[3][int(intensity)]
         #hal = steps[4][int(intensity/2.1)]
     if (intensity == 80 or intensity > 80):
         red = 0
         grn = steps[1][100]
         blu = steps[1][10]
-        uv  = steps[3][intensity]
-        hal = steps[4][int(intensity)]
+        hal = steps[3][int(intensity)]
 
     # Set LEDs and bulbs
-    uv = 0 # Disable UV for safety
-    sim.setLEDs(red,grn,blu,uv,hal)
+    sim.setLEDs(red,grn,blu,hal)
 
     if SERIAL_LOG: print(f"Intensity: {intensity}, Level: {level}")
 

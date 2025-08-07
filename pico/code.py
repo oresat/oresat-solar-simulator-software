@@ -6,7 +6,7 @@ from lib.app import SolarSimulatorApp
 def main():
     # Initialize SolarSimulator
     sim = SolarSimulator(verbose=0)
-    sim.setLEDs(0, 0, 0, 0, 0)  # Ensure all LEDs are turned off initially
+    sim.setLEDs(0, 0, 0, 0)  # Ensure all LEDs are turned off initially
 
     # Run the application
     app = SolarSimulatorApp(sim)

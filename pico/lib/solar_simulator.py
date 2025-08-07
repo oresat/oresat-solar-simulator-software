@@ -32,14 +32,12 @@ class SolarSimulator:
         self.hal = PWMOut(board.GP28, frequency=self.PWM_FREQ, duty_cycle=0, variable_frequency=True)
         if verbose: print(f"Initialized PWM at {self.PWM_FREQ}Hz")
 
-        self.uv_safety = True
         self.therm_safe = True
         # Initialize current light settings to zero
         self.current_light_settings = {
             'v': 0,
             'w': 0,
             'c': 0,
-            'uv': 0,  # (**abandon**)
             'h': 0
         }
         self.enable_therm_monitoring = True
@@ -51,11 +49,10 @@ class SolarSimulator:
         if verbose: print("Solar Simulator initialized")
 
     # Sets the LEDs and halogen brightness as a 16-bit integer value
-    def setLEDs(self, v: int = 0, w: int = 0, c: int = 0, uv: int = 0, h: int = 0):
+    def setLEDs(self, v: int = 0, w: int = 0, c: int = 0, h: int = 0):
         self.mcp.channel_a.value = v
         self.mcp.channel_b.value = w
         self.mcp.channel_c.value = c
-        self.mcp.channel_d.value = uv * (not self.uv_safety)
         self.hal.duty_cycle = h
 
         # Update current settings
@@ -63,15 +60,14 @@ class SolarSimulator:
             'v': v,
             'w': w,
             'c': c,
-            'uv': uv if not self.uv_safety else 0,  # (**abandon**)
             'h': h
         }
         if self.verbose >= 2:
             print(
-                f"VIOLET: {self.mcp.channel_a.value}, WHITE: {self.mcp.channel_b.value}, CYAN: {self.mcp.channel_c.value}, UV: {self.mcp.channel_d.value}, HAL: {self.hal.duty_cycle}")
+                f"VIOLET: {self.mcp.channel_a.value}, WHITE: {self.mcp.channel_b.value}, CYAN: {self.mcp.channel_c.value}, HAL: {self.hal.duty_cycle}")
         elif self.verbose >= 1:
             print(
-                f"VIOLET: {self.mcp.channel_a.value // 655}%, WHITE: {self.mcp.channel_b.value // 655}%, CYAN: {self.mcp.channel_c.value // 655}%, UV: {self.mcp.channel_d.value // 655}%, HAL: {self.hal.duty_cycle // 655}%")
+                f"VIOLET: {self.mcp.channel_a.value // 655}%, WHITE: {self.mcp.channel_b.value // 655}%, CYAN: {self.mcp.channel_c.value // 655}%, HAL: {self.hal.duty_cycle // 655}%")
 
     #65535，percentage just do that
     # Returns a list of thermal values per thermistor channel in Celsius
@@ -131,7 +127,6 @@ def calcSteps(limiter: float = 1) -> list:
         "violet": 1,
         "white": 1,
         "cyan": 1,
-        "uv": 1,  # (**abandon**)
         "halogen": 1
     }
 
@@ -145,7 +140,6 @@ def calcSteps(limiter: float = 1) -> list:
     violet_steps = np.array(total_steps * normalized_spectrum["violet"], dtype=np.uint16)
     white_steps = np.array(total_steps * normalized_spectrum["white"], dtype=np.uint16)
     cyan_steps = np.array(total_steps * normalized_spectrum["cyan"], dtype=np.uint16)
-    uv_steps = np.array(total_steps * normalized_spectrum["uv"], dtype=np.uint16)  # (**abandon**)
     pwm_steps = np.array(total_steps * normalized_spectrum["halogen"], dtype=np.uint16)
 
-    return [violet_steps, white_steps, cyan_steps, uv_steps, pwm_steps]
+    return [violet_steps, white_steps, cyan_steps, pwm_steps]
