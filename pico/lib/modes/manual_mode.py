@@ -107,7 +107,7 @@ class ManualMode:
         """
         while True:
             try:
-                print("Enter light intensities. Type 'exit' to return to the main menu.")
+                print("Enter light intensities (0 by default). Type 'exit' to return to the main menu.")
                 violet_input = input("Enter Violet light intensity: ")
                 if violet_input.lower() == 'exit':
                     break
@@ -120,6 +120,16 @@ class ManualMode:
                 halogen_input = input("Enter halogen light intensity: ")
                 if halogen_input.lower() == 'exit':
                     break
+                
+                # default to 0 if user hits return without typing anything
+                if violet_input == "":
+                    violet_input = 0.0
+                if white_input == "":
+                    white_input = 0.0
+                if cyan_input == "":
+                    cyan_input = ""
+                if halogen_input == "":
+                    halogen_input = ""
 
                 violet_intensity = float(violet_input)
                 white_intensity = float(white_input)
