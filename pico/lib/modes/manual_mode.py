@@ -107,20 +107,20 @@ class ManualMode:
         """
         while True:
             try:
-                print("Enter light intensities (0 by default). Type 'exit' to return to the main menu.")
-                violet_input = input("Enter Violet light intensity: ")
+                print("Enter light intensities as percentages (0-100). Type 'exit' to return to the main menu.")
+                violet_input = input("Enter Violet light intensity (%): ")
                 if violet_input.lower() == 'exit':
                     break
-                white_input = input("Enter White light intensity: ")
+                white_input = input("Enter White light intensity (%): ")
                 if white_input.lower() == 'exit':
                     break
-                cyan_input = input("Enter Cyan light intensity: ")
+                cyan_input = input("Enter Cyan light intensity (%): ")
                 if cyan_input.lower() == 'exit':
                     break
-                halogen_input = input("Enter halogen light intensity: ")
+                halogen_input = input("Enter halogen light intensity (%): ")
                 if halogen_input.lower() == 'exit':
                     break
-                
+
                 # default to 0 if user hits return without typing anything
                 if violet_input == "":
                     violet_input = 0.0
@@ -129,22 +129,22 @@ class ManualMode:
                 if cyan_input == "":
                     cyan_input = ""
                 if halogen_input == "":
-                    halogen_input = ""
+                    halogen_input = 0.0
 
-                violet_intensity = float(violet_input)
-                white_intensity = float(white_input)
-                cyan_intensity = float(cyan_input)
-                halogen_intensity = float(halogen_input)
+                violet_percent = float(violet_input)
+                white_percent = float(white_input)
+                cyan_percent = float(cyan_input)
+                halogen_percent = float(halogen_input)
 
-                if not (0 <= violet_intensity <= 1 and 0 <= white_intensity <= 1 and
-                        0 <= cyan_intensity <= 1 and 0 <= halogen_intensity <= 1):
-                    print("Invalid input. Please enter values between 0 and 1.")
+                if not (0 <= violet_percent <= 100 and 0 <= white_percent <= 100 and
+                        0 <= cyan_percent <= 100 and 0 <= halogen_percent <= 100):
+                    print("Invalid input. Please enter values between 0 and 100.")
                     continue
 
-                violet = int((violet_intensity) * 65535)
-                white = int((white_intensity) * 65535)
-                cyan = int((cyan_intensity) * 65535)
-                halogen = int((halogen_intensity) * 65535)
+                violet = int((violet_percent / 100) * 65535)
+                white = int((white_percent / 100) * 65535)
+                cyan = int((cyan_percent / 100) * 65535)
+                halogen = int((halogen_percent / 100) * 65535)
 
                 self.sim.setLEDs(v=violet, w=white, c=cyan, h=halogen)
                 print("Lights set to the specified intensities.")
