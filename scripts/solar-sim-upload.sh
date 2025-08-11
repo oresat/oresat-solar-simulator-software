@@ -1,6 +1,9 @@
 #!/bin/bash
 #tell the system that this is a bash script
 
+#ex. running from git root dir
+#   bash scripts/solar-sim-upload.sh
+
 set -euo pipefail
 #good practice, helps the script crash when there are bugs to prevent silently blowing things up
 #set -x
