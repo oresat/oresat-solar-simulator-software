@@ -8,6 +8,7 @@ from ..utils import (
     check_temperature,
     check_for_interrupt
 )
+import serial
 
 class AutoMode:
     """
@@ -44,6 +45,18 @@ class AutoMode:
             while level < 101:
                 loop_start = time.monotonic()
                 if check_temperature(self.sim):
+                    # Check for pause
+                    if usb_cdc.data.in_waiting:
+                        data = usb_cdc.data.readline().decode('utf-8')
+                        if data[0] == " ":
+                            is_paused = True
+                            while is_paused:
+                                time.sleep(0.1)
+                                data = usb_cdc.data.readline().decode('utf-8')
+                                if data[0] == " ":
+                                    is_paused() == False
+                        time.sleep(0.01)
+                    
                     # Calculate current intensity factor
                     intensity_factor = wave[level] * self.peak
 
