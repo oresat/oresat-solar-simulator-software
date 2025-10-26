@@ -1,0 +1,9 @@
+{
+    "lights": {
+        "gre": ["23-50"]
+    },
+    "base_dir": "data",
+    "base_intensity": {
+        "gre": "100"
+    }
+}
