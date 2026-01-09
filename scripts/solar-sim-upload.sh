@@ -40,3 +40,6 @@ for file in ${TO_UPLOAD[@]}; do
     #-r to make copy recursive, so it works on directories
     cp -r $SOURCE_DIR/$file $TARGET_DIR/$file
 done
+
+#copy note containing current git branch and commit to make identifying code on the pico easier
+git status > "$TARGET_DIR/git-status"
