@@ -2,23 +2,28 @@
 #tell the system that this is a bash script
 
 #ex. running from git root dir
-#   bash scripts/solar-sim-upload.sh
-
+#   bash scripts/solar-sim-upload.sh PATH/TO/REPO
+#   cd /home/$USER/solar-simulator-software && bash scripts/solar-sim-upload.sh .
 set -euo pipefail
 #good practice, helps the script crash when there are bugs to prevent silently blowing things up
 #set -x
 #un comment if you want to echo each line to the terminal for debugging
 
-TARGET_DIR="/run/media/monitor/CIRCUITPY"
+TARGET_DIR="/run/media/$USER/CIRCUITPY"
 #fully qualified path to the pico
 
-SOURCE_DIR="/home/monitor/oresat-solar-simulator-software/pico"
+if [ "$#" -lt 1 ]
+then
+  echo "No arguments supplied"
+  exit 1
+fi
+
+#TODO: complain if no argument is passed
+SOURCE_DIR="$1/pico"
 #fully qualified path to the local repo
 
 TO_UPLOAD=("code.py" "boot.py" "lib")
 #both files and directories
-
-
 
 #clear out what's in the pico
 echo "> are you sure you want to clear this directory? ( rm -rf $TARGET_DIR/* )?"
