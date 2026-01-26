@@ -1,9 +1,0 @@
-{
-    "lights": {
-        "uv": ["24-50"]
-    },
-    "base_dir": "data",
-    "base_intensity": {
-        "uv": "100"
-    }
-}
