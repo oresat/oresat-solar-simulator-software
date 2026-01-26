@@ -41,7 +41,8 @@ class AutoMode:
         loop_time = period/len(wave) # average loop repetition time to get correct period
 
         try:
-            while level < 101:
+#            while level < 101:
+            while True:
                 loop_start = time.monotonic()
                 if check_temperature(self.sim):
                     # Calculate current intensity factor
