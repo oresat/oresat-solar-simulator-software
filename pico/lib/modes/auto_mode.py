@@ -68,7 +68,7 @@ class AutoMode:
                         'h': halogen
                     }
                     # Update level index for sine wave
-                    level = (level + 1) # % len(wave)
+                    level = (level + 1) % len(wave)
 
                     check_for_interrupt()
                     display_status(self.sim)
