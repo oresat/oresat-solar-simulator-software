@@ -63,3 +63,6 @@ git clone https://github.com/oresat/oresat-solar-simulator-software
    2. Open the `CIRCUITPY` drive in your file manager
    3. Open the `boot_out.txt` file in the root directory; this should read as the latest version of CircuitPython
 6. Once the new firmware is flashed, copy everything in the `oresat-solar-simulator-software/pico` folder into the root `CIRCUITPY` drive
+   1. Optionally use the script in `oresat-solar-simulator-software` to copy files to the pico
+      eg `cd oresat-solar-simulator-software`
+         `bash scripts/solar-sim-upload.sh /path/to/oresat-solar-simulator-software`

@@ -29,11 +29,20 @@ class AutoMode:
             print("Invalid input. Please enter a number between 0 and 1.")
             return
 
+        # For reasonable accuracy, period should be between 10 seconds and ~1 hour 15 minutes
+        period = int(input("Please enter desired period of sinusoid (at least 10, in seconds). "))
+        if not (period >= 10):
+            print("invalid input. Please enter a number greater than 10.")
+            return
+
         # Generate a sine wave pattern
-        wave = np.sin(np.linspace(0, np.pi, 101))
+        wave = 0.5 * (1 - np.cos(np.linspace(0, 2*np.pi, 101)))
         level = 0  # Initialize wave level index
+        loop_time = period/len(wave) # average loop repetition time
+                                     #  to get correct period
 
         try:
+            loop_start = time.monotonic()
             while True:
                 if check_temperature(self.sim):
                     # Calculate current intensity factor
@@ -63,10 +72,14 @@ class AutoMode:
 
                     check_for_interrupt()
                     display_status(self.sim)
-                    time.sleep(1)
+
+                    # Adjust current repetition's timing as needed by sleeping
+                    before_sleep = time.monotonic() - loop_start
+                    time.sleep(loop_time - before_sleep % loop_time)
                 else:
                     print("Temperature too high! Lights turned off for safety.")
                     break
+
         except KeyboardInterrupt:
             print("\nExiting Auto Mode.")
             self.sim.setLEDs(0, 0, 0, 0, 0)
