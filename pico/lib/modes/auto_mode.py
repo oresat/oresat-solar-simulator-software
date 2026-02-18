@@ -75,9 +75,7 @@ class AutoMode:
 
                     # Adjust current repetition's timing as needed by sleeping
                     before_sleep = time.monotonic() - loop_start
-                    sleep_time = loop_time - before_sleep
-                    if (sleep_time > 0):
-                        time.sleep(loop_time - before_sleep)
+                    time.sleep(loop_time - before_sleep&loop_time)
                 else:
                     print("Temperature too high! Lights turned off for safety.")
                     break
