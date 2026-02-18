@@ -25,15 +25,13 @@ SOURCE_DIR="$1/pico"
 TO_UPLOAD=("code.py" "boot.py" "lib")
 #both files and directories
 
-#clear out what's in the pico
-echo "> are you sure you want to clear this directory? ( rm -rf $TARGET_DIR/* )?"
+echo "> over-write following files/dirs $TARGET_DIR/[${TO_UPLOAD[@]}]?"
 #warn the user about what we're about to do
 read -p "> y/n " answer
 #ask for user input, store the response in 'answer'
 
 if [ "$answer" = "y" ]; then
-    echo "[*] emptying $TARGET_DIR"
-    rm -rf $TARGET_DIR/*
+    echo "[*] writing to $TARGET_DIR"
 else
     echo "[*] quitting..."
     exit
@@ -46,5 +44,5 @@ for file in ${TO_UPLOAD[@]}; do
     cp -r $SOURCE_DIR/$file $TARGET_DIR/$file
 done
 
-#copy note containing current git branch and commit to make identifying code on the pico easier
-git status > "$TARGET_DIR/git-status"
+#copy commit hash to make identifying code on the pico easier
+git log -1 | grep commit > "$TARGET_DIR/commit"
