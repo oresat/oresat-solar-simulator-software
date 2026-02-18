@@ -46,3 +46,6 @@ done
 
 #copy commit hash to make identifying code on the pico easier
 git log -1 | grep commit > "$TARGET_DIR/commit"
+
+sync
+sync
