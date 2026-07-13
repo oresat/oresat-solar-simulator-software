@@ -49,20 +49,34 @@ These instructions will describe how to install, flash, and update the Pico's fi
 
 **NOTE:** Updating the firmware with a new version of CircuitPython will ERASE ALL OF ITS CONTENTS, so backup your stuff before loading new firmware
 
-1. Clone the [Solar Simulator Software repository](https://github.com/oresat/oresat-solar-simulator-software) (if you have not followed the Basilisk installation steps)
+1.  Clone the [Solar Simulator Software repository](https://github.com/oresat/oresat-solar-simulator-software).
 
-```sh
-git clone https://github.com/oresat/oresat-solar-simulator-software
-```
+    ```sh
+    git clone https://github.com/oresat/oresat-solar-simulator-software
+    ```
 
-2. Download the [CircuitPython UF2](https://circuitpython.org/board/raspberry_pi_pico/) firmware file for the Pico
-3. While holding the `BOOTSEl` button, plug in the Pico to the host machine
-4. Release the button and a file window should pop up with a drive labeled `RPI-RP2`
-5. Copy the downloaded firmware file to this folder and the Pico should automatically update itself to the latest version of CircuitPython
-   1. To ensure the new version is loaded, replug the Pico into the host machine
-   2. Open the `CIRCUITPY` drive in your file manager
-   3. Open the `boot_out.txt` file in the root directory; this should read as the latest version of CircuitPython
-6. Once the new firmware is flashed, copy everything in the `oresat-solar-simulator-software/pico` folder into the root `CIRCUITPY` drive
-   1. Optionally use the script in `oresat-solar-simulator-software` to copy files to the pico
-      eg `cd oresat-solar-simulator-software`
-         `bash scripts/solar-sim-upload.sh /path/to/oresat-solar-simulator-software`
+2.  Download the latest [CircuitPython UF2](https://circuitpython.org/board/raspberry_pi_pico/) firmware file for the Pico
+
+3.  While holding the `BOOTSEl` button, plug in the Pico to the host machine
+
+4.  Release the button and a file window should pop up with a drive labeled `RPI-RP2`
+
+5.  Copy the downloaded firmware file to this folder and the Pico should automatically update itself to the latest version of CircuitPython
+
+    1.  To ensure the new version is loaded, replug the Pico into the host machine and open the `CIRCUITPY` drive.
+
+    2.  Open the `CIRCUITPY/boot_out.txt` file and ensure that the expected version of CircuitPython is listed.
+
+        ```sh
+        # Example output
+        Adafruit CircuitPython 10.2.1 on 2026-05-13; Raspberry Pi Pico with rp2040
+        Board ID:raspberry_pi_pico
+        UID:E661640843707E28
+        boot.py output:
+        ```
+
+6.  Once the firmware has been flashed, copy everything in the `src/` directory into the root `CIRCUITPY/` directory on the Pi Pico.
+
+    ```sh
+    make upload
+    ```
