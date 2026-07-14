@@ -44,11 +44,17 @@ The software consists of a hub and client modules, both written in CircuitPython
 
 ## Installation
 
-TODO: include installation steps
+1.  Create and activate a virtual environment.
+
+2.  Install the project's development dependencies.
 
 ## Usage
 
 TODO: include usage
+
+## Testing
+
+Pytest is used as the test runner for this project. Run `pytest` on the command-line to run the test suite. For more information, see [Pytest's Official Documentation](https://docs.pytest.org/en/stable/).
 
 ## License
 

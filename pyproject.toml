@@ -1,0 +1,18 @@
+[project]
+name = "oresat-solar-simulator-software"
+version = "0.1.0"
+description = "Software for the PSAS Solar Simulator used for testing CubeSats."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    # "ruff",
+    # "adafruit-circuitpython-build-tools",     # build scripts, ci
+    # "adafruit-blinka",                        # board, pwmio, etc
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
