@@ -28,7 +28,6 @@ graph TD
     F -->|A| R[Red]
     F -->|B| G[Green]
     F -->|C| L[Blue]
-    F -->|D| UV[UV]
 ```
 
 ## Software

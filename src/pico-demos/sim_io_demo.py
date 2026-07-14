@@ -9,7 +9,6 @@ SPEED = 1
 
 # Create the Solar Simulator object
 sim = SolarSimulator(verbose=0)
-sim.uv_safety = True # Set this to False if you want to use the UV LEDs
 
 # Reset any active lights
 sim.setLEDs()
@@ -25,10 +24,6 @@ while True:
 
     print("Setting blue")
     sim.setLEDs(b=MAX_VALUE//2)
-    sleep(SPEED)
-
-    print("Setting uv")
-    sim.setLEDs(uv=MAX_VALUE//2)
     sleep(SPEED)
 
     print("Setting halogen")

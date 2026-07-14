@@ -1,6 +1,6 @@
 # Manual data collection code
 # THE COMBINATION FOR RGBUH IF THE WARNING DOESN'T MEAN ANYTHING
-# R:10, G:75, B:25, UV:25, H:72 .. while the spectrometer is at 30nm measurements
+# R:10, G:75, B:25, H:72 ... while the spectrometer is at 30nm measurements
 
 # Import dependencies
 from lib import solar_simulator as ss
@@ -20,27 +20,25 @@ led.value = True
 
 # Create the solar simulator
 sim = ss.SolarSimulator()
-sim.uv_safety = True
 
 # Calculate steps
 steps = ss.calcSteps()
 
 # Data collection message prompt
-command_prompt = """Select a channel: [red, grn, blu, uv, hal]
+command_prompt = """Select a channel: [red, grn, blu, hal]
 Give an integer value: 0-100
 Multiple channels can be set by using comma separation
 Use 'clear' or 'reset' to reset all brightness values
-Example inputs: (g:50), (r:100, b:32, uv:0), etc."""
+Example inputs: (g:50), (r:100, b:32), etc."""
 
 # Valid string inputs from the terminal
-valid_inputs = [ 'r', 'red', 'g', 'grn', 'green', 'b', 'blu', 'blue', 'u', 'uv', 'h', 'hal', 'halogen' ]
+valid_inputs = [ 'r', 'red', 'g', 'grn', 'green', 'b', 'blu', 'blue', 'u', 'h', 'hal', 'halogen' ]
 
 # LED channel value buffer
 led_buf = {
     'r': 0,
     'g': 0,
     'b': 0,
-    'u': 0,
     'h': 0,
 }
 
@@ -51,7 +49,7 @@ led.value = False
 while True:
     #if supervisor.runtime.serial_bytes_available:
     if PRETTY:
-        print(f"======= Current values - R={led_buf['r']}, G={led_buf['g']}, B={led_buf['b']}, UV={led_buf['u']}, H={led_buf['h']} =======")
+        print(f"======= Current values - R={led_buf['r']}, G={led_buf['g']}, B={led_buf['b']}, H={led_buf['h']} =======")
         print(command_prompt)
         print('-' * 60)
 
@@ -76,7 +74,6 @@ while True:
         led_buf['r'] = 0
         led_buf['g'] = 0
         led_buf['b'] = 0
-        led_buf['u'] = 0
         led_buf['h'] = 0
 
     calc_start = monotonic_ns()
@@ -86,17 +83,14 @@ while True:
     red = steps[0][led_buf['r']]
     grn = steps[1][led_buf['g']]
     blu = steps[2][led_buf['b']]
-    uv  = steps[3][led_buf['u']]
-    hal = steps[4][led_buf['h']]
-
-    uv = 0 # Disable UV for safety
+    hal = steps[3][led_buf['h']]
 
     calc_end = monotonic_ns()
 
-    if SERIAL_LOG: print(f"red:{red},grn:{grn},blu:{blu},uv:{uv},hal:{hal},lim:{LIMITER},calc_time:{(calc_end-calc_start)/1000:0.3f}us")
+    if SERIAL_LOG: print(f"red:{red},grn:{grn},blu:{blu},hal:{hal},lim:{LIMITER},calc_time:{(calc_end-calc_start)/1000:0.3f}us")
 
     # Set the LEDs and bulb
-    sim.setLEDs(red,grn,blu,uv,hal)
+    sim.setLEDs(red,grn,blu,hal)
 
     if PRETTY: print()
     sleep(0.01)

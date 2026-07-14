@@ -2,20 +2,11 @@
 
 This module created in CircuitPython is used to interface with the hardware. It is designed to create custom scripts as easily and safely as possible without limiting control.
 
-> [!NOTE]
-> This documentation is currently a work in progress, which means some descriptions may be old, incomplete, wrong, or broken. Please ensure the documentation that you are referencing matches the version of the module you are using.
-
-## Safety (DO NOT SKIP)
-
-The Solar Simulator hardware uses UV LEDs to create an accurate reproduction of the sun's emitted light spectrum. Please **DO NOT** look directly at or lift the lid on the Solar Simulator when the UV channel is enabled. **This could potentially cause permanent eye or skin damage with prolonged exposure.** If you do need to lift the chamber lid while the lights are enabled, please wear the appropriate PPE and make sure everyone in the immediate area is aware you are doing so.
-
-In a future revision of the hardware, we plan to add a hardware enable switch to the UV LEDs.
-
 ## Setup
 
-Make sure the `solar_simulator.py` file (along with the Adafruit hardware modules) is in the `/lib` folder on the Pico and run the `sim_io_demo.py` file by copying its contents to the `code.py` file.
+Make sure the `solar_simulator.py` file (along with the Adafruit hardware modules) is in the `/lib` folder on the Pico and run the `pico-demos/sim_io_demo.py` file by copying its contents to the `code.py` file.
 
-TODO: Integrate a system check button in the GUI settings menu
+**TODO:** Integrate a system check button in the GUI settings menu.
 
 ## Usage
 
@@ -36,10 +27,6 @@ while True:
 ## `ss` Module
 
 The module itself contains a few helper functions that are used internally by the [`SolarSimulator()`](#sssolarsimulator-object) object and can also be used in your own scripts.
-
-### `calcSteps(limiter: float)` (WIP)
-
-This function does not currently work and should not be used in scripts until this feature is fully implemented.
 
 ### `calcTemp(adc: float) -> float`
 
@@ -109,15 +96,9 @@ Thermistor[1]: 57.62C
 Thermistor[2]: 64.11C
 ```
 
-### `setLEDs(r: int, g: int, b: int, uv: int, h: int)`
+### `setLEDs(r: int, g: int, b: int, h: int)`
 
 `setLEDs()` takes 5 optional arguments to set the brightness value of the lights. The input values are 16-bit unsigned integers and use a default value of 0, so if nothing is entered into any of the arguments, it will turn off that channel.
-
-> [!NOTE]
-> By default, the UV safety flag is set to `True` when the `SolarSimulator()` object is first instantiated (for safety). If you would like to enable the UV channel on the hardware, set `sim.uv_safe` to `False`.
-
-> [!CAUTION]
-> Do not lift the lid on the simulator when the UV channel is enabled. This could cause serious and irreversible eye and skin damage. Please refer to the [Safety section](#safety-do-not-skip) of this page for more information.
 
 A quick way to turn off all the lights on the simulator is by executing `sim.setLEDS()`.
 
@@ -130,7 +111,6 @@ import time
 
 # Create the simulator
 sim = ss.SolarSimulator(verbose=0)
-sim.uv_safe = True
 
 while True:
     # set all of the lights to its max brightness

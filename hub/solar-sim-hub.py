@@ -22,7 +22,7 @@ parser.add_argument('clients', type=int, help='number of simulator clients conne
                     choices=range(1,5), default=4)
 parser.add_argument('-v', '--verbose', help='verbose mode',
                     action='store_true')
-parser.add_argument('-s', '--safe', help='engages safe mode, limits output and turns UV off',
+parser.add_argument('-s', '--safe', help='engages safe mode, limits output',
                     action='store_true')
 
 args = parser.parse_args()
