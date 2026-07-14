@@ -2,7 +2,7 @@
 
 from ulab import numpy as np
 import time
-from ..utils import (
+from .utils import (
     calculate_light_intensity,
     display_status,
     check_temperature,

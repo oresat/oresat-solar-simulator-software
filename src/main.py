@@ -1,5 +1,5 @@
-from lib.solar_simulator import SolarSimulator
-from lib.app import SolarSimulatorApp
+from .solar_simulator import SolarSimulator
+from .app import SolarSimulatorApp
 
 def main():
     sim = SolarSimulator(verbose=0)

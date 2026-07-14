@@ -4,7 +4,7 @@ This module created in CircuitPython is used to interface with the hardware. It 
 
 ## Setup
 
-Make sure the `solar_simulator.py` file (along with the Adafruit hardware modules) is in the `/lib` folder on the Pico and run the `pico-demos/sim_io_demo.py` file by copying its contents to the `code.py` file.
+Make sure the `solar_simulator.py` file (along with the Adafruit hardware modules) is in the `/lib` folder on the Pico and run the `pico-demos/sim_io_demo.py` file by copying its contents to the `main.py` file.
 
 **TODO:** Integrate a system check button in the GUI settings menu.
 

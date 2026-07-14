@@ -1,0 +1,11 @@
+[project]
+name = "oresat-solar-simulator-software"
+version = "0.1.0"
+description = "The software that drives the Solar Simulator hardware used for CubeSat testing."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "adafruit-circuitpython-ads1x15",
+    "adafruit-circuitpython-mcp4728",
+    "mpy-cross>=1.27.0.post2",
+]

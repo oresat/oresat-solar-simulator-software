@@ -3,8 +3,8 @@
 import time
 import supervisor
 import sys
-from lib.modes.manual_mode import check_for_interrupt, check_temperature, display_status
-from ..utils import calculate_light_intensity
+from .manual_mode import check_for_interrupt, check_temperature, display_status
+from .utils import calculate_light_intensity
 
 
 class BasiliskMode:

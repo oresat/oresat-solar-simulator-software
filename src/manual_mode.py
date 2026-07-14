@@ -4,7 +4,7 @@ import time
 import sys
 import supervisor
 from ulab import numpy as np
-from ..utils import (
+from .utils import (
     calculate_light_intensity,
     display_status,
     check_temperature,

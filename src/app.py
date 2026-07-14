@@ -1,9 +1,9 @@
 # lib/app.py
 
 from .utils import input_with_default
-from .modes.auto_mode import AutoMode
-from .modes.manual_mode import ManualMode
-from .modes.basilisk_mode import BasiliskMode
+from .auto_mode import AutoMode
+from .manual_mode import ManualMode
+from .basilisk_mode import BasiliskMode
 
 
 class SolarSimulatorApp:
