@@ -1,18 +1,80 @@
 [project]
-name = "oresat-solar-simulator-software"
+name = "solar-simulator"
+description = "Software for the PSAS Solar Simulator used for testing OreSat."
 version = "0.1.0"
-description = "Software for the PSAS Solar Simulator used for testing CubeSats."
-readme = "README.md"
 requires-python = ">=3.14"
+license = { text = "GPL-3.0" }
 dependencies = []
 
 [project.optional-dependencies]
 dev = [
     "pytest",
-    # "ruff",
+    "pytest-cov",
+    "pytest-mock",
+    "ruff",
     # "adafruit-circuitpython-build-tools",     # build scripts, ci
     # "adafruit-blinka",                        # board, pwmio, etc
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+exclude = [
+    "hub", "pico", "pico-demos", "tools"
+]
+line-length = 100
+
+[tool.ruff.format]
+quote-style = "preserve"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    # See https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+    "Q000",    # bad-quotes-inline-string
+    "Q002",    # bad-quotes-docstring
+    "D300",    # triple-single-quotes
+    "COM812",  # prohibited-trailing-comma
+    "ISC001",  # single-line-implicit-string-concatenation
+    "D102",    # undocumented-public-method
+    # might leave off always. Does the user need to know __str__ makes a str?
+    "D105",    # undocumented-magic-method
+    # D203, and D213 conflict with D211 and D212, prefer the latter which
+    # follow PEP257
+    "D203",    # one-blank-line-before-class
+    "D213",    # multi-line-summary-second-line
+    # Allow FIXMEs etc, but don't be too rigid about formatting. Consider not
+    # ignoring FIX here so local runs point them out but ignoring them in CI
+    # runs so they don't block commits.
+    "FIX",      # flake8-fixme
+    "TD001",    # invalid-todo-tag
+    "TD002",    # missing-todo-author
+    "TD003",    # missing-todo-link
+    "TD004",    # missing-todo-colon
+    "EM101",    # raw-string-in-exception
+    "EM102",    # f-string-in-exception
+    "D413",     # blank-line-after-last-section
+    # This might be good to turn on later, right now I'm on the fence about it
+    "TRY003",   # raise-vanilla-args
+    # Another one that might be good later but for now is too argessive. Many of
+    # the numbers it flags are obvious from context.
+    "PLR2004",  # magic value used in comparison
+    "PLR0911",  # too many return statements
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Test-specific lint ignores.
+"tests/**/test_*.py" = [
+    "S101",      # assert - pytest prefers plain assert
+    "PLC0415",   # import - pytests need flexibility around when to import
+    # The test modules are pretty self-describing, no need to enforce docstrings for them.
+    "D100",      # modules
+    "D101",      # classes
+    "D102",      # methods
+    "D103",      # functions
+    "D104",      # package
+    "D105",      # magic methods
+    "D106",      # nested classes
+    "D107",      # __init__
+]

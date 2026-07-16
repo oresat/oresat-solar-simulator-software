@@ -7,3 +7,9 @@ upload: pico/code.py pico/boot.py pico/lib
 	cp -r pico/boot.py -t $(TARGET_DIR)	
 	cp -r pico/lib -t $(TARGET_DIR)
 	git log -1 | grep commit > "$(TARGET_DIR)/commit"
+
+test:
+	pytest tests/ -v --tb=short
+
+test-ci:
+	pytest tests/ -v --tb=long --cov=src/solar_simulator --cov-report=xml --cov-report=term
