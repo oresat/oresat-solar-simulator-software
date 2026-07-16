@@ -13,3 +13,6 @@ test:
 
 test-ci:
 	pytest tests/ -v --tb=long --cov=src/solar_simulator --cov-report=xml --cov-report=term
+
+lint:
+	ruff check
