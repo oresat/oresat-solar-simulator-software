@@ -4,16 +4,18 @@ description = "Software for the PSAS Solar Simulator used for testing OreSat."
 version = "0.1.0"
 requires-python = ">=3.14"
 license = { text = "GPL-3.0" }
-dependencies = []
+dependencies = [
+    "adafruit-circuitpython-ads1x15",
+    "adafruit-circuitpython-mcp4728",
+]
 
 [project.optional-dependencies]
 dev = [
+    "circup",
     "pytest",
     "pytest-cov",
     "pytest-mock",
     "ruff",
-    # "adafruit-circuitpython-build-tools",     # build scripts, ci
-    # "adafruit-blinka",                        # board, pwmio, etc
 ]
 
 [tool.pytest.ini_options]

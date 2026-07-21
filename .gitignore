@@ -3,6 +3,9 @@
 .venv/
 *.egg-info/
 __pycache__
+bin/
+dist/
 
 .coverage
 coverage.xml
+circup_reqs.txt

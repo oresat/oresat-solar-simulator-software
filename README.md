@@ -46,7 +46,22 @@ The software consists of a hub and client modules, both written in CircuitPython
 
 1.  Create and activate a virtual environment.
 
-2.  Install the project's development dependencies.
+    ```sh
+    python -m venv .venv
+    source .venv/bin/activate
+    ```
+
+2.  Install the project's dependencies.
+
+    ```sh
+    pip install -e ".[dev]"
+    ```
+
+3.  Build and Deploy (to the Raspberry Pi Pico board attached via USB to your machine).
+
+    ```sh
+    make deploy
+    ```
 
 ## Usage
 
