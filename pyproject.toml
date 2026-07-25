@@ -11,7 +11,6 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "circup",
     "pytest",
     "pytest-cov",
     "pytest-mock",
@@ -20,6 +19,7 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = "src/solar_simulator/lib"
 
 [tool.ruff]
 exclude = [
@@ -34,21 +34,15 @@ quote-style = "preserve"
 select = ["ALL"]
 ignore = [
     # See https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
-    "Q000",    # bad-quotes-inline-string
-    "Q002",    # bad-quotes-docstring
-    "D300",    # triple-single-quotes
-    "COM812",  # prohibited-trailing-comma
-    "ISC001",  # single-line-implicit-string-concatenation
-    "D102",    # undocumented-public-method
-    # might leave off always. Does the user need to know __str__ makes a str?
-    "D105",    # undocumented-magic-method
-    # D203, and D213 conflict with D211 and D212, prefer the latter which
-    # follow PEP257
-    "D203",    # one-blank-line-before-class
-    "D213",    # multi-line-summary-second-line
-    # Allow FIXMEs etc, but don't be too rigid about formatting. Consider not
-    # ignoring FIX here so local runs point them out but ignoring them in CI
-    # runs so they don't block commits.
+    "Q000",     # bad-quotes-inline-string
+    "Q002",     # bad-quotes-docstring
+    "D300",     # triple-single-quotes
+    "COM812",   # prohibited-trailing-comma
+    "ISC001",   # single-line-implicit-string-concatenation
+    "D102",     # undocumented-public-method
+    "D105",     # undocumented-magic-method
+    "D203",     # one-blank-line-before-class
+    "D213",     # multi-line-summary-second-line
     "FIX",      # flake8-fixme
     "TD001",    # invalid-todo-tag
     "TD002",    # missing-todo-author
@@ -57,10 +51,7 @@ ignore = [
     "EM101",    # raw-string-in-exception
     "EM102",    # f-string-in-exception
     "D413",     # blank-line-after-last-section
-    # This might be good to turn on later, right now I'm on the fence about it
     "TRY003",   # raise-vanilla-args
-    # Another one that might be good later but for now is too argessive. Many of
-    # the numbers it flags are obvious from context.
     "PLR2004",  # magic value used in comparison
     "PLR0911",  # too many return statements
 ]
@@ -68,15 +59,14 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 # Test-specific lint ignores.
 "tests/**/test_*.py" = [
-    "S101",      # assert - pytest prefers plain assert
-    "PLC0415",   # import - pytests need flexibility around when to import
-    # The test modules are pretty self-describing, no need to enforce docstrings for them.
-    "D100",      # modules
-    "D101",      # classes
-    "D102",      # methods
-    "D103",      # functions
-    "D104",      # package
-    "D105",      # magic methods
-    "D106",      # nested classes
-    "D107",      # __init__
+    "S101",     # assert - pytest prefers plain assert
+    "PLC0415",  # import - pytests need flexibility around when to import
+    "D100",     # modules
+    "D101",     # classes
+    "D102",     # methods
+    "D103",     # functions
+    "D104",     # package
+    "D105",     # magic methods
+    "D106",     # nested classes
+    "D107",     # __init__
 ]

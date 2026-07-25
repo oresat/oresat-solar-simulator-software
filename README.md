@@ -46,18 +46,6 @@ The software consists of a hub and client modules, both written in CircuitPython
 
 1.  Follow the [official documentation steps](https://learn.adafruit.com/getting-started-with-raspberry-pi-pico-circuitpython/circuitpython) for flashing CircuitPython onto the Raspberry Pi Pico.
 
-    > [!NOTE]
-    > A CircuitPython firmware file (.uf2) can be found in the `firmware/` directory of this project. If a different firmware is used, kindly replace the firmware .uf2 file.
-
-2.  Once the firmware has been flashed to the device, copy the `boot_out.txt` file from the device to the `firmware/` directory of this project. This file is needed for CI automation and development workflows that utilize the `make`.
-
-    ```sh
-    make fetch-boot-out
-    ```
-
-    > [!NOTE:]
-    > If you do not follow this step, it will be run for you during the [Build and Deploy](#build-and-deploy) steps.
-
 ## Installation
 
 1.  Create and activate a virtual environment.
@@ -67,15 +55,23 @@ The software consists of a hub and client modules, both written in CircuitPython
     source .venv/bin/activate
     ```
 
-2.  Install the project's dependencies.
+2.  Install the project's primary and "dev" group dependencies.
 
     ```sh
-    pip install -e ".[dev]"
+    pip install --group dev -e .
     ```
 
-## Build and Deploy
+## Build
 
-1.  Build and Deploy to the Raspberry Pi Pico board attached via USB to your machine.
+1.  Cross-compile and build the distribution.
+
+    ```sh
+    make build
+    ```
+
+## Deploy
+
+1.  Deploy to the Raspberry Pi Pico board attached via USB to your machine.
 
     ```sh
     make deploy

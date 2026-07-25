@@ -4,7 +4,7 @@
 *.egg-info/
 __pycache__
 bin/
-dist/
+build/
 
 .coverage
 coverage.xml
