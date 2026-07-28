@@ -7,9 +7,10 @@ import adafruit_mcp4728 as mcp  # 12-bit DAC
 import board
 from adafruit_ads1x15.analog_in import AnalogIn
 from busio import I2C
+from micropython import const
 from pwmio import PWMOut
 
-MAX_VALUE = 65535
+MAX_VALUE = const(65535)
 
 
 class SolarSimulator:

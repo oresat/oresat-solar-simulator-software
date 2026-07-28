@@ -1,5 +1,4 @@
-# Edit to match how your OS mounts the Pico.
-BOARD_DIR := /media/$(USER)/CIRCUITPY
+BOARD_DIR := $(shell findmnt -lo TARGET | grep CIRCUITPY)
 CP_VERSION = $(shell head -1 "$(BOARD_DIR)/boot_out.txt" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
 
 PHONY: build deploy clean test test-ci
@@ -8,7 +7,7 @@ build:
 	python3 scripts/build.py $(CP_VERSION)
 
 deploy: build
-	cp -R build/* $(BOARD_DIR)/
+	cp -R build/* $(BOARD_DIR)/ && sync
 	@echo "Deployment complete."
 
 clean:
