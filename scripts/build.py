@@ -78,13 +78,13 @@ def compile_or_copy(src: Path, dst_dir: Path, mpy_cross_bin: str) -> None:
 
     if src.name in LEAVE_UNCOMPILED:
         dst = dst_dir / src.name
-        print(f"copy {src} -> {dst}")  # noqa: T201
+        print(f"copy {src} -> {dst}")
         shutil.copyfile(src, dst)
         return
 
     # cross-compile using mpy-cross.
     dst = dst_dir / f"{src.stem}.mpy"
-    print(f"mpy-cross {src} -> {dst}")  # noqa: T201
+    print(f"mpy-cross {src} -> {dst}")
     subprocess.run([mpy_cross_bin, "-o", str(dst), str(src)], check=True) #  noqa: S603
 
 

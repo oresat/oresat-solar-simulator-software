@@ -54,6 +54,7 @@ ignore = [
     "TRY003",   # raise-vanilla-args
     "PLR2004",  # magic value used in comparison
     "PLR0911",  # too many return statements
+    "T201",
 ]
 
 [tool.ruff.lint.per-file-ignores]
