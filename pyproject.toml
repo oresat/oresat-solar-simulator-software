@@ -7,11 +7,11 @@ license = { text = "GPL-3.0" }
 dependencies = [
     "adafruit-circuitpython-ads1x15",
     "adafruit-circuitpython-mcp4728",
+    "circuitpython-build-tools",
 ]
 
 [dependency-groups]
 dev = [
-    "circuitpython-build-tools",
     "pytest",
     "pytest-cov",
     "pytest-mock",

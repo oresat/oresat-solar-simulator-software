@@ -85,7 +85,7 @@ def compile_or_copy(src: Path, dst_dir: Path, mpy_cross_bin: str) -> None:
     # cross-compile using mpy-cross.
     dst = dst_dir / f"{src.stem}.mpy"
     print(f"mpy-cross {src} -> {dst}")
-    subprocess.run([mpy_cross_bin, "-o", str(dst), str(src)], check=True) #  noqa: S603
+    subprocess.run([mpy_cross_bin, "-o", str(dst), str(src)], check=True)  # noqa: S603
 
 
 def main(cp_version: str) -> None:

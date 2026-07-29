@@ -144,4 +144,4 @@ def check_for_interrupt() -> None:
             Sim.set_leds(0, 0, 0, 0, 0)
             raise KeyboardInterrupt
 
-        print(f"Ignored input: {input_char!r}")
+        print(f"Ignored input: {repr(input_char)}")  # noqa: RUF010
