@@ -9,7 +9,7 @@ dependencies = [
     "adafruit-circuitpython-mcp4728",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "circuitpython-build-tools",
     "pytest",
@@ -52,9 +52,9 @@ ignore = [
     "TRY003",   # raise-vanilla-args
     "PLR2004",  # magic value used in comparison
     "PLR0911",  # too many return statements
-    "CPY001",
-    "TC001",
-    "T201",
+    "CPY001",   # missing-copyright-notice
+    "TC001",    # typing-only-first-party-import
+    "T201",     # print statements are acceptable
 ]
 
 [tool.ruff.lint.per-file-ignores]
