@@ -11,6 +11,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "circuitpython-build-tools",
     "pytest",
     "pytest-cov",
     "pytest-mock",
@@ -22,9 +23,6 @@ testpaths = ["tests"]
 pythonpath = "src/solar_simulator/lib"
 
 [tool.ruff]
-exclude = [
-    "hub", "pico", "pico-demos", "tools"
-]
 line-length = 100
 
 [tool.ruff.format]
@@ -54,6 +52,8 @@ ignore = [
     "TRY003",   # raise-vanilla-args
     "PLR2004",  # magic value used in comparison
     "PLR0911",  # too many return statements
+    "CPY001",
+    "TC001",
     "T201",
 ]
 

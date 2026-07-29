@@ -1,18 +1,16 @@
 """Solar Simulator App 'Auto Mode' helper module."""
 
 import time
-from typing import TYPE_CHECKING
 
-from ulab import numpy as np
-from utils import (
+from lib.utils import (
     calculate_light_intensity,
     check_for_interrupt,
     check_temperature,
     display_status,
 )
+from ulab import numpy as np
 
-if TYPE_CHECKING:
-    from solar_simulator import SolarSimulator as Sim
+from solar_simulator import SolarSimulator as Sim
 
 
 class AutoMode:

@@ -2,18 +2,16 @@
 
 import sys
 import time
-from typing import TYPE_CHECKING
 
 import supervisor
-from utils import (
+from lib.utils import (
     calculate_light_intensity,
     check_for_interrupt,
     check_temperature,
     display_status,
 )
 
-if TYPE_CHECKING:
-    from solar_simulator import SolarSimulator as Sim
+from solar_simulator import SolarSimulator as Sim
 
 
 class ManualMode:

@@ -2,14 +2,12 @@
 
 import sys
 import time
-from typing import TYPE_CHECKING
 
 import supervisor
 from lib.modes.manual_mode import check_temperature, display_status
-from utils import calculate_light_intensity
+from lib.utils import calculate_light_intensity
 
-if TYPE_CHECKING:
-    from solar_simulator import SolarSimulator as Sim
+from solar_simulator import SolarSimulator as Sim
 
 
 class BasiliskMode:

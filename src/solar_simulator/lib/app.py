@@ -1,14 +1,11 @@
 """Solar Simulator Application."""
 
-from typing import TYPE_CHECKING
+from solar_simulator import SolarSimulator as Sim
 
 from .modes.auto_mode import AutoMode
 from .modes.basilisk_mode import BasiliskMode
 from .modes.manual_mode import ManualMode
 from .utils import input_with_default
-
-if TYPE_CHECKING:
-    from solar_simulator import SolarSimulator as Sim
 
 
 class SolarSimulatorApp:
