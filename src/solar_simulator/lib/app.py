@@ -1,6 +1,6 @@
 """Solar Simulator Application."""
 
-from solar_simulator import SolarSimulator as Sim
+from .solar_simulator import SolarSimulator as Sim
 
 from .modes.auto_mode import AutoMode
 from .modes.basilisk_mode import BasiliskMode

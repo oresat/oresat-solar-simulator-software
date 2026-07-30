@@ -2,7 +2,7 @@
 name = "solar-simulator"
 description = "Software for the PSAS Solar Simulator used for testing OreSat."
 version = "0.1.0"
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 license = { text = "GPL-3.0" }
 dependencies = [
     "adafruit-circuitpython-ads1x15",
@@ -20,7 +20,6 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = "src/solar_simulator/lib"
 
 [tool.ruff]
 line-length = 100
@@ -62,12 +61,5 @@ ignore = [
 "tests/**/test_*.py" = [
     "S101",     # assert - pytest prefers plain assert
     "PLC0415",  # import - pytests need flexibility around when to import
-    "D100",     # modules
-    "D101",     # classes
-    "D102",     # methods
-    "D103",     # functions
-    "D104",     # package
-    "D105",     # magic methods
-    "D106",     # nested classes
-    "D107",     # __init__
+    "D",        # pydoclint - https://docs.astral.sh/ruff/rules/#pydocstyle-d
 ]

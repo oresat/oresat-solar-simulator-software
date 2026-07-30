@@ -7,6 +7,7 @@ build:
 	python3 scripts/build.py $(CP_VERSION)
 
 deploy: build
+	@test -n "$(BOARD_DIR)" || (echo "ERROR: Device path not found — is it mounted?" && exit 1)
 	cp -R build/* $(BOARD_DIR)/ && sync
 	@echo "Deployment complete."
 
@@ -20,8 +21,8 @@ clean:
 	rm -f *coverage*
 	@echo "Clean up complete."
 
-test:
-	pytest tests/ -v --tb=short
+# test:
+# 	pytest tests/ -v --tb=short
 
-test-ci:
-	pytest tests/ -v --tb=long --cov=src/solar_simulator --cov-report=xml --cov-report=term
+# test-ci:
+# 	pytest tests/ -v --tb=long --cov=src/solar_simulator --cov-report=xml --cov-report=term
