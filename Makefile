@@ -1,25 +1,29 @@
-BOARD_DIR := $(shell findmnt -lo TARGET | grep CIRCUITPY)
 CP_VERSION = 10.2.1
 
-PHONY: build deploy clean test test-ci
+.PHONY: build deploy clean test test-ci
 
 build:
 	python3 scripts/build.py $(CP_VERSION)
 
 deploy: build
-	@if [ -z "$(BOARD_DIR)" ]; then \
+	@BOARD_DIR=$$(findmnt -lo TARGET | grep CIRCUITPY); \
+	if [ -z "$$BOARD_DIR" ]; then \
 		echo "ERROR: Device path not found — is it mounted?"; \
 		exit 1; \
 	fi; \
-	ACTUAL_VERSION=$$(head -1 "$(BOARD_DIR)/boot_out.txt" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'); \
+	ACTUAL_VERSION=$$(head -1 "$$BOARD_DIR/boot_out.txt" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'); \
 	if [ "$$ACTUAL_VERSION" != "$(CP_VERSION)" ]; then \
 		echo "ERROR: Device is running CircuitPython $$ACTUAL_VERSION, expected $(CP_VERSION)."; \
 		exit 1; \
-	fi
-	cp -R build/* $(BOARD_DIR)/ && sync
+	fi; \
+	cp -R build/* "$$BOARD_DIR/" && sync
 	@echo "Deployment complete."
 
 clean:
+	@echo "Cleaning up build/ files ..."
+	rm -rf build/
+
+distclean:
 	@echo "Cleaning up cache, report, binaries, and distribution files ..."
 	rm -rf .pytest_cache/
 	rm -rf .ruff_cache/
