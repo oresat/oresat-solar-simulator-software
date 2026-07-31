@@ -4,7 +4,7 @@ LIB_ROOT   := $(SRC_ROOT)/lib
 BUILD_ROOT := build
 LIB_SRCS   := app.py solar_simulator.py utils.py
 MODE_SRCS  := auto_mode.py basilisk_mode.py manual_mode.py
-COPY_SRCS  := $(SRC_ROOT)/boot.py $(SRC_ROOT)/code.py $(wildcard $(LIB_ROOT)/__init__.py $(LIB_ROOT)/modes/__init__.py)
+COPY_SRCS  := $(SRC_ROOT)/boot.py $(SRC_ROOT)/code.py $(SRC_ROOT)/__init__.py $(wildcard $(LIB_ROOT)/__init__.py $(LIB_ROOT)/modes/__init__.py)
 
 MPYFILES   := $(addprefix $(BUILD_ROOT)/lib/, $(LIB_SRCS:.py=.mpy)) $(addprefix $(BUILD_ROOT)/lib/modes/, $(MODE_SRCS:.py=.mpy))
 PYFILES    := $(patsubst $(SRC_ROOT)/%, build/%, $(COPY_SRCS))
