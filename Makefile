@@ -1,9 +1,31 @@
-CP_VERSION = 10.2.1
+CP_VERSION := 10.2.1
+SRC_ROOT   := src/solar_simulator
+LIB_ROOT   := $(SRC_ROOT)/lib
+BUILD_ROOT := build
+LIB_SRCS   := app.py solar_simulator.py utils.py
+MODE_SRCS  := auto_mode.py basilisk_mode.py manual_mode.py
+COPY_SRCS  := $(SRC_ROOT)/boot.py $(SRC_ROOT)/code.py $(wildcard $(LIB_ROOT)/__init__.py $(LIB_ROOT)/modes/__init__.py)
+
+MPYFILES   := $(addprefix $(BUILD_ROOT)/lib/, $(LIB_SRCS:.py=.mpy)) $(addprefix $(BUILD_ROOT)/lib/modes/, $(MODE_SRCS:.py=.mpy))
+PYFILES    := $(patsubst $(SRC_ROOT)/%, build/%, $(COPY_SRCS))
+
+vpath %.py $(SRC_ROOT):$(SRC_ROOT)/lib
 
 .PHONY: build deploy clean test test-ci
 
-build:
-	python3 scripts/build.py $(CP_VERSION)
+build: $(PYFILES) $(MPYFILES)
+
+$(BUILD_ROOT)/%.mpy: %.py
+	@mkdir -p $(dir $@)
+	circuitpython-mpy-cross --circuitpython-version 10.x -o $@ $^
+
+$(BUILD_ROOT)/modes/%.mpy: %.py
+	@mkdir -p $(dir $@)
+	circuitpython-mpy-cross --circuitpython-version 10.x -o $@ $^
+
+build/%.py: $(SRC_ROOT)/%.py
+	@mkdir -p $(dir $@)
+	cp $< $@
 
 deploy: build
 	@BOARD_DIR=$$(findmnt -lo TARGET | grep CIRCUITPY); \
