@@ -69,12 +69,12 @@ The software consists of a hub and client modules, both written in CircuitPython
     make build
     ```
 
-## Deploy
+## Write
 
-1.  Deploy to the Raspberry Pi Pico board attached via USB to your machine.
+1.  Write to the Raspberry Pi Pico board attached via USB to your machine.
 
     ```sh
-    make deploy
+    make write
     ```
 
 ## Usage

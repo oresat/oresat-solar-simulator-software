@@ -38,7 +38,7 @@ def calculate_light_intensity(factor: float) -> dict:
 def display_status(sim: Sim) -> None:
     """Display the current thermal and light status."""
     try:
-        thermals = sim.checkThermals()
+        thermals = sim.check_thermals()
 
         if thermals:
             led_temp, heatsink_temp, cell_temp = thermals
@@ -83,7 +83,7 @@ def check_temperature(sim: Sim) -> bool:
     if not sim.enable_therm_monitoring:
         return True
 
-    thermals = sim.checkThermals()
+    thermals = sim.check_thermals()
     if not thermals:
         print("Cannot read the temperature sensors")
         return False
@@ -108,7 +108,7 @@ def check_temperature(sim: Sim) -> bool:
             and cell_temp > sim.therm_resume_temp
         ):
             time.sleep(1)
-            thermals = sim.checkThermals()
+            thermals = sim.check_thermals()
             if thermals:
                 led_temp, heatsink_temp, cell_temp = thermals
                 led_temp = led_temp or 0

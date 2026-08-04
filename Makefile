@@ -1,13 +1,13 @@
-CP_VERSION := 10.2.1
-SRC_ROOT   := src/solar_simulator
-LIB_ROOT   := $(SRC_ROOT)/lib
-BUILD_ROOT := build
-LIB_SRCS   := app.py solar_simulator.py utils.py
-MODE_SRCS  := auto_mode.py basilisk_mode.py manual_mode.py
-COPY_SRCS  := $(SRC_ROOT)/boot.py $(SRC_ROOT)/code.py $(SRC_ROOT)/__init__.py $(wildcard $(LIB_ROOT)/__init__.py $(LIB_ROOT)/modes/__init__.py)
+CP_MAJOR_VERSION := 10
+SRC_ROOT         := src/solar_simulator
+LIB_ROOT         := $(SRC_ROOT)/lib
+BUILD_ROOT       := build
+LIB_SRCS         := app.py solar_simulator.py utils.py
+MODE_SRCS        := auto_mode.py basilisk_mode.py manual_mode.py
+COPY_SRCS        := $(SRC_ROOT)/boot.py $(SRC_ROOT)/code.py $(SRC_ROOT)/__init__.py $(wildcard $(LIB_ROOT)/__init__.py $(LIB_ROOT)/modes/__init__.py)
 
-MPYFILES   := $(addprefix $(BUILD_ROOT)/lib/, $(LIB_SRCS:.py=.mpy)) $(addprefix $(BUILD_ROOT)/lib/modes/, $(MODE_SRCS:.py=.mpy))
-PYFILES    := $(patsubst $(SRC_ROOT)/%, build/%, $(COPY_SRCS))
+MPYFILES         := $(addprefix $(BUILD_ROOT)/lib/, $(LIB_SRCS:.py=.mpy)) $(addprefix $(BUILD_ROOT)/lib/modes/, $(MODE_SRCS:.py=.mpy))
+PYFILES          := $(patsubst $(SRC_ROOT)/%, build/%, $(COPY_SRCS))
 
 vpath %.py $(SRC_ROOT):$(SRC_ROOT)/lib
 
@@ -27,19 +27,24 @@ build/%.py: $(SRC_ROOT)/%.py
 	@mkdir -p $(dir $@)
 	cp $< $@
 
-deploy: build
-	@BOARD_DIR=$$(findmnt -lo TARGET | grep CIRCUITPY); \
+write: build
+	@BOARD_DIR=$$(findmnt --noheadings --source LABEL=CIRCUITPY --output TARGET); \
 	if [ -z "$$BOARD_DIR" ]; then \
-		echo "ERROR: Device path not found — is it mounted?"; \
+		echo "ERROR: Device path with disk label 'CIRCUITPY' not found — is it mounted?"; \
 		exit 1; \
 	fi; \
-	ACTUAL_VERSION=$$(head -1 "$$BOARD_DIR/boot_out.txt" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'); \
-	if [ "$$ACTUAL_VERSION" != "$(CP_VERSION)" ]; then \
-		echo "ERROR: Device is running CircuitPython $$ACTUAL_VERSION, expected $(CP_VERSION)."; \
+	if [ ! -f "$$BOARD_DIR/boot_out.txt" ]; then \
+		echo "ERROR: $$BOARD_DIR/boot_out.txt not found -- cannot determine CircuitPython version on device."; \
 		exit 1; \
 	fi; \
-	cp -R build/* "$$BOARD_DIR/" && sync
-	@echo "Deployment complete."
+	ACTUAL_MAJOR_VERSION=$$(head -1 "$$BOARD_DIR/boot_out.txt" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | cut -d. -f1); \
+	if [ "$$ACTUAL_MAJOR_VERSION" != "$(CP_MAJOR_VERSION)" ]; then \
+		echo "ERROR: Device is running CircuitPython version $$ACTUAL_MAJOR_VERSION, expected version $(CP_MAJOR_VERSION)."; \
+		exit 1; \
+	fi; \
+	git log -1 | grep commit > $$BOARD_DIR/commit && \
+	cp -Rv build/* "$$BOARD_DIR/" && sync
+	@echo "SUCCESS: Build written to device."
 
 clean:
 	@echo "Cleaning up build/ files ..."
