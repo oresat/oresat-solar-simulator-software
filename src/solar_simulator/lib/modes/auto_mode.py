@@ -1,29 +1,36 @@
-# lib/modes/auto_mode.py
+"""Solar Simulator App 'Auto Mode' helper module."""
 
-from ulab import numpy as np
 import time
-from ..utils import (
+
+from lib.utils import (
     calculate_light_intensity,
-    display_status,
+    check_for_interrupt,
     check_temperature,
-    check_for_interrupt
+    display_status,
 )
+from ulab import numpy as np
+
+from solar_simulator import SolarSimulator as Sim
+
 
 class AutoMode:
-    """
-    Implements the Auto Mode functionality.
-    """
-    def __init__(self, sim):
-        self.sim = sim
-        self.peak = 0.5  # Default peak intensity
+    """Auto Mode helper class for Solar Simulator App."""
 
-    def run(self):
+    def __init__(self, sim: Sim) -> None:
+        """Initialize auto mode."""
+        self.sim = sim
+        self.peak = 0.5
+
+
+    def run(self) -> None:
+        """Run auto mode loop."""
         print("Entering Auto Mode")
         max_intensity_input = input("Please enter the desired maximum light intensity (0 to 1): ")
+
         try:
             self.peak = float(max_intensity_input)
             if not (0 <= self.peak <= 1):
-                raise ValueError("Intensity out of range.")
+                raise ValueError("Intensity out of range.")  # noqa: TRY301
             print(f"Maximum light intensity set to: {self.peak}")
         except ValueError:
             print("Invalid input. Please enter a number between 0 and 1.")
@@ -32,7 +39,7 @@ class AutoMode:
         # For reasonable accuracy, period should be between 10 seconds and ~1 hour 15 minutes
         period = int(input("Please enter desired period of sinusoid (at least 10, in seconds). "))
         if not (period >= 10):
-            print("invalid input. Please enter a number greater than 10.")
+            print("Invalid input. Please enter a number greater than 10.")
             return
 
         # Generate a sine wave pattern
@@ -43,6 +50,7 @@ class AutoMode:
 
         try:
             loop_start = time.monotonic()
+
             while True:
                 if check_temperature(self.sim):
                     # Calculate current intensity factor
@@ -56,15 +64,13 @@ class AutoMode:
                     white = int(intensity_values["White"] * 655)
                     cyan = int(intensity_values["Cyan"] * 655)
                     halogen = int(intensity_values["Halogen"] * 655)
-                    uv = int(intensity_values["UV"] * 655)  # (**abandon**)
 
                     # Set LED intensities
-                    self.sim.setLEDs(v=violet, w=white, c=cyan, uv=uv, h=halogen)
+                    self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
                     self.sim.current_light_settings = {
                         'v': violet,
                         'w': white,
                         'c': cyan,
-                        'uv': uv,  # (**abandon**)
                         'h': halogen
                     }
                     # Update level index for sine wave
@@ -82,4 +88,4 @@ class AutoMode:
 
         except KeyboardInterrupt:
             print("\nExiting Auto Mode.")
-            self.sim.setLEDs(0, 0, 0, 0, 0)
+            self.sim.set_leds(0, 0, 0, 0)

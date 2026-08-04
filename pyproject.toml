@@ -1,0 +1,66 @@
+[project]
+name = "solar-simulator"
+description = "Software for the PSAS Solar Simulator used for testing OreSat."
+version = "0.1.0"
+requires-python = ">=3.12"
+license = { text = "GPL-3.0" }
+dependencies = [
+    "adafruit-circuitpython-ads1x15",
+    "adafruit-circuitpython-mcp4728",
+    "circuitpython-build-tools",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "ruff",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py37"
+
+[tool.ruff.format]
+quote-style = "preserve"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    # See https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+    "Q000",     # bad-quotes-inline-string
+    "Q002",     # bad-quotes-docstring
+    "D300",     # triple-single-quotes
+    "COM812",   # prohibited-trailing-comma
+    "ISC001",   # single-line-implicit-string-concatenation
+    "D102",     # undocumented-public-method
+    "D105",     # undocumented-magic-method
+    "D203",     # one-blank-line-before-class
+    "D213",     # multi-line-summary-second-line
+    "FIX",      # flake8-fixme
+    "TD001",    # invalid-todo-tag
+    "TD002",    # missing-todo-author
+    "TD003",    # missing-todo-link
+    "TD004",    # missing-todo-colon
+    "EM101",    # raw-string-in-exception
+    "EM102",    # f-string-in-exception
+    "D413",     # blank-line-after-last-section
+    "TRY003",   # raise-vanilla-args
+    "PLR2004",  # magic value used in comparison
+    "PLR0911",  # too many return statements
+    "CPY001",   # missing-copyright-notice
+    "TC001",    # typing-only-first-party-import
+    "T201",     # print statements are acceptable
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Test-specific lint ignores.
+"tests/**/test_*.py" = [
+    "S101",     # assert - pytest prefers plain assert
+    "PLC0415",  # import - pytests need flexibility around when to import
+    "D",        # pydoclint - https://docs.astral.sh/ruff/rules/#pydocstyle-d
+]

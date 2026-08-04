@@ -1,3 +1,0 @@
-python-engineio==4.3.*
-python-socketio==5.8.*
-eventlet==0.33.*

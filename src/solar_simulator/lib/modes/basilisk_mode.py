@@ -1,36 +1,37 @@
-# lib/modes/basilisk_mode.py
+"""Solar Simulator App 'Basilisk Mode' helper module."""
 
-import time
-import supervisor
 import sys
-from lib.modes.manual_mode import check_for_interrupt, check_temperature, display_status
-from ..utils import calculate_light_intensity
+import time
+
+import supervisor
+from lib.modes.manual_mode import check_temperature, display_status
+from lib.utils import calculate_light_intensity
+
+from solar_simulator import SolarSimulator as Sim
 
 
 class BasiliskMode:
-    """
-    Implements the Basilisk Mode functionality with UART communication for CircuitPython.
-    """
+    """Implements the Basilisk Mode functionality with UART communication for CircuitPython."""
 
-    def __init__(self, sim):
+    def __init__(self, sim: Sim) -> None:
+        """Initialize basilisk mode."""
         self.sim = sim
 
-    def run(self):
+
+    def run(self) -> None:
+        """Run basilisk mode loop."""
         print("Entering Basilisk Mode, wait for data input")
-        pre_data = None
         data = None
         buffer = ""
         try:
             while True:
                 if supervisor.runtime.serial_bytes_available:
                     data = sys.stdin.read(1)
-                    # print(f"data received: {repr(data)}")
                     buffer += data
 
                     if "\n" in buffer:
                         line, buffer = buffer.split("\n", 1)
                         line = line.replace("\x00", "").strip()
-                        # print(f"Raw data received: {line}")
                         intensity = int(line)
 
                         if 0 <= intensity <= 100:
@@ -39,14 +40,12 @@ class BasiliskMode:
                             white = int(intensity_values["White"] * 655)
                             cyan = int(intensity_values["Cyan"] * 655)
                             halogen = int(intensity_values["Halogen"] * 655)
-                            uv = int(intensity_values["UV"] * 655)  # (**abandon**)
 
-                            self.sim.setLEDs(v=violet, w=white, c=cyan, uv=uv, h=halogen)
+                            self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
                             self.sim.current_light_settings = {
                                 'v': violet,
                                 'w': white,
                                 'c': cyan,
-                                'uv': uv,  # (**abandon**)
                                 'h': halogen
                             }
 

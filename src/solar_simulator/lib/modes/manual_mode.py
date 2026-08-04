@@ -1,24 +1,29 @@
-# lib/modes/manual_mode.py
+"""Solar Simulator App 'Manual Mode' helper module."""
 
-import time
 import sys
+import time
+
 import supervisor
-from ulab import numpy as np
-from ..utils import (
+from lib.utils import (
     calculate_light_intensity,
-    display_status,
+    check_for_interrupt,
     check_temperature,
-    check_for_interrupt
+    display_status,
 )
 
+from solar_simulator import SolarSimulator as Sim
+
+
 class ManualMode:
-    """
-    Implements the Manual Mode functionality.
-    """
-    def __init__(self, sim):
+    """Manual Mode helper class for Solar Simulator App."""
+
+    def __init__(self, sim: Sim) -> None:
+        """Initialize manual mode."""
         self.sim = sim
 
-    def run(self):
+
+    def run(self) -> None:
+        """Run manual mode loop."""
         print("Entering Manual Mode")
         print("Choose your manual control mode:")
         print("1. Fixed Preset Mode")
@@ -26,12 +31,13 @@ class ManualMode:
         print("3. Wave Mode")
         print("4. Measurement Mode")
         print("5. Fine-Tuning Adjustment")
+
         while True:
             choice = input("Your choice (input 1, 2, 3, 4, or 5): ")
+
             if choice in ["1", "2", "3", "4", "5"]:
                 break
-            else:
-                print("Invalid input. Please enter 1, 2, 3, 4, or 5.")
+            print("Invalid input. Please enter 1, 2, 3, 4, or 5.")
 
         if choice == '1':
             self.fixed_preset_mode()
@@ -44,10 +50,9 @@ class ManualMode:
         elif choice == '5':
             self.fine_tuning_adjustment()
 
-    def fixed_preset_mode(self):
-        """
-        Fixed Preset Mode
-        """
+
+    def fixed_preset_mode(self) -> None:
+        """Set Fixed Preset Mode."""
         print("Enter an initial intensity value (0 to 1).")
         print("Type 'exit' to return to the main menu.")
 
@@ -56,37 +61,38 @@ class ManualMode:
 
             if user_input.lower() == 'exit':
                 print("Exiting to the main menu.")
-                self.sim.setLEDs(0, 0, 0, 0, 0)
+                self.sim.set_leds(0, 0, 0, 0)
                 return
 
             if user_input == "":
                 intensity_input = 0.0
                 break
-            else:
-                try:
-                    intensity_input = float(user_input)
-                    if not (0 <= intensity_input <= 1):
-                        print("Invalid intensity. Please enter a value between 0 and 1.")
-                except ValueError:
-                    print("Invalid input. Please enter a numeric value.")
+
+            try:
+                intensity_input = float(user_input)
+                if not (0 <= intensity_input <= 1):
+                    print("Invalid intensity. Please enter a value between 0 and 1.")
+            except ValueError:
+                print("Invalid input. Please enter a numeric value.")
 
             intensity_values = calculate_light_intensity(intensity_input)
             violet = int(intensity_values["Violet"] * 655)
             white = int(intensity_values["White"] * 655)
             cyan = int(intensity_values["Cyan"] * 655)
             halogen = int(intensity_values["Halogen"] * 655)
-            uv = int(intensity_values["UV"] * 655)  # (**abandon**)
-            self.sim.setLEDs(v=violet, w=white, c=cyan, uv=uv, h=halogen)
+
+            self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
             self.sim.current_light_settings = {
                 'v': violet,
                 'w': white,
                 'c': cyan,
-                'uv': uv,  # (**abandon**)
                 'h': halogen
             }
+
             print(f"\nCurrent intensity: {intensity_input:.2f}")
             print("Press 'Enter' to reset your LEDs...")
             print("Type 'exit' to return to the main menu.")
+
             input_line = ""
 
             while True:
@@ -97,27 +103,25 @@ class ManualMode:
                 # Non-blocking user input detection
                 if supervisor.runtime.serial_bytes_available:
                     c = sys.stdin.read(1)
-                    if c == '\n' or c == '\r':
+                    if c in {'\n', '\r'}:
                         user_command = input_line.strip().lower()
 
                         if user_command == 'exit':
                             print("Exiting to the main menu.")
-                            self.sim.setLEDs(0, 0, 0, 0, 0)
+                            self.sim.set_leds(0, 0, 0, 0)
                             return
-                        else:
-                            print("Returning to light intensity input.")
-                            break
-                    else:
-                        input_line += c
+                        print("Returning to light intensity input.")
+                        break
+                    input_line += c
                 time.sleep(1)
 
-    def manual_light_adjustment(self):
-        """
-        Manual Light Source Adjustment
-        """
+
+    def manual_light_adjustment(self) -> None:  # noqa: PLR0915, C901
+        """Manual Light Source Adjustment."""
         while True:
             try:
-                print("Enter light intensities as percentages (0-100). Type 'exit' to return to the main menu.")
+                print("Enter light intensities as percentages (0-100).")
+                print("Type 'exit' to return to the main menu.")
                 violet_input = input("Enter Violet light intensity (%): ")
                 if violet_input.lower() == 'exit':
                     break
@@ -134,28 +138,24 @@ class ManualMode:
                 violet_percent = float(violet_input)
                 white_percent = float(white_input)
                 cyan_percent = float(cyan_input)
-                uv_percent = 0
                 halogen_percent = float(halogen_input)
 
                 if not (0 <= violet_percent <= 100 and 0 <= white_percent <= 100 and
-                        0 <= cyan_percent <= 100 and 0 <= uv_percent <= 100 and
-                        0 <= halogen_percent <= 100):
+                        0 <= cyan_percent <= 100 and 0 <= halogen_percent <= 100):
                     print("Invalid input. Please enter values between 0 and 100.")
                     continue
 
                 violet = int((violet_percent / 100) * 65535)
                 white = int((white_percent / 100) * 65535)
                 cyan = int((cyan_percent / 100) * 65535)
-                uv = int((uv_percent / 100) * 65535)  # (**abandon**)
                 halogen = int((halogen_percent / 100) * 65535)
 
-                self.sim.setLEDs(v=violet, w=white, c=cyan, uv=uv, h=halogen)
+                self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
                 print("Lights set to the specified intensities.")
                 self.sim.current_light_settings = {
                     'v': violet,
                     'w': white,
                     'c': cyan,
-                    'uv': uv,  # (**abandon**)
                     'h': halogen
                 }
                 input_line = ""
@@ -168,19 +168,17 @@ class ManualMode:
 
                     if supervisor.runtime.serial_bytes_available:
                         c = sys.stdin.read(1)
-                        if c == '\n' or c == '\r':
+                        if c in {'\n', '\r'}:
                             user_command = input_line.strip().lower()
                             input_line = ""
 
                             if user_command == 'exit':
                                 print("Exiting to the main menu.")
-                                self.sim.setLEDs(0, 0, 0, 0, 0)
+                                self.sim.set_leds(0, 0, 0, 0)
                                 return
-                            else:
-                                print("Returning to light intensity input.")
-                                break
-                        else:
-                            input_line += c
+                            print("Returning to light intensity input.")
+                            break
+                        input_line += c
                     time.sleep(1)
             except ValueError:
                 print("Invalid input. Please enter numeric values only.")

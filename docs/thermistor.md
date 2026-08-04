@@ -8,9 +8,7 @@ We’re using the [Murata NXFT15XV103FEAB050 thermistor](https://mm.digikey.com/
 
 ## The Schematic
 
-![circuit schematic](images/image1.png)
-
-That’s just a voltage divider with our thermistor in the “R1” spot, so:
+It's just a voltage divider with our thermistor in the “R1” spot, so:
 
 $V_{OUT} = (R_2 / (R_{TH} + R_2))V_{IN}$
 
@@ -50,10 +48,10 @@ So in our case:
 
 $R_T = 10000{\Omega} * e^{(3435 K * (1 / T - 1 / 298.15 K))}$
 
-Well calculating $R_T$ based on $T$ is exactly the opposite of what we want, so now solve that equation for $T$. That’s handily done on [this website](https://www.giangrandi.org/electronics/ntc/ntc.shtml), including calculators to check your work.
+Calculating $R_T$ based on $T$ is exactly the opposite of what we want, so now solve that equation for $T$. That’s handily done on [this website](https://www.giangrandi.org/electronics/ntc/ntc.shtml), including calculators to check your work.
 
 Plugging in our standard values and using $R_{TH}$ calculated from [1] above:
 
 $T = 1 / (({\log}(R_{TH} / 10000{\Omega}) / 3435K) + (1 / 298.15 K)) [2]$
 
-That’s in Kelvin, so subtract 273.15 to get that in °C.
+That’s in Kelvin, so subtract 273.15 to get the temperature in °C.

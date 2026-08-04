@@ -1,38 +1,38 @@
-# lib/app.py
+"""Solar Simulator Application."""
 
-from .utils import input_with_default
 from .modes.auto_mode import AutoMode
-from .modes.manual_mode import ManualMode
 from .modes.basilisk_mode import BasiliskMode
+from .modes.manual_mode import ManualMode
+from .solar_simulator import SolarSimulator as Sim
+from .utils import input_with_default
 
 
 class SolarSimulatorApp:
-    """
-    Main application class for the Solar Simulator.
-    """
+    """Main application class for the Solar Simulator."""
 
-    def __init__(self, sim):
+    def __init__(self, sim: Sim) -> None:
+        """Initialize Solar Simulator App."""
         self.sim = sim
-        # Thermal monitoring settings
 
-    def run(self):
+
+    def run(self) -> None:
+        """Run the Solar Simulator App."""
         self.mode_selection()
 
-    def setup(self):
-        # Thermal monitoring setting
 
+    def setup(self) -> None:
+        """Set up the cli menu options."""
         default_settings_summary = (
                 "\nDefault settings are:\n"
-                "  - Thermal Monitoring: " + ("Enabled" if self.sim.enable_therm_monitoring else "Disabled") + "\n" +
-                "  - UV Light (**abandon**): " + ("Disabled" if self.sim.uv_safety else "Enabled") + "\n" +
+                "  - Thermal Monitoring: " + ("Enabled" if self.sim.enable_therm_monitoring else "Disabled") + "\n" +  # noqa: E501
                 "  - LED Shutdown Temperature: " + str(self.sim.therm_led_shutdown) + "°C\n" +
-                "  - Heatsink Shutdown Temperature: " + str(self.sim.therm_heatsink_shutdown) + "°C\n" +
+                "  - Heatsink Shutdown Temperature: " + str(self.sim.therm_heatsink_shutdown) + "°C\n" +  # noqa: E501
                 "  - Cell Shutdown Temperature: " + str(self.sim.therm_cell_shutdown) + "°C\n" +
                 "  - Resume Operation Temperature: " + str(self.sim.therm_resume_temp) + "°C\n"
         )
 
         change_settings = input_with_default(
-            "Would you like to change the default settings? (yes/no, default is no): " + default_settings_summary,
+            f"Would you like to change the default settings? (yes/no, default is no): {default_settings_summary}",  # noqa: E501
             default_value="no",
             valid_values=["yes", "no"]
         )
@@ -70,14 +70,17 @@ class SolarSimulatorApp:
         else:
             print("Using default settings. No changes were made.")
 
-    def mode_selection(self):
+    def mode_selection(self) -> None:
+        """Mode selection menu."""
         print("Please choose your mode")
         print("1. Auto Mode")
         print("2. Manual Mode")
         print("3. Basilisk Mode")
         print("4. Thermal setup, if you need")
+
         while True:
             mode = input("Your mode (input 1, 2, 3 or 4 if you need change default): ")
+
             if mode in ["1", "2", "3","4"]:
                 mode = int(mode)
             else:
@@ -87,15 +90,18 @@ class SolarSimulatorApp:
                 auto_mode = AutoMode(self.sim)
                 auto_mode.run()
                 break
-            elif mode == 2:
+
+            if mode == 2:
                 manual_mode = ManualMode(self.sim)
                 manual_mode.run()
                 break
-            elif mode == 3:
+
+            if mode == 3:
                 basilisk_mode = BasiliskMode(self.sim)
                 basilisk_mode.run()
                 break
-            elif mode == 4:
+
+            if mode == 4:
                 self.setup()
                 print("Thermal setup completed. Returning to mode selection.\n")
                 continue
