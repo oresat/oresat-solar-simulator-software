@@ -75,9 +75,3 @@ distclean:
 	rm -f *.coverage*
 	rm -f *coverage*
 	@echo "Clean up complete."
-
-# test:
-# 	pytest tests/ -v --tb=short
-
-# test-ci:
-# 	pytest tests/ -v --tb=long --cov=src/solar_simulator --cov-report=xml --cov-report=term

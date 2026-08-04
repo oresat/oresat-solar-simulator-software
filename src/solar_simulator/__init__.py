@@ -3,4 +3,4 @@
 from .lib.app import SolarSimulatorApp
 from .lib.solar_simulator import SolarSimulator
 
-__all__ = ["SolarSimulatorApp", "SolarSimulator"]
+__all__ = ["SolarSimulator", "SolarSimulatorApp"]

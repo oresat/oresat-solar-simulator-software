@@ -1,10 +1,9 @@
 """Solar Simulator Application."""
 
-from .solar_simulator import SolarSimulator as Sim
-
 from .modes.auto_mode import AutoMode
 from .modes.basilisk_mode import BasiliskMode
 from .modes.manual_mode import ManualMode
+from .solar_simulator import SolarSimulator as Sim
 from .utils import input_with_default
 
 
@@ -26,7 +25,6 @@ class SolarSimulatorApp:
         default_settings_summary = (
                 "\nDefault settings are:\n"
                 "  - Thermal Monitoring: " + ("Enabled" if self.sim.enable_therm_monitoring else "Disabled") + "\n" +  # noqa: E501
-                "  - UV Light (**abandon**): " + ("Disabled" if self.sim.uv_safety else "Enabled") + "\n" +  # noqa: E501
                 "  - LED Shutdown Temperature: " + str(self.sim.therm_led_shutdown) + "°C\n" +
                 "  - Heatsink Shutdown Temperature: " + str(self.sim.therm_heatsink_shutdown) + "°C\n" +  # noqa: E501
                 "  - Cell Shutdown Temperature: " + str(self.sim.therm_cell_shutdown) + "°C\n" +

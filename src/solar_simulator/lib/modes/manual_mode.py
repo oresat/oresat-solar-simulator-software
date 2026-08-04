@@ -61,7 +61,7 @@ class ManualMode:
 
             if user_input.lower() == 'exit':
                 print("Exiting to the main menu.")
-                self.sim.set_leds(0, 0, 0, 0, 0)
+                self.sim.set_leds(0, 0, 0, 0)
                 return
 
             if user_input == "":
@@ -80,14 +80,12 @@ class ManualMode:
             white = int(intensity_values["White"] * 655)
             cyan = int(intensity_values["Cyan"] * 655)
             halogen = int(intensity_values["Halogen"] * 655)
-            uv = int(intensity_values["UV"] * 655)  # (**abandon**)
 
-            self.sim.set_leds(v=violet, w=white, c=cyan, uv=uv, h=halogen)
+            self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
             self.sim.current_light_settings = {
                 'v': violet,
                 'w': white,
                 'c': cyan,
-                'uv': uv,  # (**abandon**)
                 'h': halogen
             }
 
@@ -110,7 +108,7 @@ class ManualMode:
 
                         if user_command == 'exit':
                             print("Exiting to the main menu.")
-                            self.sim.set_leds(0, 0, 0, 0, 0)
+                            self.sim.set_leds(0, 0, 0, 0)
                             return
                         print("Returning to light intensity input.")
                         break
@@ -140,28 +138,24 @@ class ManualMode:
                 violet_percent = float(violet_input)
                 white_percent = float(white_input)
                 cyan_percent = float(cyan_input)
-                uv_percent = 0
                 halogen_percent = float(halogen_input)
 
                 if not (0 <= violet_percent <= 100 and 0 <= white_percent <= 100 and
-                        0 <= cyan_percent <= 100 and 0 <= uv_percent <= 100 and
-                        0 <= halogen_percent <= 100):
+                        0 <= cyan_percent <= 100 and 0 <= halogen_percent <= 100):
                     print("Invalid input. Please enter values between 0 and 100.")
                     continue
 
                 violet = int((violet_percent / 100) * 65535)
                 white = int((white_percent / 100) * 65535)
                 cyan = int((cyan_percent / 100) * 65535)
-                uv = int((uv_percent / 100) * 65535)  # (**abandon**)
                 halogen = int((halogen_percent / 100) * 65535)
 
-                self.sim.set_leds(v=violet, w=white, c=cyan, uv=uv, h=halogen)
+                self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
                 print("Lights set to the specified intensities.")
                 self.sim.current_light_settings = {
                     'v': violet,
                     'w': white,
                     'c': cyan,
-                    'uv': uv,  # (**abandon**)
                     'h': halogen
                 }
                 input_line = ""
@@ -180,7 +174,7 @@ class ManualMode:
 
                             if user_command == 'exit':
                                 print("Exiting to the main menu.")
-                                self.sim.set_leds(0, 0, 0, 0, 0)
+                                self.sim.set_leds(0, 0, 0, 0)
                                 return
                             print("Returning to light intensity input.")
                             break

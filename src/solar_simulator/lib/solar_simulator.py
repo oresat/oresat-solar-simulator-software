@@ -1,5 +1,7 @@
 """The SolarSimulator module."""
 
+from __future__ import annotations
+
 import math
 
 import adafruit_ads1x15.ads1015 as ads  # 4-channel ADC
@@ -32,13 +34,11 @@ class SolarSimulator:
             duty_cycle=0,
             variable_frequency=True
         )
-        self.uv_safety = True
         self.therm_safe = True
         self.current_light_settings = {
             'v': 0,
             'w': 0,
             'c': 0,
-            'uv': 0,  # (**abandon**)
             'h': 0
         }
         self.enable_therm_monitoring = True
@@ -48,18 +48,16 @@ class SolarSimulator:
         self.therm_resume_temp = 45
 
 
-    def set_leds(self, v: int = 0, w: int = 0, c: int = 0, uv: int = 0, h: int = 0) -> None:
+    def set_leds(self, v: int = 0, w: int = 0, c: int = 0, h: int = 0) -> None:
         """Set the light brightness levels and record the light configuration."""
         self.mcp.channel_a.value = v
         self.mcp.channel_b.value = w
         self.mcp.channel_c.value = c
-        self.mcp.channel_d.value = uv * (not self.uv_safety)
         self.hal.duty_cycle = h
         self.current_light_settings = {
             'v': v,
             'w': w,
             'c': c,
-            'uv': uv if not self.uv_safety else 0,  # (**abandon**)
             'h': h
         }
 
@@ -69,7 +67,7 @@ class SolarSimulator:
         thermals = []
         thermistors = self._read_thermistors()
 
-        for _i, chan in zip(range(3), thermistors, strict=True):
+        for _i, chan in zip(range(3), thermistors):
             thermals.append(chan[2])
 
         return thermals

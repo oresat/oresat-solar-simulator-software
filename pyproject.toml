@@ -23,6 +23,7 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
+target-version = "py37"
 
 [tool.ruff.format]
 quote-style = "preserve"

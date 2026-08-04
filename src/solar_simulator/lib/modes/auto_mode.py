@@ -64,15 +64,13 @@ class AutoMode:
                     white = int(intensity_values["White"] * 655)
                     cyan = int(intensity_values["Cyan"] * 655)
                     halogen = int(intensity_values["Halogen"] * 655)
-                    uv = int(intensity_values["UV"] * 655)  # (**abandon**)
 
                     # Set LED intensities
-                    self.sim.set_leds(v=violet, w=white, c=cyan, uv=uv, h=halogen)
+                    self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
                     self.sim.current_light_settings = {
                         'v': violet,
                         'w': white,
                         'c': cyan,
-                        'uv': uv,  # (**abandon**)
                         'h': halogen
                     }
                     # Update level index for sine wave
@@ -90,4 +88,4 @@ class AutoMode:
 
         except KeyboardInterrupt:
             print("\nExiting Auto Mode.")
-            self.sim.set_leds(0, 0, 0, 0, 0)
+            self.sim.set_leds(0, 0, 0, 0)
