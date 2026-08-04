@@ -22,13 +22,7 @@ When this object is first instantiated, it will connect and setup all of the har
 
 ### `check_thermals() -> list`
 
-`check_thermals()` returns a list of temperature values that are read from the hardware's thermistors in order of location. The returned list contains 3 temperatures in Celsius as a `float`. If you would like to learn how we converted these temperatures from analog voltage values, check out the [thermistor documentation](thermistor.md).
-
-Thermistor indicies:
-
-- `check_thermals()[0]` - Thermistor located at the SMT LEDs under the lid PCB
-- `check_thermals()[1]` - Thermistor attached to the heatsink on the top
-- `check_thermals()[2]` - Thermistor located where the solar cell is placed in the chamber
+`check_thermals()` returns a list of temperature values that are read from the hardware's thermistors in order of location. If you would like to learn how we converted these temperatures from analog voltage values, check out the [thermistor documentation](thermistor.md).
 
 #### Minimal `check_thermals()` Example
 
@@ -62,7 +56,8 @@ Thermistor[2]: 64.11C
 
 `set_leds()` takes 4 optional arguments to set the brightness value of the lights. The input values are 16-bit unsigned integers and use a default value of 0, so if nothing is entered into any of the arguments, it will turn off that channel.
 
-A quick way to turn off all the lights on the simulator is to execute `sim.set_leds()`.
+> [!TIP]
+> A quick way to turn off all the lights on the simulator is to execute `sim.set_leds()`.
 
 #### Minimal `set_leds()` Example
 

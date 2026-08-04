@@ -49,7 +49,11 @@ class SolarSimulator:
 
 
     def set_leds(self, v: int = 0, w: int = 0, c: int = 0, h: int = 0) -> None:
-        """Set the light brightness levels and record the light configuration."""
+        """Set the light brightness levels and record the light configuration.
+        
+        The input values are 16-bit unsigned integers and use a default value of 0, so if 
+        nothing is entered into any of the arguments, it will turn off that channel.
+        """
         self.mcp.channel_a.value = v
         self.mcp.channel_b.value = w
         self.mcp.channel_c.value = c
@@ -63,7 +67,13 @@ class SolarSimulator:
 
 
     def check_thermals(self) -> list:
-        """Return a list of thermal values per thermistor channel in Celsius."""
+        """Return a list of thermal values per thermistor channel in Celsius.
+        
+        The returned list contains 3 temperatures in Celsius as a `float`.
+            - `check_thermals()[0]` - Thermistor located at the SMT LEDs under the lid PCB
+            - `check_thermals()[1]` - Thermistor attached to the heatsink on the top
+            - `check_thermals()[2]` - Thermistor located where the solar cell is placed
+        """
         thermals = []
         thermistors = self._read_thermistors()
 
