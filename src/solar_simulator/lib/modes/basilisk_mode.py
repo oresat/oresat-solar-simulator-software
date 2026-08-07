@@ -17,7 +17,6 @@ class BasiliskMode:
         """Initialize basilisk mode."""
         self.sim = sim
 
-
     def run(self) -> None:
         """Run basilisk mode loop."""
         print("Entering Basilisk Mode, wait for data input")
@@ -46,7 +45,7 @@ class BasiliskMode:
                                 'v': violet,
                                 'w': white,
                                 'c': cyan,
-                                'h': halogen
+                                'h': halogen,
                             }
 
                             print(f"BasiliskMode: Intensity={intensity}", end="\n")

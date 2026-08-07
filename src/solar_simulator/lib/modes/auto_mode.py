@@ -21,7 +21,6 @@ class AutoMode:
         self.sim = sim
         self.peak = 0.5
 
-
     def run(self) -> None:
         """Run auto mode loop."""
         print("Entering Auto Mode")
@@ -43,10 +42,10 @@ class AutoMode:
             return
 
         # Generate a sine wave pattern
-        wave = 0.5 * (1 - np.cos(np.linspace(0, 2*np.pi, 101)))
+        wave = 0.5 * (1 - np.cos(np.linspace(0, 2 * np.pi, 101)))
         level = 0  # Initialize wave level index
-        loop_time = period/len(wave) # average loop repetition time
-                                     #  to get correct period
+        loop_time = period / len(wave)  # average loop repetition time
+        #  to get correct period
 
         try:
             loop_start = time.monotonic()
@@ -71,7 +70,7 @@ class AutoMode:
                         'v': violet,
                         'w': white,
                         'c': cyan,
-                        'h': halogen
+                        'h': halogen,
                     }
                     # Update level index for sine wave
                     level = (level + 1) % len(wave)

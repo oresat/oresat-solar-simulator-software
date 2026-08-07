@@ -39,7 +39,9 @@ def display_status(sim: Sim) -> None:
 
         if thermals:
             led_temp, heatsink_temp, cell_temp = thermals
-            temp_info = f"LED: {led_temp:.1f}°C, Heatsink: {heatsink_temp:.1f}°C, Cell: {cell_temp:.1f}°C"  # noqa: E501
+            temp_info = (
+                f"LED: {led_temp:.1f}°C, Heatsink: {heatsink_temp:.1f}°C, Cell: {cell_temp:.1f}°C"
+            )
         else:
             temp_info = "Cannot read temperature data"
     except Exception:  # noqa: BLE001
@@ -123,7 +125,7 @@ def check_temperature(sim: Sim) -> bool:
                 v=previous_light_settings['v'],
                 w=previous_light_settings['w'],
                 c=previous_light_settings['c'],
-                h=previous_light_settings['h']
+                h=previous_light_settings['h'],
             )
         return True
 
@@ -135,7 +137,7 @@ def check_for_interrupt() -> None:
     if supervisor.runtime.serial_bytes_available:
         input_char = sys.stdin.read(1)
 
-        if input_char == '\x03': #Ctrl-C (ASCII 3)
+        if input_char == '\x03':  # Ctrl-C (ASCII 3)
             print("\nCtrl-C detected. Turning off LEDs...")
             Sim.set_leds(0, 0, 0, 0)
             raise KeyboardInterrupt
