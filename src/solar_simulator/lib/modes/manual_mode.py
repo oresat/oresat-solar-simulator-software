@@ -5,8 +5,8 @@ import time
 
 import supervisor
 
-from solar_simulator.lib.solar_simulator import SolarSimulator as Sim
-from solar_simulator.lib.utils import (
+from ..solar_simulator import SolarSimulator as Sim
+from ..utils import (
     calculate_light_intensity,
     check_for_interrupt,
     check_temperature,

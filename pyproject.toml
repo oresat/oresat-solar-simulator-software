@@ -43,10 +43,13 @@ ignore = [
     "D203",     # one-blank-line-before-class
     "D213",     # multi-line-summary-second-line
     "FIX",      # flake8-fixme
+    "T201",     # print statements are acceptable
+    "TC001",    # typing-only-first-party-import
     "TD001",    # invalid-todo-tag
     "TD002",    # missing-todo-author
     "TD003",    # missing-todo-link
     "TD004",    # missing-todo-colon
+    "TID252",   # relative imports are fine
     "EM101",    # raw-string-in-exception
     "EM102",    # f-string-in-exception
     "D413",     # blank-line-after-last-section
@@ -54,8 +57,6 @@ ignore = [
     "PLR2004",  # magic value used in comparison
     "PLR0911",  # too many return statements
     "CPY001",   # missing-copyright-notice
-    "TC001",    # typing-only-first-party-import
-    "T201",     # print statements are acceptable
 ]
 
 [tool.ruff.lint.per-file-ignores]
