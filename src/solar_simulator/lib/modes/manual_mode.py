@@ -4,14 +4,14 @@ import sys
 import time
 
 import supervisor
-from lib.utils import (
+
+from solar_simulator.lib.solar_simulator import SolarSimulator as Sim
+from solar_simulator.lib.utils import (
     calculate_light_intensity,
     check_for_interrupt,
     check_temperature,
     display_status,
 )
-
-from solar_simulator import SolarSimulator as Sim
 
 
 class ManualMode:

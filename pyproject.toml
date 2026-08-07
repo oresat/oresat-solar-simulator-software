@@ -19,6 +19,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
+pythonpath = ["src", "src/solar_simulator"]
 testpaths = ["tests"]
 
 [tool.ruff]
