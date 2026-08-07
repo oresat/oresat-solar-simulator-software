@@ -93,7 +93,7 @@ class SolarSimulator:
 
 
     def _read_thermistors(self) -> list:
-        """Read all of the thermistors and returns a list of lists of data for each channel.
+        """Read all of the thermistors and return a nested list of data for each channel.
 
         Example Output:
         [[CHAN0 binary data, voltage, celsius temp],
@@ -104,23 +104,22 @@ class SolarSimulator:
         for i in range(3):
             chan = AnalogIn(self.ads, i)
             therm_values.append(
-                [chan.value >> 4, chan.voltage, calc_temp(chan.voltage)]
+                [chan.value >> 4, chan.voltage, self._calc_temp(chan.voltage)]
             )
 
         return therm_values
 
 
-def calc_temp(v_adc: float, vcc: float = 3.3, r_fixed: float = 10000.0) -> float | None:
-    """Calculate the temperature."""
-    # Compute thermistor resistance
-    r_therm = r_fixed * v_adc / (vcc - v_adc)
-    # Compute temperature using beta equation
-    beta = 3977   # From datasheet (B25/85)
-    t0 = 298.15   # Reference temperature in Kelvin (25°C)
-    r0 = 10000.0  # Resistance at t0 (25°C)
+    @staticmethod
+    def _calc_temp(v_adc: float, vcc: float = 3.3, r_fixed: float = 10000.0) -> float:
+        """Given thermistor resistance, calculuate and return temperature (in Celsius)."""
+        # Thermistor resistance
+        r_therm = r_fixed * v_adc / (vcc - v_adc)
 
-    try:
+        # Compute temperature (beta equation)
+        beta = 3977   # From datasheet (B25/85)
+        t0 = 298.15   # Reference temperature in Kelvin (25°C)
+        r0 = 10000.0  # Resistance at t0 (25°C)
         temp_k = 1.0 / ((math.log(r_therm / r0) / beta) + (1.0 / t0))
+
         return temp_k - 273.15
-    except ValueError:
-        return None
