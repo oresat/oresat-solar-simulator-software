@@ -36,10 +36,10 @@ sim = ss.SolarSimulator()
 # Read and print temperature values every second
 while True:
     temps = sim.check_thermals()
-    print('~'*21)
+    print('~' * 21)
     for i, temp in zip(range(3), temps):
         print(f"Thermistor[{i}]: {temp:.2f}C")
-    
+
     time.sleep(1)
 ```
 
@@ -78,7 +78,7 @@ while True:
     time.sleep(1)
 
     # Set all of the lights to half brightness
-    sim.set_leds(65535//2, 65535//2, 65535//2, 65535//2)
+    sim.set_leds(65535 // 2, 65535 // 2, 65535 // 2, 65535 // 2)
     time.sleep(1)
 
     # Turn all of the lights off (quick method)

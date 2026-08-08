@@ -4,10 +4,10 @@ import sys
 import time
 
 import supervisor
-from lib.modes.manual_mode import check_temperature, display_status
-from lib.utils import calculate_light_intensity
 
-from solar_simulator import SolarSimulator as Sim
+from ..solar_simulator import SolarSimulator as Sim
+from ..utils import calculate_light_intensity
+from .manual_mode import check_temperature, display_status
 
 
 class BasiliskMode:
@@ -16,7 +16,6 @@ class BasiliskMode:
     def __init__(self, sim: Sim) -> None:
         """Initialize basilisk mode."""
         self.sim = sim
-
 
     def run(self) -> None:
         """Run basilisk mode loop."""
@@ -46,7 +45,7 @@ class BasiliskMode:
                                 'v': violet,
                                 'w': white,
                                 'c': cyan,
-                                'h': halogen
+                                'h': halogen,
                             }
 
                             print(f"BasiliskMode: Intensity={intensity}", end="\n")
