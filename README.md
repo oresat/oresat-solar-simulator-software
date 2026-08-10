@@ -67,6 +67,14 @@ and follow the instructions under "Learn how to install CircuitPython on this bo
     make write
     ```
 
+## Testing
+
+This project uses [pytest](https://docs.pytest.org/en/stable/). To run the test suite, simply run:
+
+```sh
+pytest
+```
+
 ## Acknowledgements
 
 The original work for this was done as an MCECS Capstone Project from January to June of 2023 by Bendjy Faurestal,

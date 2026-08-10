@@ -4,14 +4,14 @@ import sys
 import time
 
 import supervisor
-from lib.utils import (
+
+from ..solar_simulator import SolarSimulator as Sim
+from ..utils import (
     calculate_light_intensity,
     check_for_interrupt,
     check_temperature,
     display_status,
 )
-
-from solar_simulator import SolarSimulator as Sim
 
 
 class ManualMode:
@@ -20,7 +20,6 @@ class ManualMode:
     def __init__(self, sim: Sim) -> None:
         """Initialize manual mode."""
         self.sim = sim
-
 
     def run(self) -> None:
         """Run manual mode loop."""
@@ -49,7 +48,6 @@ class ManualMode:
             self.measurement_mode()
         elif choice == '5':
             self.fine_tuning_adjustment()
-
 
     def fixed_preset_mode(self) -> None:
         """Set Fixed Preset Mode."""
@@ -82,12 +80,7 @@ class ManualMode:
             halogen = int(intensity_values["Halogen"] * 655)
 
             self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
-            self.sim.current_light_settings = {
-                'v': violet,
-                'w': white,
-                'c': cyan,
-                'h': halogen
-            }
+            self.sim.current_light_settings = {'v': violet, 'w': white, 'c': cyan, 'h': halogen}
 
             print(f"\nCurrent intensity: {intensity_input:.2f}")
             print("Press 'Enter' to reset your LEDs...")
@@ -115,7 +108,6 @@ class ManualMode:
                     input_line += c
                 time.sleep(1)
 
-
     def manual_light_adjustment(self) -> None:  # noqa: PLR0915, C901
         """Manual Light Source Adjustment."""
         while True:
@@ -140,8 +132,12 @@ class ManualMode:
                 cyan_percent = float(cyan_input)
                 halogen_percent = float(halogen_input)
 
-                if not (0 <= violet_percent <= 100 and 0 <= white_percent <= 100 and
-                        0 <= cyan_percent <= 100 and 0 <= halogen_percent <= 100):
+                if not (
+                    0 <= violet_percent <= 100
+                    and 0 <= white_percent <= 100
+                    and 0 <= cyan_percent <= 100
+                    and 0 <= halogen_percent <= 100
+                ):
                     print("Invalid input. Please enter values between 0 and 100.")
                     continue
 
@@ -152,12 +148,7 @@ class ManualMode:
 
                 self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
                 print("Lights set to the specified intensities.")
-                self.sim.current_light_settings = {
-                    'v': violet,
-                    'w': white,
-                    'c': cyan,
-                    'h': halogen
-                }
+                self.sim.current_light_settings = {'v': violet, 'w': white, 'c': cyan, 'h': halogen}
                 input_line = ""
                 print("Press 'Enter' to input new values, or 'exit' to return to the main menu.")
 

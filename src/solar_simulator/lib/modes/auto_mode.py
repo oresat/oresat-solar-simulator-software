@@ -2,15 +2,15 @@
 
 import time
 
-from lib.utils import (
+from ulab import numpy as np
+
+from ..solar_simulator import SolarSimulator as Sim
+from ..utils import (
     calculate_light_intensity,
     check_for_interrupt,
     check_temperature,
     display_status,
 )
-from ulab import numpy as np
-
-from solar_simulator import SolarSimulator as Sim
 
 
 class AutoMode:
