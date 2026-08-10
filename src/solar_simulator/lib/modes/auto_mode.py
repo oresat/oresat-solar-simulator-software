@@ -42,9 +42,14 @@ class AutoMode:
             return
 
         # Generate a sine wave pattern
-        wave = 0.5 * (1 - np.cos(np.linspace(0, 2 * np.pi, 101)))
+        wave_array_length = 101
+        wave = -np.cos(np.linspace(0, 2 * np.pi, wave_array_length))
+        zeros = [0] * wave_array_length
+        wave = np.maximum(wave, zeros)
+
         level = 0  # Initialize wave level index
-        loop_time = period / len(wave)  # average loop repetition time to get correct period
+        loop_time = period / wave_array_length  # average loop repetition time
+        #  to get correct period
 
         try:
             loop_start = time.monotonic()
