@@ -15,6 +15,7 @@ CIRCUITPYTHON_MODULES = {
     "pwmio",
     "supervisor",
     "ulab",
+    "usb_cdc",
 }
 
 
