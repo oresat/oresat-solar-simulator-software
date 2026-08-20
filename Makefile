@@ -2,7 +2,7 @@ CP_MAJOR_VERSION := 10
 SRC_ROOT         := src/solar_simulator
 LIB_ROOT         := $(SRC_ROOT)/lib
 BUILD_ROOT       := build
-LIB_SRCS         := app.py basilisk_app.py solar_simulator.py utils.py
+LIB_SRCS         := app.py headless_app.py solar_simulator.py utils.py
 MODE_SRCS        := auto_mode.py basilisk_mode.py manual_mode.py
 COPY_SRCS        := $(SRC_ROOT)/boot.py $(SRC_ROOT)/code.py $(SRC_ROOT)/__init__.py $(wildcard $(LIB_ROOT)/__init__.py $(LIB_ROOT)/modes/__init__.py)
 

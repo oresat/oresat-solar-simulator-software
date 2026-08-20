@@ -1,6 +1,6 @@
 """Entrypoint for the solar simulator."""
 
-from lib.basilisk_app import SolarSimulatorBasiliskApp
+from lib.headless_app import SolarSimulatorHeadlessApp
 from lib.solar_simulator import SolarSimulator
 
 
@@ -9,7 +9,7 @@ def main() -> None:
     sim = SolarSimulator()
     sim.set_leds(0, 0, 0, 0)
 
-    app = SolarSimulatorBasiliskApp(sim)
+    app = SolarSimulatorHeadlessApp(sim)
     app.run()
 
 
