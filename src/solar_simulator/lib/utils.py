@@ -32,7 +32,7 @@ def calculate_light_intensity(factor: float) -> dict:
     }
 
 
-def display_status(sim: Sim) -> None:
+def display_status(sim: Sim, writer=print) -> None:  # noqa: ANN001
     """Display the current thermal and light status."""
     try:
         thermals = sim.check_thermals()
@@ -54,6 +54,7 @@ def display_status(sim: Sim) -> None:
         light_info = "Light data unavailable"
 
     print(f"{temp_info} | {light_info}", end="\n")
+    writer(f"{temp_info} | {light_info}")
 
 
 def input_with_default(
