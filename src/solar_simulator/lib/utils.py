@@ -33,7 +33,7 @@ def calculate_light_intensity(factor: float) -> dict:
     }
 
 
-def display_status(sim: Sim, writer: Callable[..., None]=print) -> None:
+def display_status(sim: Sim, writer: Callable[..., None] = print) -> None:
     """Display the current thermal and light status."""
     try:
         thermals = sim.check_thermals()
