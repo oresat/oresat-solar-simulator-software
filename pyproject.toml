@@ -20,6 +20,7 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src/solar_simulator"]
 
 [tool.ruff]
 line-length = 100
@@ -51,6 +52,7 @@ ignore = [
     "TID252",   # relative imports are fine
     "EM101",    # raw-string-in-exception
     "EM102",    # f-string-in-exception
+    "ERA001",   # commented-out-code
     "D413",     # blank-line-after-last-section
     "TRY003",   # raise-vanilla-args
     "PLR2004",  # magic value used in comparison

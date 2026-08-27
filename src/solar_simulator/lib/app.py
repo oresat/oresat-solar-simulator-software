@@ -1,10 +1,11 @@
 """Solar Simulator Application."""
 
-from .modes.auto_mode import AutoMode
-from .modes.basilisk_mode import BasiliskMode
-from .modes.manual_mode import ManualMode
+import time
+
+import usb_cdc
+
 from .solar_simulator import SolarSimulator as Sim
-from .utils import input_with_default
+from .utils import calculate_light_intensity, check_temperature, display_status
 
 
 class SolarSimulatorApp:
@@ -14,104 +15,75 @@ class SolarSimulatorApp:
         """Initialize Solar Simulator App."""
         self.sim = sim
 
+    def run(self, build_mode: str) -> None:
+        """Run the Solar Simulator App for a given build mode.
+
+        Headless is the default build mode, which is optimized for integration
+        with FlatHILS and Basilisk.
+        """
+        if build_mode == "complete":
+            from .cli import Cli  # noqa: PLC0415
+
+            cli = Cli(self.sim)
+            cli.run()
+        elif build_mode == "headless":
+            headless = Headless(self.sim)
+            headless.run()
+
+
+class Headless:
+    """Headless class.
+
+    Encapsulates the main loop for headless operation.
+    """
+
+    def __init__(self, sim: Sim) -> None:
+        """Initialize headless mode."""
+        self.sim = sim
+        self.data = usb_cdc.data
+
     def run(self) -> None:
-        """Run the Solar Simulator App."""
-        self.mode_selection()
+        """Run headless mode."""
+        self.data.write(b"READY\n")
 
-    def setup(self) -> None:
-        """Set up the cli menu options."""
-        default_settings_summary = (
-            "\nDefault settings are:\n"
-            "  - Thermal Monitoring: "
-            + ("Enabled" if self.sim.enable_therm_monitoring else "Disabled")
-            + "\n"
-            + "  - LED Shutdown Temperature: "
-            + str(self.sim.therm_led_shutdown)
-            + "°C\n"
-            + "  - Heatsink Shutdown Temperature: "
-            + str(self.sim.therm_heatsink_shutdown)
-            + "°C\n"
-            + "  - Cell Shutdown Temperature: "
-            + str(self.sim.therm_cell_shutdown)
-            + "°C\n"
-            + "  - Resume Operation Temperature: "
-            + str(self.sim.therm_resume_temp)
-            + "°C\n"
-        )
+        buffer = ""
+        try:
+            while True:
+                if self.data.in_waiting:
+                    buffer += self.data.read(self.data.in_waiting).decode()
 
-        change_settings = input_with_default(
-            f"Would you like to change the default settings? (yes/no, default is no): {default_settings_summary}",  # noqa: E501
-            default_value="no",
-            valid_values=["yes", "no"],
-        )
+                    while "\n" in buffer:
+                        line, buffer = buffer.split("\n", 1)
 
-        if change_settings == "yes":
-            # Thermal monitoring setting
-            enable_therm_monitoring_input = input_with_default(
-                "Would you like to enable thermal monitoring? (yes/no, default is yes): ",
-                default_value="yes",
-                valid_values=["yes", "no"],
-            )
-            self.sim.enable_therm_monitoring = enable_therm_monitoring_input == "yes"
+                        if not line:
+                            return
 
-            # Thermal shutdown temperatures
-            self.sim.therm_led_shutdown = input_with_default(
-                "Set LED shutdown temperature (default is 100°C): ",
-                default_value=100,
-                value_type=int,
-            )
-            self.sim.therm_heatsink_shutdown = input_with_default(
-                "Set Heatsink shutdown temperature (default is 60°C): ",
-                default_value=60,
-                value_type=int,
-            )
-            self.sim.therm_cell_shutdown = input_with_default(
-                "Set Cell shutdown temperature (default is 80°C): ",
-                default_value=80,
-                value_type=int,
-            )
-            self.sim.therm_resume_temp = input_with_default(
-                "Set temperature to resume operation (default is 45°C): ",
-                default_value=45,
-                value_type=int,
-            )
-        else:
-            print("Using default settings. No changes were made.")
+                        # Try setting intensity, bail if not.
+                        try:
+                            intensity = int(line)
+                        except ValueError:
+                            self.data.write(f"ERR invalid line: {line!r}\n".encode())
+                            return
 
-    def mode_selection(self) -> None:
-        """Mode selection menu."""
-        print("Please choose your mode")
-        print("1. Auto Mode")
-        print("2. Manual Mode")
-        print("3. Basilisk Mode")
-        print("4. Thermal setup, if you need")
+                        # Check intensity is within range, bail if not.
+                        if not 0 <= intensity <= 100:
+                            self.data.write(f"ERR intensity out of range: {intensity}\n".encode())
+                            return
 
-        while True:
-            mode = input("Your mode (input 1, 2, 3 or 4 if you need change default): ")
+                        vals = calculate_light_intensity(intensity / 100)
+                        v, w, c, h = (
+                            int(vals[k] * 655) for k in ("Violet", "White", "Cyan", "Halogen")
+                        )
+                        self.sim.set_leds(v=v, w=w, c=c, h=h)
+                        self.sim.current_light_settings = {"v": v, "w": w, "c": c, "h": h}
 
-            if mode in ["1", "2", "3", "4"]:
-                mode = int(mode)
-            else:
-                print("Invalid input. Please enter 1, 2, or 3.")
+                        check_temperature(self.sim)
+                        display_status(
+                            self.sim, writer=lambda s: self.data.write((f"{s}\n").encode())
+                        )
 
-            if mode == 1:
-                auto_mode = AutoMode(self.sim)
-                auto_mode.run()
-                break
-
-            if mode == 2:
-                manual_mode = ManualMode(self.sim)
-                manual_mode.run()
-                break
-
-            if mode == 3:
-                basilisk_mode = BasiliskMode(self.sim)
-                basilisk_mode.run()
-                break
-
-            if mode == 4:
-                self.setup()
-                print("Thermal setup completed. Returning to mode selection.\n")
-                continue
-        else:
-            print("Invalid selection, please restart the program and choose 1, 2, or 3.")
+                time.sleep(0.1)
+        except KeyboardInterrupt:
+            print("SolarSimulatorHeadlessApp: interrupted, shutting down.")
+        finally:
+            self.sim.set_leds(0, 0, 0, 0)

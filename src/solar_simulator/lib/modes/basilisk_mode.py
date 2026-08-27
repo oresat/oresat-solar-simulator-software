@@ -6,8 +6,7 @@ import time
 import supervisor
 
 from ..solar_simulator import SolarSimulator as Sim
-from ..utils import calculate_light_intensity
-from .manual_mode import check_temperature, display_status
+from ..utils import calculate_light_intensity, check_temperature, display_status
 
 
 class BasiliskMode:

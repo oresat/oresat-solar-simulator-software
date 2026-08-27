@@ -1,7 +1,11 @@
 """Entrypoint for the solar simulator."""
 
-from lib.headless_app import SolarSimulatorHeadlessApp
+import os
+
+from lib.app import SolarSimulatorApp
 from lib.solar_simulator import SolarSimulator
+
+build_mode = os.getenv("BUILD_MODE", "headless")
 
 
 def main() -> None:
@@ -9,8 +13,8 @@ def main() -> None:
     sim = SolarSimulator()
     sim.set_leds(0, 0, 0, 0)
 
-    app = SolarSimulatorHeadlessApp(sim)
-    app.run()
+    app = SolarSimulatorApp(sim)
+    app.run(build_mode)
 
 
 if __name__ == "__main__":

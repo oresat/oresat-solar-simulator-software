@@ -58,27 +58,6 @@ def display_status(sim: Sim, writer: Callable[..., None] = print) -> None:
     writer(f"{temp_info} | {light_info}")
 
 
-def input_with_default(
-    prompt: str, default_value: str, valid_values: None, value_type: str
-) -> None:
-    """Get user input with a default value and optional validation."""
-    while True:
-        user_input = input(prompt).strip().lower()
-
-        if user_input == "":
-            return default_value
-        try:
-            value = value_type(user_input)
-            if valid_values and value not in valid_values:
-                raise ValueError  # noqa: TRY301
-            return value  # noqa: TRY300
-        except ValueError:
-            print("Invalid input. Please enter one of the following:")
-            print(f"\t{valid_values} or press Enter for default.")
-        except NameError:
-            print(f"Please enter a valid {value_type.__name__} value or press Enter for default.")
-
-
 def check_temperature(sim: Sim) -> bool:
     """Check the temperature and handle thermal shutdown and resume."""
     if not sim.enable_therm_monitoring:
