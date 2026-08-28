@@ -15,15 +15,16 @@ MCP4728_MPY      := $(BUILD_ROOT)/lib/adafruit_mcp4728.mpy
 
 # Internal packages.
 CORE_LIB_SRCS    := app.py solar_simulator.py utils.py
+CORE_MODE_SRCS   := basilisk_mode.py
 CLI_SRCS         := cli.py
-MODE_SRCS        := auto_mode.py basilisk_mode.py manual_mode.py
+CLI_MODE_SRCS    := auto_mode.py manual_mode.py
 COPY_SRCS        := $(SRC_ROOT)/boot.py $(SRC_ROOT)/code.py $(SRC_ROOT)/__init__.py $(SETTINGS_TOML) $(wildcard $(LIB_ROOT)/__init__.py $(LIB_ROOT)/modes/__init__.py)
 
 # Build files.
 PYFILES             := $(patsubst $(SRC_ROOT)/%, $(BUILD_ROOT)/%, $(COPY_SRCS))
-HEADLESS_MPY        := $(addprefix $(BUILD_ROOT)/lib/, $(CORE_LIB_SRCS:.py=.mpy)) $(ADS1X15_MPY) $(MCP4728_MPY)
-COMPLETE_MPY        := $(addprefix $(BUILD_ROOT)/lib/, $(CLI_SRCS:.py=.mpy)) $(addprefix $(BUILD_ROOT)/lib/modes/, $(MODE_SRCS:.py=.mpy))
-COMPLETE_MPY_BUNDLE := $(HEADLESS_MPY) $(COMPLETE_MPY)
+HEADLESS_MPY        := $(addprefix $(BUILD_ROOT)/lib/, $(CORE_LIB_SRCS:.py=.mpy)) $(addprefix $(BUILD_ROOT)/lib/modes/, $(CORE_MODE_SRCS:.py=.mpy)) $(ADS1X15_MPY) $(MCP4728_MPY)
+CLI_ONLY_MPY        := $(addprefix $(BUILD_ROOT)/lib/, $(CLI_SRCS:.py=.mpy)) $(addprefix $(BUILD_ROOT)/lib/modes/, $(CLI_MODE_SRCS:.py=.mpy))
+COMPLETE_MPY        := $(HEADLESS_MPY) $(CLI_ONLY_MPY)
 
 vpath %.py $(SRC_ROOT):$(SRC_ROOT)/lib
 
@@ -32,7 +33,7 @@ vpath %.py $(SRC_ROOT):$(SRC_ROOT)/lib
 build: $(BUILD_MODE)
 
 headless: $(PYFILES) $(HEADLESS_MPY)
-	@rm -f $(COMPLETE_MPY)
+	@rm -f $(CLI_ONLY_MPY)
 
 complete: $(PYFILES) $(COMPLETE_MPY)
 

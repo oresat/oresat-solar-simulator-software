@@ -2,11 +2,17 @@
 
 import sys
 import time
-from typing import Callable
 
 import supervisor
 
 from .solar_simulator import SolarSimulator as Sim
+
+try:
+    from typing import Callable
+except ImportError:
+    # CircuitPython ships no typing module. Annotations are never evaluated there,
+    # so the quoted hints below still work without it.
+    Callable = None
 
 
 def calculate_light_intensity(factor: float) -> dict:
@@ -33,7 +39,7 @@ def calculate_light_intensity(factor: float) -> dict:
     }
 
 
-def display_status(sim: Sim, writer: Callable[..., None] = print) -> None:
+def display_status(sim: Sim, writer: "Callable[..., None]" = print) -> None:
     """Display the current thermal and light status."""
     try:
         thermals = sim.check_thermals()
