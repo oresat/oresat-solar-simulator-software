@@ -2,11 +2,10 @@ CP_MAJOR_VERSION := 10
 SRC_ROOT         := src/solar_simulator
 LIB_ROOT         := $(SRC_ROOT)/lib
 BUILD_ROOT       := build
-LIB_SRCS         := app.py cli.py solar_simulator.py utils.py
-MODE_SRCS        := auto_mode.py basilisk_mode.py manual_mode.py
-COPY_SRCS        := $(SRC_ROOT)/boot.py $(SRC_ROOT)/code.py $(SRC_ROOT)/__init__.py $(SRC_ROOT)/settings.toml $(wildcard $(LIB_ROOT)/__init__.py $(LIB_ROOT)/modes/__init__.py)
+SETTINGS_TOML    := $(SRC_ROOT)/settings.toml
+BUILD_MODE       := $(shell python3 -c "import tomllib; print(tomllib.load(open('$(SETTINGS_TOML)', 'rb')).get('BUILD_MODE', 'headless'))")
 
-# External package dependencies.
+# External packages.
 SITE_PACKAGES    := $(shell python3 -c "import sysconfig; print(sysconfig.get_paths()['purelib'])")
 ADS1X15_PKG      := $(SITE_PACKAGES)/adafruit_ads1x15
 ADS1X15_PY       := $(wildcard $(ADS1X15_PKG)/*.py)
@@ -14,20 +13,30 @@ ADS1X15_MPY      := $(patsubst $(ADS1X15_PKG)/%.py, $(BUILD_ROOT)/lib/adafruit_a
 MCP4728_PY       := $(SITE_PACKAGES)/adafruit_mcp4728.py
 MCP4728_MPY      := $(BUILD_ROOT)/lib/adafruit_mcp4728.mpy
 
-MPYFILES         := $(addprefix $(BUILD_ROOT)/lib/, $(LIB_SRCS:.py=.mpy)) $(addprefix $(BUILD_ROOT)/lib/modes/, $(MODE_SRCS:.py=.mpy)) $(ADS1X15_MPY) $(MCP4728_MPY)
-PYFILES          := $(patsubst $(SRC_ROOT)/%, build/%, $(COPY_SRCS))
+# Internal packages.
+CORE_LIB_SRCS    := app.py solar_simulator.py utils.py
+CLI_SRCS         := cli.py
+MODE_SRCS        := auto_mode.py basilisk_mode.py manual_mode.py
+COPY_SRCS        := $(SRC_ROOT)/boot.py $(SRC_ROOT)/code.py $(SRC_ROOT)/__init__.py $(SETTINGS_TOML) $(wildcard $(LIB_ROOT)/__init__.py $(LIB_ROOT)/modes/__init__.py)
+
+# Build files.
+PYFILES             := $(patsubst $(SRC_ROOT)/%, $(BUILD_ROOT)/%, $(COPY_SRCS))
+HEADLESS_MPY        := $(addprefix $(BUILD_ROOT)/lib/, $(CORE_LIB_SRCS:.py=.mpy)) $(ADS1X15_MPY) $(MCP4728_MPY)
+COMPLETE_MPY        := $(addprefix $(BUILD_ROOT)/lib/, $(CLI_SRCS:.py=.mpy)) $(addprefix $(BUILD_ROOT)/lib/modes/, $(MODE_SRCS:.py=.mpy))
+COMPLETE_MPY_BUNDLE := $(HEADLESS_MPY) $(COMPLETE_MPY)
 
 vpath %.py $(SRC_ROOT):$(SRC_ROOT)/lib
 
-.PHONY: build deploy clean test test-ci
+.PHONY: build headless complete write clean distclean test test-ci
 
-build: $(PYFILES) $(MPYFILES)
+build: $(BUILD_MODE)
+
+headless: $(PYFILES) $(HEADLESS_MPY)
+	@rm -f $(COMPLETE_MPY)
+
+complete: $(PYFILES) $(COMPLETE_MPY)
 
 $(BUILD_ROOT)/%.mpy: %.py
-	@mkdir -p $(dir $@)
-	circuitpython-mpy-cross --circuitpython-version 10.x -o $@ $^
-
-$(BUILD_ROOT)/modes/%.mpy: %.py
 	@mkdir -p $(dir $@)
 	circuitpython-mpy-cross --circuitpython-version 10.x -o $@ $^
 
@@ -39,7 +48,7 @@ $(BUILD_ROOT)/lib/adafruit_mcp4728.mpy: $(MCP4728_PY)
 	@mkdir -p $(dir $@)
 	circuitpython-mpy-cross --circuitpython-version 10.x -o $@ $<
 
-build/%.py: $(SRC_ROOT)/%.py
+$(PYFILES): $(BUILD_ROOT)/%: $(SRC_ROOT)/%
 	@mkdir -p $(dir $@)
 	cp $< $@
 
