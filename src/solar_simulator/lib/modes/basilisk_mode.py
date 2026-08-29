@@ -22,7 +22,7 @@ class BasiliskMode:
 
     def write(self, message: str) -> None:
         """Emit a single line of output.
-        
+
         This function is a thin wrapper to allow inheriting classes to use other
         means of writing commands to the solar simulator.
         """
