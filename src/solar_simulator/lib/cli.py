@@ -27,7 +27,8 @@ class Cli:
             if mode in ["1", "2", "3", "4"]:
                 mode = int(mode)
             else:
-                print("Invalid input. Please enter 1, 2, or 3.")
+                print("Invalid input. Please enter 1, 2, 3, or 4.")
+                continue
 
             if mode == 1:
                 auto_mode = AutoMode(self.sim)
@@ -48,8 +49,6 @@ class Cli:
                 self.setup()
                 print("Thermal setup completed. Returning to mode selection.\n")
                 continue
-        else:
-            print("Invalid selection, please restart the program and choose 1, 2, or 3.")
 
     def setup(self) -> None:
         """Set up the cli menu options."""
