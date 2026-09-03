@@ -112,7 +112,7 @@ class Cli:
             print("Using default settings. No changes were made.")
 
     def _input_with_default(
-        self, prompt: str, default_value: str, valid_values: None, value_type: str
+        self, prompt: str, default_value: str, valid_values: list = None, value_type: type = str
     ) -> None:
         """Get user input with a default value and optional validation."""
         while True:
