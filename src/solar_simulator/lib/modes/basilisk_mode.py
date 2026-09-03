@@ -52,7 +52,7 @@ class BasiliskMode:
         line = line.replace("\x00", "").strip()
 
         if not line:
-            return False
+            return True
 
         try:
             intensity = int(line)
@@ -73,4 +73,5 @@ class BasiliskMode:
 
         check_temperature(self.sim)
         display_status(self.sim, writer=self.write)
+
         return True
