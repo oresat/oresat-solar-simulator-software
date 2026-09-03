@@ -2,4 +2,4 @@
 
 from .lib.solar_simulator import SolarSimulator
 
-__all__ = ["SolarSimulator", "SolarSimulatorApp"]
+__all__ = ["SolarSimulator"]
