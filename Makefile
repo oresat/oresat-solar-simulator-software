@@ -2,9 +2,15 @@ CP_MAJOR_VERSION := 10
 SRC_ROOT         := src/solar_simulator
 LIB_ROOT         := $(SRC_ROOT)/lib
 BUILD_ROOT       := build
-LIB_SRCS         := app.py solar_simulator.py utils.py
-MODE_SRCS        := auto_mode.py basilisk_mode.py manual_mode.py
 COPY_SRCS        := $(SRC_ROOT)/boot.py $(SRC_ROOT)/code.py $(SRC_ROOT)/__init__.py $(wildcard $(LIB_ROOT)/__init__.py $(LIB_ROOT)/modes/__init__.py)
+
+# Sources shipped by every build.
+LIB_SRCS         := app.py solar_simulator.py utils.py
+MODE_SRCS        := basilisk_mode.py
+
+# Sources shipped only by the `complete` build (the interactive menu).
+CLI_LIB_SRCS     := cli.py
+CLI_MODE_SRCS    := auto_mode.py manual_mode.py
 
 # External package dependencies.
 SITE_PACKAGES    := $(shell python3 -c "import sysconfig; print(sysconfig.get_paths()['purelib'])")
@@ -14,14 +20,29 @@ ADS1X15_MPY      := $(patsubst $(ADS1X15_PKG)/%.py, $(BUILD_ROOT)/lib/adafruit_a
 MCP4728_PY       := $(SITE_PACKAGES)/adafruit_mcp4728.py
 MCP4728_MPY      := $(BUILD_ROOT)/lib/adafruit_mcp4728.mpy
 
+SETTINGS_TOML    := $(BUILD_ROOT)/settings.toml
 MPYFILES         := $(addprefix $(BUILD_ROOT)/lib/, $(LIB_SRCS:.py=.mpy)) $(addprefix $(BUILD_ROOT)/lib/modes/, $(MODE_SRCS:.py=.mpy)) $(ADS1X15_MPY) $(MCP4728_MPY)
+CLI_MPYFILES     := $(addprefix $(BUILD_ROOT)/lib/, $(CLI_LIB_SRCS:.py=.mpy)) $(addprefix $(BUILD_ROOT)/lib/modes/, $(CLI_MODE_SRCS:.py=.mpy))
 PYFILES          := $(patsubst $(SRC_ROOT)/%, build/%, $(COPY_SRCS))
 
 vpath %.py $(SRC_ROOT):$(SRC_ROOT)/lib
 
-.PHONY: build deploy clean test test-ci
+.PHONY: build headless complete deploy clean test test-ci
 
-build: $(PYFILES) $(MPYFILES)
+# `headless` is the default build: unattended, driven over serial by FlatHILS.
+build: headless
+
+headless: $(PYFILES) $(MPYFILES)
+	@rm -f $(CLI_MPYFILES)
+	@echo 'BUILD_MODE = "headless"' > $(SETTINGS_TOML)
+
+complete: $(PYFILES) $(MPYFILES) $(CLI_MPYFILES)
+	@echo 'BUILD_MODE = "complete"' > $(SETTINGS_TOML)
+
+# Fall back to the default build so `make write` works from a clean tree, without
+# clobbering an existing `make complete` build.
+$(SETTINGS_TOML):
+	@$(MAKE) --no-print-directory headless
 
 $(BUILD_ROOT)/%.mpy: %.py
 	@mkdir -p $(dir $@)
@@ -43,7 +64,7 @@ build/%.py: $(SRC_ROOT)/%.py
 	@mkdir -p $(dir $@)
 	cp $< $@
 
-write: build
+write: $(SETTINGS_TOML)
 	@BOARD_DIR=$$(findmnt --noheadings --source LABEL=CIRCUITPY --output TARGET); \
 	if [ -z "$$BOARD_DIR" ]; then \
 		echo "ERROR: Device path with disk label 'CIRCUITPY' not found — is it mounted?"; \
