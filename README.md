@@ -83,6 +83,13 @@ that are not integers, are reported on the console and skipped.
 printf '50\n' > /dev/ttyACM0
 ```
 
+To see a board respond, ramp one flashed with the `headless` build through its intensity
+range using the simple headless smoke-test script.
+
+```sh
+python scripts/headless_smoke.py
+```
+
 ## Write
 
 1.  Write to the Raspberry Pi Pico board attached via USB to your machine.

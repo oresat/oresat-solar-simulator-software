@@ -15,6 +15,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-mock",
+    "pyserial",
     "ruff",
 ]
 
