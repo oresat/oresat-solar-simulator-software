@@ -7,6 +7,11 @@ import supervisor
 
 from .solar_simulator import SolarSimulator as Sim
 
+try:
+    from typing import Callable
+except ImportError:
+    Callable = None
+
 
 def calculate_light_intensity(factor: float) -> dict:
     """Calculate the light intensity values for 5 types of lights."""
@@ -56,14 +61,23 @@ def display_status(sim: Sim) -> None:
     print(f"{temp_info} | {light_info}", end="\n")
 
 
-def check_temperature(sim: Sim) -> bool:
-    """Check the temperature and handle thermal shutdown and resume."""
+def check_temperature(
+    sim: Sim,
+    writer: "Callable[..., None]" = print,
+    on_shutdown: "Callable[[], None]" = None,
+) -> bool:
+    """Check the temperature, and handle thermal shutdown and resume.
+
+    Progress messages go to `writer`. `on_shutdown` is called once the lights have been
+    turned off and before the cooldown wait blocks, so a caller can report the shutdown
+    while it is still news.
+    """
     if not sim.enable_therm_monitoring:
         return True
 
     thermals = sim.check_thermals()
     if not thermals:
-        print("Cannot read the temperature sensors")
+        writer("Cannot read the temperature sensors")
         return False
 
     led_temp, heatsink_temp, cell_temp = thermals
@@ -78,7 +92,9 @@ def check_temperature(sim: Sim) -> bool:
     ):
         previous_light_settings = sim.current_light_settings
         sim.set_leds(0, 0, 0, 0)
-        print("Temperature too high! Turning off lights for safety.")
+        writer("Temperature too high! Turning off lights for safety.")
+        if on_shutdown:
+            on_shutdown()
 
         while (
             led_temp > sim.therm_resume_temp
@@ -92,13 +108,13 @@ def check_temperature(sim: Sim) -> bool:
                 led_temp = led_temp or 0
                 heatsink_temp = heatsink_temp or 0
                 cell_temp = cell_temp or 0
-                print("Cooling down ...")
-                print(f"LED: {led_temp}°C, Heatsink: {heatsink_temp}°C, Cell: {cell_temp}°C")
+                writer("Cooling down ...")
+                writer(f"LED: {led_temp}°C, Heatsink: {heatsink_temp}°C, Cell: {cell_temp}°C")
             else:
-                print("Cannot read the temperature sensors")
+                writer("Cannot read the temperature sensors")
                 return False
 
-        print("Temperature back to safe levels. Resuming operation.")
+        writer("Temperature back to safe levels. Resuming operation.")
         if previous_light_settings:
             sim.set_leds(
                 v=previous_light_settings['v'],
