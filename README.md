@@ -53,11 +53,35 @@ and follow the instructions under "Learn how to install CircuitPython on this bo
 
 ## Build
 
-1.  Cross-compile and build the distribution.
+The simulator has two build modes, selected by the make target. The build writes the mode it
+produced to `settings.toml`, which the device reads at boot to decide how to run.
+
+| Target (`BUILD_MODE`)          | Behavior                                                                         |
+| --------------- | -------------------------------------------------------------------------------- |
+| `headless`      | Unattended. Runs the Basilisk serial loop, driven by OreSat's FlatHILS/Basilisk. |
+| `complete`      | Adds the interactive menu (auto/manual/basilisk) for user interactivity.         |
+
+1.  Cross-compile and build the distribution (*Note:* `make build` is an alias for `make headless`).
 
     ```sh
     make build
     ```
+
+2.  To build the interactive fallback instead:
+
+    ```sh
+    make complete
+    ```
+
+### Headless protocol
+
+Headless mode is driven over the single USB console serial port. Send one intensity value per
+line — a bare integer from 0 to 100, newline terminated. Values outside that range, and lines
+that are not integers, are reported on the console and skipped.
+
+```sh
+printf '50\n' > /dev/ttyACM0
+```
 
 ## Write
 
