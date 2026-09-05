@@ -56,10 +56,10 @@ and follow the instructions under "Learn how to install CircuitPython on this bo
 The simulator has two build modes, selected by the make target. The build writes the mode it
 produced to `settings.toml`, which the device reads at boot to decide how to run.
 
-| Target (`BUILD_MODE`)          | Behavior                                                                         |
-| --------------- | -------------------------------------------------------------------------------- |
-| `headless`      | Unattended. Runs the Basilisk serial loop, driven by OreSat's FlatHILS/Basilisk. |
-| `complete`      | Adds the interactive menu (auto/manual/basilisk) for user interactivity.         |
+| Target (`BUILD_MODE`) | Behavior                                                                         |
+| --------------------- | -------------------------------------------------------------------------------- |
+| `headless`            | Unattended. Runs the Basilisk serial loop, driven by OreSat's FlatHILS/Basilisk. |
+| `complete`            | Adds the interactive menu (auto/manual/basilisk) for user interactivity.         |
 
 1.  Cross-compile and build the distribution (*Note:* `make build` is an alias for `make headless`).
 
