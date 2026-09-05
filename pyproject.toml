@@ -15,6 +15,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-mock",
+    "pyserial",
     "ruff",
 ]
 
@@ -64,4 +65,5 @@ ignore = [
     "S101",     # assert - pytest prefers plain assert
     "PLC0415",  # import - pytests need flexibility around when to import
     "D",        # pydoclint - https://docs.astral.sh/ruff/rules/#pydocstyle-d
+    "SLF001",   # private-member-access - tests may exercise internal helpers
 ]
