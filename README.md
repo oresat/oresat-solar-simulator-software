@@ -92,6 +92,17 @@ The token is the state and the temperatures say how far that state is from chang
 host can tell a panel that is cooling from a board that has died. An `ERR` answers a line
 that never reached the thermal check, and carries no reading.
 
+#### Watchdog
+
+If no line arrives for five seconds, the lamp is driven to zero and any setpoint held for a
+cooling panel is dropped. This is the only mechanism that can safe the lamp once the host
+is gone: a crashed or unplugged host cannot act, and the board checks temperature only when
+a command arrives, so without it a lit lamp would hold its last setpoint unwatched.
+
+The watchdog says nothing on the wire — every response answers a command, and a host that
+has stopped sending is either gone or can see the gap on its own clock. The next line the
+host sends rearms it.
+
 To see a board respond, ramp one through its intensity range using the simple headless
 smoke-test script.
 

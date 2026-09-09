@@ -8,6 +8,11 @@ import supervisor
 from ..solar_simulator import SolarSimulator as Sim
 from ..utils import calculate_light_intensity, check_temperature
 
+try:
+    from typing import Callable
+except ImportError:
+    Callable = None
+
 
 def _reading(thermals: list) -> str:
     """Render a thermal reading as trailing protocol fields, or nothing if none was taken."""
@@ -21,10 +26,21 @@ def _reading(thermals: list) -> str:
 class BasiliskMode:
     """Implements the Basilisk Mode functionality with UART communication for CircuitPython."""
 
-    def __init__(self, sim: Sim) -> None:
+    QUIET_TIMEOUT_S = 5.0
+    """How long the host may say nothing before the lamp is driven to zero.
+
+    Five missed commands at the one-per-second cadence FlatHILS drives (`STEP_S`), which
+    is long enough to ride out a host that is merely late and short enough that a host
+    that is gone cannot leave the lamp lit and unwatched.
+    """
+
+    def __init__(self, sim: Sim, clock: "Callable[[], float]" = time.monotonic) -> None:
         """Initialize basilisk mode."""
         self.sim = sim
+        self.clock = clock
         self.buffer = ""
+        self.last_line_at = clock()
+        self.safed = False
 
     def run(self) -> None:
         """Run basilisk mode loop."""
@@ -32,10 +48,10 @@ class BasiliskMode:
             self.tick()
 
     def tick(self) -> None:
-        """Advance the loop one step: take a waiting byte, and dispatch a finished line.
+        """Advance the loop one step: take a waiting byte, then watch the host's silence.
 
-        Nothing here blocks, so the loop stays free to do something other than wait on the
-        host between bytes.
+        Nothing here blocks, so the watchdog is still reached when the host has stopped
+        mid-line or stopped altogether.
         """
         if supervisor.runtime.serial_bytes_available:
             self.buffer += sys.stdin.read(1)
@@ -45,9 +61,38 @@ class BasiliskMode:
                 self.receive(line)
                 time.sleep(0.1)
 
+        if not self.safed and self.clock() - self.last_line_at > self.QUIET_TIMEOUT_S:
+            self.safe_the_lamp()
+            self.safed = True
+
     def receive(self, line: str) -> None:
-        """Answer one line from the host."""
+        """Answer one line from the host, and note that the host is alive.
+
+        A line the protocol rejects still rearms the watchdog: a host sending a value this
+        board will not take is a host that is talking, and the watchdog exists to catch
+        one that has stopped.
+        """
         self.apply_line(line)
+        self.last_line_at = self.clock()
+        self.safed = False
+
+    def safe_the_lamp(self) -> None:
+        """Drive the lamp to zero because the host has gone quiet.
+
+        The only mechanism that can safe the lamp once the host is gone. A crashed or
+        unplugged host cannot act, and thermal monitoring runs only when a command arrives,
+        so without this a lit lamp would hold its last setpoint unwatched and unmeasured
+        (ADR-0007 in `brysat-flathils`).
+
+        Drops the held setpoint along with the live one. A panel cooling out of thermal
+        shutdown resumes at whatever `pending_light_settings` carries, and resuming to a
+        value commanded before the silence would relight a lamp nobody is watching.
+
+        Says nothing on the wire. Every response answers a command, and a host that has
+        stopped sending is either gone or can see the gap on its own clock.
+        """
+        self.sim.set_leds(0, 0, 0, 0)
+        self.sim.pending_light_settings = {'v': 0, 'w': 0, 'c': 0, 'h': 0}
 
     def apply_line(self, line: str) -> None:
         """Apply one line of the Basilisk protocol: a bare integer from 0 to 100.
