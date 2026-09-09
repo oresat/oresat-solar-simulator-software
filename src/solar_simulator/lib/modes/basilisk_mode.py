@@ -65,14 +65,9 @@ class BasiliskMode:
 
         self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
 
-        # The console carries protocol lines only: the shared cooldown chatter is
-        # dropped, and the shutdown it announces is answered as WARN instead.
+        # The shutdown the check announces is answered as WARN instead.
         self._warned = False
-        check_temperature(
-            self.sim,
-            writer=lambda _message: None,
-            on_shutdown=self._report_thermal_shutdown,
-        )
+        check_temperature(self.sim, on_shutdown=self._report_thermal_shutdown)
 
         if not self._warned:
             print(f"OK {intensity}")
