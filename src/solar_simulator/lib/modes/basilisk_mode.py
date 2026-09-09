@@ -15,7 +15,6 @@ class BasiliskMode:
     def __init__(self, sim: Sim) -> None:
         """Initialize basilisk mode."""
         self.sim = sim
-        self._warned = False
 
     def run(self) -> None:
         """Run basilisk mode loop."""
@@ -63,16 +62,14 @@ class BasiliskMode:
         cyan = int(intensity_values["Cyan"] * 655)
         halogen = int(intensity_values["Halogen"] * 655)
 
-        self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
+        # Driving the lamp while the panel is cooling would relight it until the check
+        # below cut it again, once per line the host sends. Hold the value instead.
+        if self.sim.therm_safe:
+            self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
+        else:
+            self.sim.pending_light_settings = {'v': violet, 'w': white, 'c': cyan, 'h': halogen}
 
-        # The shutdown the check announces is answered as WARN instead.
-        self._warned = False
-        check_temperature(self.sim, on_shutdown=self._report_thermal_shutdown)
-
-        if not self._warned:
+        if check_temperature(self.sim):
             print(f"OK {intensity}")
-
-    def _report_thermal_shutdown(self) -> None:
-        """Answer the line with a thermal warning."""
-        self._warned = True
-        print("WARN THERMAL temperature too high, lights off for safety")
+        else:
+            print("WARN THERMAL temperature too high, lights off for safety")

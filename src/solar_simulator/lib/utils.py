@@ -1,13 +1,6 @@
 """Utility class for Solar Simulator."""
 
-import time
-
 from .solar_simulator import SolarSimulator as Sim
-
-try:
-    from typing import Callable
-except ImportError:
-    Callable = None
 
 
 def calculate_light_intensity(factor: float) -> dict:
@@ -34,11 +27,21 @@ def calculate_light_intensity(factor: float) -> dict:
     }
 
 
-def check_temperature(sim: Sim, on_shutdown: "Callable[[], None]" = None) -> bool:
-    """Check the temperature, and handle thermal shutdown and resume.
+def check_temperature(sim: Sim) -> bool:
+    """Advance the thermal state one step and say whether the lamp may be lit.
 
-    `on_shutdown` is called once the lights have been turned off and before the cooldown
-    wait blocks, so a caller can report the shutdown while it is still news.
+    One call reads the sensors once and decides once; it never waits for the panel to
+    cool. A caller that wants to wait calls again, and stays free to do something else in
+    between -- answer the host, abort the run -- instead of disappearing for minutes
+    (ADR-0007 in `brysat-flathils`).
+
+    The lamp is cut when any channel passes its shutdown threshold, and the setpoint it
+    was carrying is held in `sim.pending_light_settings` until every channel is back under
+    `sim.therm_resume_temp`. Resuming takes all three, because one cool channel does not
+    make the panel safe.
+
+    Says nothing on the console: the only caller answers the host on the protocol stream,
+    which no other output may share.
     """
     if not sim.enable_therm_monitoring:
         return True
@@ -52,38 +55,22 @@ def check_temperature(sim: Sim, on_shutdown: "Callable[[], None]" = None) -> boo
     heatsink_temp = heatsink_temp or 0
     cell_temp = cell_temp or 0
 
-    if (
-        led_temp > sim.therm_led_shutdown
-        or heatsink_temp > sim.therm_heatsink_shutdown
-        or cell_temp > sim.therm_cell_shutdown
-    ):
-        previous_light_settings = sim.current_light_settings
-        sim.set_leds(0, 0, 0, 0)
-        if on_shutdown:
-            on_shutdown()
-
-        while (
-            led_temp > sim.therm_resume_temp
-            and heatsink_temp > sim.therm_resume_temp
-            and cell_temp > sim.therm_resume_temp
+    if sim.therm_safe:
+        if (
+            led_temp > sim.therm_led_shutdown
+            or heatsink_temp > sim.therm_heatsink_shutdown
+            or cell_temp > sim.therm_cell_shutdown
         ):
-            time.sleep(1)
-            thermals = sim.check_thermals()
-            if thermals:
-                led_temp, heatsink_temp, cell_temp = thermals
-                led_temp = led_temp or 0
-                heatsink_temp = heatsink_temp or 0
-                cell_temp = cell_temp or 0
-            else:
-                return False
-
-        if previous_light_settings:
-            sim.set_leds(
-                v=previous_light_settings['v'],
-                w=previous_light_settings['w'],
-                c=previous_light_settings['c'],
-                h=previous_light_settings['h'],
-            )
+            sim.pending_light_settings = sim.current_light_settings
+            sim.set_leds(0, 0, 0, 0)
+            sim.therm_safe = False
+            return False
         return True
 
+    if max(led_temp, heatsink_temp, cell_temp) > sim.therm_resume_temp:
+        return False
+
+    sim.therm_safe = True
+    pending = sim.pending_light_settings
+    sim.set_leds(v=pending['v'], w=pending['w'], c=pending['c'], h=pending['h'])
     return True
