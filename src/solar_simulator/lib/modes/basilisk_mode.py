@@ -24,18 +24,30 @@ class BasiliskMode:
     def __init__(self, sim: Sim) -> None:
         """Initialize basilisk mode."""
         self.sim = sim
+        self.buffer = ""
 
     def run(self) -> None:
         """Run basilisk mode loop."""
-        buffer = ""
         while True:
-            if supervisor.runtime.serial_bytes_available:
-                buffer += sys.stdin.read(1)
+            self.tick()
 
-                if "\n" in buffer:
-                    line, buffer = buffer.split("\n", 1)
-                    self.apply_line(line)
-                    time.sleep(0.1)
+    def tick(self) -> None:
+        """Advance the loop one step: take a waiting byte, and dispatch a finished line.
+
+        Nothing here blocks, so the loop stays free to do something other than wait on the
+        host between bytes.
+        """
+        if supervisor.runtime.serial_bytes_available:
+            self.buffer += sys.stdin.read(1)
+
+            if "\n" in self.buffer:
+                line, self.buffer = self.buffer.split("\n", 1)
+                self.receive(line)
+                time.sleep(0.1)
+
+    def receive(self, line: str) -> None:
+        """Answer one line from the host."""
+        self.apply_line(line)
 
     def apply_line(self, line: str) -> None:
         """Apply one line of the Basilisk protocol: a bare integer from 0 to 100.
