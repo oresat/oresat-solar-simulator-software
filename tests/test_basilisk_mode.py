@@ -15,7 +15,9 @@ def sim() -> MagicMock:
     sim.therm_heatsink_shutdown = 60
     sim.therm_cell_shutdown = 80
     sim.therm_resume_temp = 45
+    sim.therm_safe = True
     sim.current_light_settings = {'v': 0, 'w': 0, 'c': 0, 'h': 0}
+    sim.pending_light_settings = {'v': 0, 'w': 0, 'c': 0, 'h': 0}
     return sim
 
 
@@ -114,3 +116,23 @@ def test_apply_line_acknowledges_again_once_the_panel_has_cooled(
 
     # Assert
     assert capsys.readouterr().out == "OK 50\n"
+
+
+def test_apply_line_holds_the_value_without_relighting_while_the_panel_cools(
+    sim: MagicMock, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A held value must not reach the lamp, or every line would pulse it back on."""
+    # Arrange
+    sim.check_thermals.side_effect = [[120.0, 25.0, 25.0], [120.0, 25.0, 25.0]]
+    mode = BasiliskMode(sim)
+    mode.apply_line("50")
+    sim.set_leds.reset_mock()
+    capsys.readouterr()
+
+    # Act
+    mode.apply_line("75")
+
+    # Assert
+    sim.set_leds.assert_not_called()
+    assert sim.pending_light_settings == {'v': 14106, 'w': 26591, 'c': 18797, 'h': 49687}
+    assert capsys.readouterr().out == "WARN THERMAL temperature too high, lights off for safety\n"
