@@ -9,6 +9,15 @@ from ..solar_simulator import SolarSimulator as Sim
 from ..utils import calculate_light_intensity, check_temperature
 
 
+def _reading(thermals: list) -> str:
+    """Render a thermal reading as trailing protocol fields, or nothing if none was taken."""
+    if not thermals:
+        return ""
+
+    led, heatsink, cell = thermals
+    return f" led={led:.1f} heatsink={heatsink:.1f} cell={cell:.1f}"
+
+
 class BasiliskMode:
     """Implements the Basilisk Mode functionality with UART communication for CircuitPython."""
 
@@ -34,11 +43,19 @@ class BasiliskMode:
         Answers with exactly one response line, so that a stray byte on the wire cannot
         take down an unattended run:
 
-            OK <intensity>              the value was applied
-            ERR <CODE> <description>    the line could not be acted on; CODE is the token
-                                        the caller branches on
-            WARN THERMAL <description>  the value is valid and is now the pending setpoint,
-                                        held off while thermal shutdown is active
+            OK <intensity> <reading>          the value was applied
+            WARN THERMAL <intensity> <reading>
+                                              the value is valid and is now the pending
+                                              setpoint, held off while thermal shutdown
+                                              is active
+            ERR <CODE> <description>          the line could not be acted on; CODE is the
+                                              token the caller branches on
+
+        `OK` and `WARN` carry the reading the thermal decision was made on, as
+        `led=<C> heatsink=<C> cell=<C>`. The token is the state and the temperatures say
+        how far that state is from changing, so a host can tell a panel that is cooling
+        from a board that has died (ADR-0007 in `brysat-flathils`). An `ERR` answers a
+        line that never reached the thermal check, and carries no reading.
         """
         line = line.replace("\x00", "").strip()
 
@@ -69,7 +86,9 @@ class BasiliskMode:
         else:
             self.sim.pending_light_settings = {'v': violet, 'w': white, 'c': cyan, 'h': halogen}
 
-        if check_temperature(self.sim):
-            print(f"OK {intensity}")
+        lit, thermals = check_temperature(self.sim)
+
+        if lit:
+            print(f"OK {intensity}{_reading(thermals)}")
         else:
-            print("WARN THERMAL temperature too high, lights off for safety")
+            print(f"WARN THERMAL {intensity}{_reading(thermals)}")

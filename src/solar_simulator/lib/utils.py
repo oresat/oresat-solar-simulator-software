@@ -27,7 +27,7 @@ def calculate_light_intensity(factor: float) -> dict:
     }
 
 
-def check_temperature(sim: Sim) -> bool:
+def check_temperature(sim: Sim) -> tuple:
     """Advance the thermal state one step and say whether the lamp may be lit.
 
     One call reads the sensors once and decides once; it never waits for the panel to
@@ -40,20 +40,26 @@ def check_temperature(sim: Sim) -> bool:
     `sim.therm_resume_temp`. Resuming takes all three, because one cool channel does not
     make the panel safe.
 
+    Returns `(lit, thermals)`: whether the lamp may be lit, and the three temperatures the
+    decision was made on, so the caller can report the reading without going back to the
+    sensors and getting a second, different one. `thermals` is empty when no reading was
+    taken.
+
     Says nothing on the console: the only caller answers the host on the protocol stream,
     which no other output may share.
     """
     if not sim.enable_therm_monitoring:
-        return True
+        return True, []
 
     thermals = sim.check_thermals()
     if not thermals:
-        return False
+        return False, []
 
     led_temp, heatsink_temp, cell_temp = thermals
     led_temp = led_temp or 0
     heatsink_temp = heatsink_temp or 0
     cell_temp = cell_temp or 0
+    reading = [led_temp, heatsink_temp, cell_temp]
 
     if sim.therm_safe:
         if (
@@ -64,13 +70,13 @@ def check_temperature(sim: Sim) -> bool:
             sim.pending_light_settings = sim.current_light_settings
             sim.set_leds(0, 0, 0, 0)
             sim.therm_safe = False
-            return False
-        return True
+            return False, reading
+        return True, reading
 
     if max(led_temp, heatsink_temp, cell_temp) > sim.therm_resume_temp:
-        return False
+        return False, reading
 
     sim.therm_safe = True
     pending = sim.pending_light_settings
     sim.set_leds(v=pending['v'], w=pending['w'], c=pending['c'], h=pending['h'])
-    return True
+    return True, reading

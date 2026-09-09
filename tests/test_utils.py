@@ -25,10 +25,11 @@ def sim() -> MagicMock:
 
 def test_a_cool_panel_may_be_lit(sim: MagicMock) -> None:
     # Act
-    lit = check_temperature(sim)
+    lit, thermals = check_temperature(sim)
 
     # Assert
     assert lit is True
+    assert thermals == [25.0, 25.0, 25.0]
     sim.set_leds.assert_not_called()
 
 
@@ -37,10 +38,11 @@ def test_monitoring_can_be_turned_off(sim: MagicMock) -> None:
     sim.enable_therm_monitoring = False
 
     # Act
-    lit = check_temperature(sim)
+    lit, thermals = check_temperature(sim)
 
     # Assert
     assert lit is True
+    assert thermals == []
     sim.check_thermals.assert_not_called()
 
 
@@ -59,11 +61,12 @@ def test_any_channel_over_its_threshold_cuts_the_lamp(
     sim.check_thermals.return_value = thermals
 
     # Act
-    lit = check_temperature(sim)
+    lit, reading = check_temperature(sim)
 
     # Assert
     assert lit is False
     assert sim.therm_safe is False
+    assert reading == thermals
     assert sim.pending_light_settings == {'v': 100, 'w': 200, 'c': 300, 'h': 400}
     sim.set_leds.assert_called_once_with(0, 0, 0, 0)
 
@@ -74,7 +77,7 @@ def test_the_call_that_cuts_the_lamp_returns_rather_than_waiting(sim: MagicMock)
     sim.check_thermals.side_effect = [[120.0, 25.0, 25.0], [25.0, 25.0, 25.0]]
 
     # Act
-    lit = check_temperature(sim)
+    lit, _ = check_temperature(sim)
 
     # Assert
     assert lit is False
@@ -88,7 +91,7 @@ def test_one_channel_still_hot_holds_the_lamp_dark(sim: MagicMock) -> None:
     sim.check_thermals.return_value = [25.0, 25.0, 50.0]
 
     # Act
-    lit = check_temperature(sim)
+    lit, _ = check_temperature(sim)
 
     # Assert
     assert lit is False
@@ -103,7 +106,7 @@ def test_a_cooled_panel_resumes_at_the_setpoint_it_was_holding(sim: MagicMock) -
     sim.check_thermals.return_value = [45.0, 40.0, 30.0]
 
     # Act
-    lit = check_temperature(sim)
+    lit, _ = check_temperature(sim)
 
     # Assert
     assert lit is True

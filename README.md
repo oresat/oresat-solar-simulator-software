@@ -65,12 +65,32 @@ OreSat's FlatHILS, and offers no interactive menu.
 ### Headless protocol
 
 The board is driven over the single USB console serial port. Send one intensity value per
-line — a bare integer from 0 to 100, newline terminated. Values outside that range, and lines
-that are not integers, are reported on the console and skipped.
+line — a bare integer from 0 to 100, newline terminated.
 
 ```sh
 printf '50\n' > /dev/ttyACM0
 ```
+
+Every line is answered with exactly one response line, so a stray byte on the wire cannot
+take down an unattended run.
+
+| Response | Meaning |
+| --- | --- |
+| `OK <intensity> <reading>` | The value was applied. |
+| `WARN THERMAL <intensity> <reading>` | The value is valid and is now the pending setpoint, held off while thermal shutdown is active. |
+| `ERR <CODE> <description>` | The line could not be acted on. `CODE` is the token to branch on: `EMPTY`, `PARSE`, or `RANGE`. |
+
+`OK` and `WARN` carry the thermal reading their answer was decided on, as
+`led=<C> heatsink=<C> cell=<C>`:
+
+```
+OK 50 led=31.2 heatsink=28.4 cell=27.9
+WARN THERMAL 50 led=104.7 heatsink=28.4 cell=27.9
+```
+
+The token is the state and the temperatures say how far that state is from changing, so a
+host can tell a panel that is cooling from a board that has died. An `ERR` answers a line
+that never reached the thermal check, and carries no reading.
 
 To see a board respond, ramp one through its intensity range using the simple headless
 smoke-test script.
