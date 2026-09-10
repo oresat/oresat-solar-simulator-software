@@ -14,7 +14,6 @@ CIRCUITPYTHON_MODULES = {
     "pdb",
     "pwmio",
     "supervisor",
-    "ulab",
 }
 
 

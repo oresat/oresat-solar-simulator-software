@@ -1,16 +1,6 @@
 """Utility class for Solar Simulator."""
 
-import sys
-import time
-
-import supervisor
-
 from .solar_simulator import SolarSimulator as Sim
-
-try:
-    from typing import Callable
-except ImportError:
-    Callable = None
 
 
 def calculate_light_intensity(factor: float) -> dict:
@@ -37,104 +27,56 @@ def calculate_light_intensity(factor: float) -> dict:
     }
 
 
-def display_status(sim: Sim) -> None:
-    """Display the current thermal and light status."""
-    try:
-        thermals = sim.check_thermals()
+def check_temperature(sim: Sim) -> tuple:
+    """Advance the thermal state one step and say whether the lamp may be lit.
 
-        if thermals:
-            led_temp, heatsink_temp, cell_temp = thermals
-            temp_info = (
-                f"LED: {led_temp:.1f}°C, Heatsink: {heatsink_temp:.1f}°C, Cell: {cell_temp:.1f}°C"
-            )
-        else:
-            temp_info = "Cannot read temperature data"
-    except Exception:  # noqa: BLE001
-        temp_info = "Temperature data unavailable"
+    One call reads the sensors once and decides once; it never waits for the panel to
+    cool. A caller that wants to wait calls again, and stays free to do something else in
+    between -- answer the host, abort the run -- instead of disappearing for minutes
+    (ADR-0007 in `brysat-flathils`).
 
-    current_settings = sim.current_light_settings
-    try:
-        light_info = f"VIOLET:{current_settings['v'] // 655}% WHITE:{current_settings['w'] // 655}% CYAN:{current_settings['c'] // 655}%  HAL:{current_settings['h'] // 655}%"  # noqa: E501
-    except Exception:  # noqa: BLE001
-        light_info = "Light data unavailable"
+    The lamp is cut when any channel passes its shutdown threshold, and the setpoint it
+    was carrying is held in `sim.pending_light_settings` until every channel is back under
+    `sim.therm_resume_temp`. Resuming takes all three, because one cool channel does not
+    make the panel safe.
 
-    print(f"{temp_info} | {light_info}", end="\n")
+    Returns `(lit, thermals)`: whether the lamp may be lit, and the three temperatures the
+    decision was made on, so the caller can report the reading without going back to the
+    sensors and getting a second, different one. `thermals` is empty when no reading was
+    taken.
 
-
-def check_temperature(
-    sim: Sim,
-    writer: "Callable[..., None]" = print,
-    on_shutdown: "Callable[[], None]" = None,
-) -> bool:
-    """Check the temperature, and handle thermal shutdown and resume.
-
-    Progress messages go to `writer`. `on_shutdown` is called once the lights have been
-    turned off and before the cooldown wait blocks, so a caller can report the shutdown
-    while it is still news.
+    Says nothing on the console: the only caller answers the host on the protocol stream,
+    which no other output may share.
     """
     if not sim.enable_therm_monitoring:
-        return True
+        return True, []
 
     thermals = sim.check_thermals()
     if not thermals:
-        writer("Cannot read the temperature sensors")
-        return False
+        return False, []
 
     led_temp, heatsink_temp, cell_temp = thermals
     led_temp = led_temp or 0
     heatsink_temp = heatsink_temp or 0
     cell_temp = cell_temp or 0
+    reading = [led_temp, heatsink_temp, cell_temp]
 
-    if (
-        led_temp > sim.therm_led_shutdown
-        or heatsink_temp > sim.therm_heatsink_shutdown
-        or cell_temp > sim.therm_cell_shutdown
-    ):
-        previous_light_settings = sim.current_light_settings
-        sim.set_leds(0, 0, 0, 0)
-        writer("Temperature too high! Turning off lights for safety.")
-        if on_shutdown:
-            on_shutdown()
-
-        while (
-            led_temp > sim.therm_resume_temp
-            and heatsink_temp > sim.therm_resume_temp
-            and cell_temp > sim.therm_resume_temp
+    if sim.therm_safe:
+        if (
+            led_temp > sim.therm_led_shutdown
+            or heatsink_temp > sim.therm_heatsink_shutdown
+            or cell_temp > sim.therm_cell_shutdown
         ):
-            time.sleep(1)
-            thermals = sim.check_thermals()
-            if thermals:
-                led_temp, heatsink_temp, cell_temp = thermals
-                led_temp = led_temp or 0
-                heatsink_temp = heatsink_temp or 0
-                cell_temp = cell_temp or 0
-                writer("Cooling down ...")
-                writer(f"LED: {led_temp}°C, Heatsink: {heatsink_temp}°C, Cell: {cell_temp}°C")
-            else:
-                writer("Cannot read the temperature sensors")
-                return False
+            sim.pending_light_settings = sim.current_light_settings
+            sim.set_leds(0, 0, 0, 0)
+            sim.therm_safe = False
+            return False, reading
+        return True, reading
 
-        writer("Temperature back to safe levels. Resuming operation.")
-        if previous_light_settings:
-            sim.set_leds(
-                v=previous_light_settings['v'],
-                w=previous_light_settings['w'],
-                c=previous_light_settings['c'],
-                h=previous_light_settings['h'],
-            )
-        return True
+    if max(led_temp, heatsink_temp, cell_temp) > sim.therm_resume_temp:
+        return False, reading
 
-    return True
-
-
-def check_for_interrupt() -> None:
-    """Listen for keyboard interrupts."""
-    if supervisor.runtime.serial_bytes_available:
-        input_char = sys.stdin.read(1)
-
-        if input_char == '\x03':  # Ctrl-C (ASCII 3)
-            print("\nCtrl-C detected. Turning off LEDs...")
-            Sim.set_leds(0, 0, 0, 0)
-            raise KeyboardInterrupt
-
-        print(f"Ignored input: {repr(input_char)}")  # noqa: RUF010
+    sim.therm_safe = True
+    pending = sim.pending_light_settings
+    sim.set_leds(v=pending['v'], w=pending['w'], c=pending['c'], h=pending['h'])
+    return True, reading

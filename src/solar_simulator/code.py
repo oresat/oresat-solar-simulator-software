@@ -1,8 +1,6 @@
 """Entrypoint for the solar simulator."""
 
-import os
-
-from lib.app import SolarSimulatorApp
+from lib.modes.basilisk_mode import BasiliskMode
 from lib.solar_simulator import SolarSimulator
 
 
@@ -11,8 +9,7 @@ def main() -> None:
     sim = SolarSimulator()
     sim.set_leds(0, 0, 0, 0)
 
-    app = SolarSimulatorApp(sim)
-    app.run(os.getenv("BUILD_MODE", "headless"))
+    BasiliskMode(sim).run()
 
 
 if __name__ == "__main__":

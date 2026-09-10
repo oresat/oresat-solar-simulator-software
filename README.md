@@ -53,38 +53,58 @@ and follow the instructions under "Learn how to install CircuitPython on this bo
 
 ## Build
 
-The simulator has two build modes, selected by the make target. The build writes the mode it
-produced to `settings.toml`, which the device reads at boot to decide how to run.
+The simulator has one build. It is unattended: it runs the Basilisk serial loop, driven by
+OreSat's FlatHILS, and offers no interactive menu.
 
-| Target (`BUILD_MODE`) | Behavior                                                                         |
-| --------------------- | -------------------------------------------------------------------------------- |
-| `headless`            | Unattended. Runs the Basilisk serial loop, driven by OreSat's FlatHILS/Basilisk. |
-| `complete`            | Adds the interactive menu (auto/manual/basilisk) for user interactivity.         |
-
-1.  Cross-compile and build the distribution (*Note:* `make build` is an alias for `make headless`).
+1.  Cross-compile and build the distribution.
 
     ```sh
     make build
     ```
 
-2.  To build the interactive fallback instead:
-
-    ```sh
-    make complete
-    ```
-
 ### Headless protocol
 
-Headless mode is driven over the single USB console serial port. Send one intensity value per
-line — a bare integer from 0 to 100, newline terminated. Values outside that range, and lines
-that are not integers, are reported on the console and skipped.
+The board is driven over the single USB console serial port. Send one intensity value per
+line — a bare integer from 0 to 100, newline terminated.
 
 ```sh
 printf '50\n' > /dev/ttyACM0
 ```
 
-To see a board respond, ramp one flashed with the `headless` build through its intensity
-range using the simple headless smoke-test script.
+Every line is answered with exactly one response line, so a stray byte on the wire cannot
+take down an unattended run.
+
+| Response | Meaning |
+| --- | --- |
+| `OK <intensity> <reading>` | The value was applied. |
+| `WARN THERMAL <intensity> <reading>` | The value is valid and is now the pending setpoint, held off while thermal shutdown is active. |
+| `ERR <CODE> <description>` | The line could not be acted on. `CODE` is the token to branch on: `EMPTY`, `PARSE`, or `RANGE`. |
+
+`OK` and `WARN` carry the thermal reading their answer was decided on, as
+`led=<C> heatsink=<C> cell=<C>`:
+
+```
+OK 50 led=31.2 heatsink=28.4 cell=27.9
+WARN THERMAL 50 led=104.7 heatsink=28.4 cell=27.9
+```
+
+The token is the state and the temperatures say how far that state is from changing, so a
+host can tell a panel that is cooling from a board that has died. An `ERR` answers a line
+that never reached the thermal check, and carries no reading.
+
+#### Watchdog
+
+If no line arrives for five seconds, the lamp is driven to zero and any setpoint held for a
+cooling panel is dropped. This is the only mechanism that can safe the lamp once the host
+is gone: a crashed or unplugged host cannot act, and the board checks temperature only when
+a command arrives, so without it a lit lamp would hold its last setpoint unwatched.
+
+The watchdog says nothing on the wire — every response answers a command, and a host that
+has stopped sending is either gone or can see the gap on its own clock. The next line the
+host sends rearms it.
+
+To see a board respond, ramp one through its intensity range using the simple headless
+smoke-test script.
 
 ```sh
 python scripts/headless_smoke.py

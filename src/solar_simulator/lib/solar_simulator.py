@@ -33,6 +33,7 @@ class SolarSimulator:
         )
         self.therm_safe = True
         self.current_light_settings = {'v': 0, 'w': 0, 'c': 0, 'h': 0}
+        self.pending_light_settings = {'v': 0, 'w': 0, 'c': 0, 'h': 0}
         self.enable_therm_monitoring = True
         self.therm_led_shutdown = 100
         self.therm_heatsink_shutdown = 60
