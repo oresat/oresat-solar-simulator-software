@@ -1,9 +1,6 @@
 """Solar Simulator App 'Basilisk Mode' helper module."""
 
 import sys
-import time
-
-import supervisor
 
 from ..solar_simulator import SolarSimulator as Sim
 from ..utils import calculate_light_intensity, check_temperature
@@ -18,16 +15,9 @@ class BasiliskMode:
         self._warned = False
 
     def run(self) -> None:
-        """Run basilisk mode loop."""
-        buffer = ""
-        while True:
-            if supervisor.runtime.serial_bytes_available:
-                buffer += sys.stdin.read(1)
-
-                if "\n" in buffer:
-                    line, buffer = buffer.split("\n", 1)
-                    self.apply_line(line)
-                    time.sleep(0.1)
+        """Apply each line received on the console."""
+        for line in sys.stdin:
+            self.apply_line(line.rstrip("\n"))
 
     def apply_line(self, line: str) -> None:
         """Apply one line of the Basilisk protocol: an integer from 0 to 100.
