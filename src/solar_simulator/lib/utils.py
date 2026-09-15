@@ -14,7 +14,7 @@ except ImportError:
 
 
 def calculate_light_intensity(factor: float) -> dict:
-    """Calculate the light intensity values for 5 types of lights."""
+    """Return the `set_leds` settings for an intensity factor from 0 to 1."""
     if not (0 <= factor <= 1):
         raise ValueError("Scaling factor must be between 0 and 1.")
 
@@ -30,10 +30,10 @@ def calculate_light_intensity(factor: float) -> dict:
         halogen_intensity = 89.1446 * factor + 9.0003
 
     return {
-        "Violet": violet_intensity,
-        "White": white_intensity,
-        "Cyan": cyan_intensity,
-        "Halogen": halogen_intensity,
+        'v': int(violet_intensity * 655),
+        'w': int(white_intensity * 655),
+        'c': int(cyan_intensity * 655),
+        'h': int(halogen_intensity * 655),
     }
 
 

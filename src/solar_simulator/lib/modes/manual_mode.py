@@ -73,13 +73,7 @@ class ManualMode:
             except ValueError:
                 print("Invalid input. Please enter a numeric value.")
 
-            intensity_values = calculate_light_intensity(intensity_input)
-            violet = int(intensity_values["Violet"] * 655)
-            white = int(intensity_values["White"] * 655)
-            cyan = int(intensity_values["Cyan"] * 655)
-            halogen = int(intensity_values["Halogen"] * 655)
-
-            self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
+            self.sim.set_leds(**calculate_light_intensity(intensity_input))
 
             print(f"\nCurrent intensity: {intensity_input:.2f}")
             print("Press 'Enter' to reset your LEDs...")

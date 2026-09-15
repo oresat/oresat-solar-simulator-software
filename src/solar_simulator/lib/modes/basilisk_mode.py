@@ -42,13 +42,7 @@ class BasiliskMode:
             print(f"ERR RANGE invalid intensity value received: {line}")
             return
 
-        intensity_values = calculate_light_intensity(intensity / 100)
-        violet = int(intensity_values["Violet"] * 655)
-        white = int(intensity_values["White"] * 655)
-        cyan = int(intensity_values["Cyan"] * 655)
-        halogen = int(intensity_values["Halogen"] * 655)
-
-        self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
+        self.sim.set_leds(**calculate_light_intensity(intensity / 100))
 
         # The console carries protocol lines only: the shared cooldown chatter is
         # dropped, and the shutdown it announces is answered as WARN instead.

@@ -59,17 +59,7 @@ class AutoMode:
                     # Calculate current intensity factor
                     intensity_factor = wave[level] * self.peak
 
-                    # Calculate light intensities
-                    intensity_values = calculate_light_intensity(intensity_factor)
-
-                    # Scale values to PWM range (0 to 65535)
-                    violet = int(intensity_values["Violet"] * 655)
-                    white = int(intensity_values["White"] * 655)
-                    cyan = int(intensity_values["Cyan"] * 655)
-                    halogen = int(intensity_values["Halogen"] * 655)
-
-                    # Set LED intensities
-                    self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
+                    self.sim.set_leds(**calculate_light_intensity(intensity_factor))
                     # Update level index for sine wave
                     level = (level + 1) % len(wave)
 
