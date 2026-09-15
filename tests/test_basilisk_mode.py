@@ -25,22 +25,24 @@ def mode(sim: MagicMock) -> BasiliskMode:
     return BasiliskMode(sim)
 
 
+@pytest.mark.parametrize(
+    ("line", "settings"),
+    [
+        ("100", {'v': 13859, 'w': 31888, 'c': 20478, 'h': 64284}),
+        ("0", {'v': 0, 'w': 0, 'c': 0, 'h': 0}),
+    ],
+)
 def test_apply_line_sets_leds_for_a_valid_intensity(
-    mode: BasiliskMode, sim: MagicMock, capsys: pytest.CaptureFixture[str]
+    mode: BasiliskMode,
+    sim: MagicMock,
+    capsys: pytest.CaptureFixture[str],
+    line: str,
+    settings: dict,
 ) -> None:
-    mode.apply_line("100")
+    mode.apply_line(line)
 
-    sim.set_leds.assert_called_once_with(v=13859, w=31888, c=20478, h=64284)
-    assert capsys.readouterr().out == "OK 100\n"
-
-
-def test_apply_line_turns_everything_off_at_zero(
-    mode: BasiliskMode, sim: MagicMock, capsys: pytest.CaptureFixture[str]
-) -> None:
-    mode.apply_line("0")
-
-    sim.set_leds.assert_called_once_with(v=0, w=0, c=0, h=0)
-    assert capsys.readouterr().out == "OK 0\n"
+    sim.set_leds.assert_called_once_with(**settings)
+    assert capsys.readouterr().out == f"OK {line}\n"
 
 
 @pytest.mark.parametrize(
