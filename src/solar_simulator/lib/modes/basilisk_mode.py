@@ -32,14 +32,11 @@ class BasiliskMode:
     def apply_line(self, line: str) -> None:
         """Apply one line of the Basilisk protocol: a bare integer from 0 to 100.
 
-        Answers with exactly one response line, so that a stray byte on the wire cannot
-        take down an unattended run:
-
-            OK <intensity>              the value was applied
-            ERR <CODE> <description>    the line could not be acted on; CODE is the token
-                                        the caller branches on
-            WARN THERMAL <description>  the value is valid and is now the pending setpoint,
-                                        held off while thermal shutdown is active
+        OK <intensity>              the value was applied
+        ERR <CODE> <description>    the line could not be acted on; CODE is the token
+                                    the caller branches on
+        WARN THERMAL <description>  the value is valid and is now the pending setpoint,
+                                    held off while thermal shutdown is active
         """
         line = line.replace("\x00", "").strip()
 
