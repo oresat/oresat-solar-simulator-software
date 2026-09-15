@@ -80,7 +80,6 @@ class ManualMode:
             halogen = int(intensity_values["Halogen"] * 655)
 
             self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
-            self.sim.current_light_settings = {'v': violet, 'w': white, 'c': cyan, 'h': halogen}
 
             print(f"\nCurrent intensity: {intensity_input:.2f}")
             print("Press 'Enter' to reset your LEDs...")

@@ -70,12 +70,6 @@ class AutoMode:
 
                     # Set LED intensities
                     self.sim.set_leds(v=violet, w=white, c=cyan, h=halogen)
-                    self.sim.current_light_settings = {
-                        'v': violet,
-                        'w': white,
-                        'c': cyan,
-                        'h': halogen,
-                    }
                     # Update level index for sine wave
                     level = (level + 1) % len(wave)
 
