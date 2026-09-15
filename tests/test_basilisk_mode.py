@@ -22,13 +22,10 @@ def sim() -> MagicMock:
 def test_apply_line_sets_leds_for_a_valid_intensity(
     sim: MagicMock, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    # Arrange
     mode = BasiliskMode(sim)
 
-    # Act
     mode.apply_line("100")
 
-    # Assert
     sim.set_leds.assert_called_once_with(v=13859, w=31888, c=20478, h=64284)
     assert capsys.readouterr().out == "OK 100\n"
 
@@ -36,13 +33,10 @@ def test_apply_line_sets_leds_for_a_valid_intensity(
 def test_apply_line_turns_everything_off_at_zero(
     sim: MagicMock, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    # Arrange
     mode = BasiliskMode(sim)
 
-    # Act
     mode.apply_line("0")
 
-    # Assert
     sim.set_leds.assert_called_once_with(v=0, w=0, c=0, h=0)
     assert capsys.readouterr().out == "OK 0\n"
 
@@ -60,13 +54,10 @@ def test_apply_line_turns_everything_off_at_zero(
 def test_apply_line_reports_a_bad_line(
     sim: MagicMock, capsys: pytest.CaptureFixture[str], line: str, response: str
 ) -> None:
-    # Arrange
     mode = BasiliskMode(sim)
 
-    # Act
     mode.apply_line(line)
 
-    # Assert
     sim.set_leds.assert_not_called()
     assert capsys.readouterr().out == f"{response}\n"
 
@@ -75,28 +66,22 @@ def test_apply_line_warns_during_thermal_shutdown(
     sim: MagicMock, capsys: pytest.CaptureFixture[str]
 ) -> None:
     """The setpoint is pending, not applied, so `OK` would hide the divergence."""
-    # Arrange
     sim.check_thermals.side_effect = [[120.0, 25.0, 25.0], [25.0, 25.0, 25.0]]
     mode = BasiliskMode(sim)
 
-    # Act
     mode.apply_line("50")
 
-    # Assert
     assert capsys.readouterr().out == "WARN THERMAL temperature too high, lights off for safety\n"
 
 
 def test_apply_line_acknowledges_again_once_the_panel_has_cooled(
     sim: MagicMock, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    # Arrange
     sim.check_thermals.side_effect = [[120.0, 25.0, 25.0], [25.0, 25.0, 25.0], [25.0, 25.0, 25.0]]
     mode = BasiliskMode(sim)
 
-    # Act
     mode.apply_line("50")
     capsys.readouterr()
     mode.apply_line("50")
 
-    # Assert
     assert capsys.readouterr().out == "OK 50\n"
