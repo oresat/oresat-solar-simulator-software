@@ -76,7 +76,7 @@ produced to `settings.toml`, which the device reads at boot to decide how to run
 ### Headless protocol
 
 Headless mode is driven over the single USB console serial port. Send one intensity value per
-line — a bare integer from 0 to 100, newline terminated. Values outside that range, and lines
+line — an integer from 0 to 100, newline terminated. Values outside that range, and lines
 that are not integers, are reported on the console and skipped.
 
 ```sh

@@ -30,7 +30,7 @@ class BasiliskMode:
                     time.sleep(0.1)
 
     def apply_line(self, line: str) -> None:
-        """Apply one line of the Basilisk protocol: a bare integer from 0 to 100.
+        """Apply one line of the Basilisk protocol: an integer from 0 to 100.
 
         OK <intensity>              the value was applied
         ERR <CODE> <description>    the line could not be acted on; CODE is the token
