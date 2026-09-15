@@ -23,7 +23,7 @@ def calculate_light_intensity(factor: float) -> dict:
         white_intensity = 0
         cyan_intensity = 0
         halogen_intensity = 0
-    elif 0 < factor <= 1:
+    else:
         violet_intensity = -1.5066 * factor + 22.6663
         white_intensity = 32.3521 * factor + 16.3331
         cyan_intensity = 10.2647 * factor + 20.9998
