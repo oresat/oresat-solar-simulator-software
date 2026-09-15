@@ -64,24 +64,15 @@ def test_apply_line_reports_a_bad_line(
     assert capsys.readouterr().out == f"{response}\n"
 
 
-def test_apply_line_warns_during_thermal_shutdown(
-    mode: BasiliskMode, sim: MagicMock, capsys: pytest.CaptureFixture[str]
-) -> None:
-    """The setpoint is pending, not applied, so `OK` would hide the divergence."""
-    sim.check_thermals.side_effect = [[120.0, 25.0, 25.0], [25.0, 25.0, 25.0]]
-
-    mode.apply_line("50")
-
-    assert capsys.readouterr().out == "WARN THERMAL temperature too high, lights off for safety\n"
-
-
-def test_apply_line_acknowledges_again_once_the_panel_has_cooled(
+def test_apply_line_warns_while_hot_then_acknowledges_once_cooled(
     mode: BasiliskMode, sim: MagicMock, capsys: pytest.CaptureFixture[str]
 ) -> None:
     sim.check_thermals.side_effect = [[120.0, 25.0, 25.0], [25.0, 25.0, 25.0], [25.0, 25.0, 25.0]]
 
     mode.apply_line("50")
-    capsys.readouterr()
+
+    assert capsys.readouterr().out == "WARN THERMAL temperature too high, lights off for safety\n"
+
     mode.apply_line("50")
 
     assert capsys.readouterr().out == "OK 50\n"
