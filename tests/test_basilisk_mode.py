@@ -51,7 +51,6 @@ def test_apply_line_turns_everything_off_at_zero(
     ("line", "response"),
     [
         ("", "ERR EMPTY no intensity value received"),
-        ("   ", "ERR EMPTY no intensity value received"),
         ("abc", "ERR PARSE invalid intensity value received: abc"),
         ("12.5", "ERR PARSE invalid intensity value received: 12.5"),
         ("-1", "ERR RANGE invalid intensity value received: -1"),
@@ -70,19 +69,6 @@ def test_apply_line_reports_a_bad_line(
     # Assert
     sim.set_leds.assert_not_called()
     assert capsys.readouterr().out == f"{response}\n"
-
-
-def test_apply_line_scrubs_stray_bytes_around_a_value(
-    sim: MagicMock, capsys: pytest.CaptureFixture[str]
-) -> None:
-    # Arrange
-    mode = BasiliskMode(sim)
-
-    # Act
-    mode.apply_line("\x0050\r")
-
-    # Assert
-    assert capsys.readouterr().out == "OK 50\n"
 
 
 def test_apply_line_warns_during_thermal_shutdown(

@@ -38,8 +38,6 @@ class BasiliskMode:
         WARN THERMAL <description>  the value is valid and is now the pending setpoint,
                                     held off while thermal shutdown is active
         """
-        line = line.replace("\x00", "").strip()
-
         if not line:
             print("ERR EMPTY no intensity value received")
             return
