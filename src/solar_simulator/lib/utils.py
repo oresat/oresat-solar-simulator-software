@@ -65,6 +65,32 @@ def display_status(sim: Sim) -> None:
     print(f"{temp_info} | {light_info}", end="\n")
 
 
+def read_temperatures(sim: Sim) -> tuple:
+    """Return the LED, heatsink, and cell temperatures in Celsius.
+
+    Raise ThermalSensorError when the thermistors cannot be read.
+    """
+    thermals = sim.check_thermals()
+    if not thermals:
+        raise ThermalSensorError("Cannot read the temperature sensors")
+
+    led_temp, heatsink_temp, cell_temp = thermals
+
+    return (led_temp or 0, heatsink_temp or 0, cell_temp or 0)
+
+
+def is_within_thermal_limits(sim: Sim, temperatures: tuple) -> bool:
+    """Return whether every temperature is at or below its own shutdown limit."""
+    limits = (sim.therm_led_shutdown, sim.therm_heatsink_shutdown, sim.therm_cell_shutdown)
+
+    return all(temp <= limit for temp, limit in zip(temperatures, limits))
+
+
+def has_cooled_down(sim: Sim, temperatures: tuple) -> bool:
+    """Return whether every temperature is back at or below the resume limit."""
+    return all(temp <= sim.therm_resume_temp for temp in temperatures)
+
+
 def check_temperature(
     sim: Sim,
     writer: "Callable[..., None]" = print,
@@ -81,21 +107,8 @@ def check_temperature(
     if not sim.enable_therm_monitoring:
         return True
 
-    thermals = sim.check_thermals()
-    if not thermals:
-        raise ThermalSensorError("Cannot read the temperature sensors")
-
-    led_temp, heatsink_temp, cell_temp = thermals
-    led_temp = led_temp or 0
-    heatsink_temp = heatsink_temp or 0
-    cell_temp = cell_temp or 0
-
-    within_limits = (
-        led_temp <= sim.therm_led_shutdown,
-        heatsink_temp <= sim.therm_heatsink_shutdown,
-        cell_temp <= sim.therm_cell_shutdown,
-    )
-    if all(within_limits):
+    temperatures = read_temperatures(sim)
+    if is_within_thermal_limits(sim, temperatures):
         return True
 
     previous_light_settings = sim.current_light_settings
@@ -105,20 +118,10 @@ def check_temperature(
     if on_shutdown:
         on_shutdown()
 
-    while (
-        led_temp > sim.therm_resume_temp
-        or heatsink_temp > sim.therm_resume_temp
-        or cell_temp > sim.therm_resume_temp
-    ):
+    while not has_cooled_down(sim, temperatures):
         time.sleep(1)
-        thermals = sim.check_thermals()
-        if not thermals:
-            raise ThermalSensorError("Cannot read the temperature sensors")
-
-        led_temp, heatsink_temp, cell_temp = thermals
-        led_temp = led_temp or 0
-        heatsink_temp = heatsink_temp or 0
-        cell_temp = cell_temp or 0
+        temperatures = read_temperatures(sim)
+        led_temp, heatsink_temp, cell_temp = temperatures
         writer("Cooling down ...")
         writer(f"LED: {led_temp}°C, Heatsink: {heatsink_temp}°C, Cell: {cell_temp}°C")
 
