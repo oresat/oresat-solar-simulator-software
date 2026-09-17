@@ -6,15 +6,12 @@ import time
 import supervisor
 
 from .solar_simulator import SolarSimulator as Sim
+from .solar_simulator import ThermalSensorError
 
 try:
     from typing import Callable
 except ImportError:
     Callable = None
-
-
-class ThermalSensorError(Exception):
-    """The thermistors could not be read, so the temperatures are unknown."""
 
 
 def calculate_light_intensity(factor: float) -> dict:

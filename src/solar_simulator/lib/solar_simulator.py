@@ -15,6 +15,10 @@ from pwmio import PWMOut
 MAX_VALUE = const(65535)
 
 
+class ThermalSensorError(Exception):
+    """A thermistor could not be read, so its temperature is unknown."""
+
+
 class SolarSimulator:
     """Simulates solar intensity through light device brightness.
 
@@ -58,6 +62,8 @@ class SolarSimulator:
             - `check_thermals()[0]` - Thermistor located at the SMT LEDs under the lid PCB
             - `check_thermals()[1]` - Thermistor attached to the heatsink on the top
             - `check_thermals()[2]` - Thermistor located where the solar cell is placed
+
+        Raise ThermalSensorError when a thermistor cannot be read.
         """
         thermals = []
         thermistors = self._read_thermistors()
@@ -92,7 +98,15 @@ class SolarSimulator:
 
     @staticmethod
     def _calc_temp(v_adc: float, vcc: float = 3.3, r_fixed: float = 10000.0) -> float:
-        """Given thermistor resistance, calculuate and return temperature (in Celsius)."""
+        """Given thermistor resistance, calculuate and return temperature (in Celsius).
+
+        Raise ThermalSensorError when the voltage sits at or past either rail. That is a
+        disconnected or shorted thermistor, not a very cold or very hot one: the divider
+        cannot produce those voltages while a thermistor is attached to it.
+        """
+        if not 0 < v_adc < vcc:
+            raise ThermalSensorError(f"Thermistor voltage out of range: {v_adc:.3f}V")
+
         # Thermistor resistance
         r_therm = r_fixed * v_adc / (vcc - v_adc)
 
