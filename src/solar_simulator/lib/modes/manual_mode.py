@@ -82,7 +82,7 @@ class ManualMode:
             input_line = ""
 
             while True:
-                check_for_interrupt()
+                check_for_interrupt(self.sim)
                 check_temperature(self.sim)
                 display_status(self.sim)
 
@@ -146,7 +146,7 @@ class ManualMode:
                 print("Press 'Enter' to input new values, or 'exit' to return to the main menu.")
 
                 while True:
-                    check_for_interrupt()
+                    check_for_interrupt(self.sim)
                     check_temperature(self.sim)
                     display_status(self.sim)
 

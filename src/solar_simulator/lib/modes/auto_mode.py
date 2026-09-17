@@ -63,7 +63,7 @@ class AutoMode:
                     # Update level index for sine wave
                     level = (level + 1) % len(wave)
 
-                    check_for_interrupt()
+                    check_for_interrupt(self.sim)
                     display_status(self.sim)
 
                     # Adjust current repetition's timing as needed by sleeping

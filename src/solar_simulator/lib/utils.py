@@ -127,14 +127,14 @@ def check_temperature(
     return True
 
 
-def check_for_interrupt() -> None:
+def check_for_interrupt(sim: Sim) -> None:
     """Listen for keyboard interrupts."""
     if supervisor.runtime.serial_bytes_available:
         input_char = sys.stdin.read(1)
 
         if input_char == '\x03':  # Ctrl-C (ASCII 3)
             print("\nCtrl-C detected. Turning off LEDs...")
-            Sim.set_leds(0, 0, 0, 0)
+            sim.set_leds(0, 0, 0, 0)
             raise KeyboardInterrupt
 
         print(f"Ignored input: {repr(input_char)}")  # noqa: RUF010

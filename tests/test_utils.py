@@ -1,4 +1,8 @@
+import io
+import sys
 from unittest.mock import MagicMock
+
+import pytest
 
 from solar_simulator.lib import utils
 
@@ -15,3 +19,15 @@ def test_check_temperature_waits_for_every_sensor_to_cool(sim: MagicMock) -> Non
     utils.check_temperature(sim, writer=lambda _message: None)
 
     assert sim.check_thermals.call_count == 3
+
+
+def test_check_for_interrupt_turns_off_the_lights_on_ctrl_c(
+    sim: MagicMock, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(utils.supervisor.runtime, "serial_bytes_available", True)
+    monkeypatch.setattr(sys, "stdin", io.StringIO("\x03"))
+
+    with pytest.raises(KeyboardInterrupt):
+        utils.check_for_interrupt(sim)
+
+    sim.set_leds.assert_called_once_with(0, 0, 0, 0)
