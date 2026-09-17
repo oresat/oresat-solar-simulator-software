@@ -1,14 +1,14 @@
 import io
 import sys
-from unittest.mock import MagicMock
 
 import pytest
 
+from solar_simulator import SolarSimulator
 from solar_simulator.lib import utils
 from solar_simulator.lib.solar_simulator import ThermalSensorError
 
 
-def test_enforce_thermal_limits_waits_for_every_sensor_to_cool(sim: MagicMock) -> None:
+def test_enforce_thermal_limits_waits_for_every_sensor_to_cool(sim: SolarSimulator) -> None:
     # The LED runs hot on its own; the heatsink and cell are under the resume limit
     # from the first reading, so a check that needs all three to be hot never waits.
     sim.check_thermals.side_effect = [
@@ -23,7 +23,7 @@ def test_enforce_thermal_limits_waits_for_every_sensor_to_cool(sim: MagicMock) -
 
 
 def test_check_for_interrupt_turns_off_the_lights_on_ctrl_c(
-    sim: MagicMock, monkeypatch: pytest.MonkeyPatch
+    sim: SolarSimulator, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(utils.supervisor.runtime, "serial_bytes_available", True)
     monkeypatch.setattr(sys, "stdin", io.StringIO("\x03"))
@@ -34,7 +34,7 @@ def test_check_for_interrupt_turns_off_the_lights_on_ctrl_c(
     sim.set_leds.assert_called_once_with(0, 0, 0, 0)
 
 
-def test_enforce_thermal_limits_raises_when_the_sensors_cannot_be_read(sim: MagicMock) -> None:
+def test_enforce_thermal_limits_raises_when_the_sensors_cannot_be_read(sim: SolarSimulator) -> None:
     sim.check_thermals.side_effect = ThermalSensorError("Thermistor voltage out of range: 0.000V")
 
     with pytest.raises(ThermalSensorError):
@@ -42,7 +42,7 @@ def test_enforce_thermal_limits_raises_when_the_sensors_cannot_be_read(sim: Magi
 
 
 def test_display_status_reports_a_thermistor_fault(
-    sim: MagicMock, capsys: pytest.CaptureFixture[str]
+    sim: SolarSimulator, capsys: pytest.CaptureFixture[str]
 ) -> None:
     sim.check_thermals.side_effect = ThermalSensorError("Thermistor voltage out of range: 0.000V")
 

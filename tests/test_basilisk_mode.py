@@ -1,13 +1,12 @@
-from unittest.mock import MagicMock
-
 import pytest
 
+from solar_simulator import SolarSimulator
 from solar_simulator.lib.modes.basilisk_mode import BasiliskMode
 from solar_simulator.lib.solar_simulator import ThermalSensorError
 
 
 @pytest.fixture
-def mode(sim: MagicMock) -> BasiliskMode:
+def mode(sim: SolarSimulator) -> BasiliskMode:
     """Basilisk mode driving the stub simulator."""
     return BasiliskMode(sim)
 
@@ -21,7 +20,7 @@ def mode(sim: MagicMock) -> BasiliskMode:
 )
 def test_apply_line_sets_leds_for_a_valid_intensity(
     mode: BasiliskMode,
-    sim: MagicMock,
+    sim: SolarSimulator,
     capsys: pytest.CaptureFixture[str],
     line: str,
     settings: dict,
@@ -43,7 +42,11 @@ def test_apply_line_sets_leds_for_a_valid_intensity(
     ],
 )
 def test_apply_line_reports_a_bad_line(
-    mode: BasiliskMode, sim: MagicMock, capsys: pytest.CaptureFixture[str], line: str, response: str
+    mode: BasiliskMode,
+    sim: SolarSimulator,
+    capsys: pytest.CaptureFixture[str],
+    line: str,
+    response: str,
 ) -> None:
     mode.apply_line(line)
 
@@ -52,7 +55,7 @@ def test_apply_line_reports_a_bad_line(
 
 
 def test_apply_line_warns_while_hot_then_acknowledges_once_cooled(
-    mode: BasiliskMode, sim: MagicMock, capsys: pytest.CaptureFixture[str]
+    mode: BasiliskMode, sim: SolarSimulator, capsys: pytest.CaptureFixture[str]
 ) -> None:
     sim.check_thermals.side_effect = [[120.0, 25.0, 25.0], [25.0, 25.0, 25.0], [25.0, 25.0, 25.0]]
 
@@ -66,7 +69,7 @@ def test_apply_line_warns_while_hot_then_acknowledges_once_cooled(
 
 
 def test_apply_line_reports_a_thermal_sensor_fault(
-    mode: BasiliskMode, sim: MagicMock, capsys: pytest.CaptureFixture[str]
+    mode: BasiliskMode, sim: SolarSimulator, capsys: pytest.CaptureFixture[str]
 ) -> None:
     sim.check_thermals.side_effect = ThermalSensorError("Thermistor voltage out of range: 0.000V")
 

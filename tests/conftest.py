@@ -26,18 +26,23 @@ for cp_module in CIRCUITPYTHON_MODULES:
 
 sys.modules["micropython"].const = lambda x: x
 
+# Importable only once the stand-ins above are in place, since the simulator reaches for
+# the board's I2C, ADC, DAC, and PWM the moment it is constructed.
+from solar_simulator import SolarSimulator  # noqa: E402
+
 
 @pytest.fixture
-def sim() -> MagicMock:
-    """Build a simulator reporting safe temperatures, so thermal shutdown stays out of the way."""
-    sim = MagicMock()
-    sim.check_thermals.return_value = [25.0, 25.0, 25.0]
-    sim.enable_therm_monitoring = True
-    sim.therm_led_shutdown = 100
-    sim.therm_heatsink_shutdown = 60
-    sim.therm_cell_shutdown = 80
-    sim.therm_resume_temp = 45
-    sim.current_light_settings = {'v': 0, 'w': 0, 'c': 0, 'h': 0}
+def sim() -> SolarSimulator:
+    """Build a simulator whose sensors read safe, so thermal shutdown stays out of the way.
+
+    It is the real class, so the thresholds are the real defaults and the light bookkeeping
+    is the real bookkeeping. Only the two edges a test needs to reach are instrumented:
+    the thermistors, which have no hardware to read, and set_leds, which tests assert on.
+    """
+    sim = SolarSimulator()
+    sim.check_thermals = MagicMock(return_value=[25.0, 25.0, 25.0])
+    sim.set_leds = MagicMock(wraps=sim.set_leds)
+
     return sim
 
 
