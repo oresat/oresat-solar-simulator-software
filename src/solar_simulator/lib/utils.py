@@ -104,8 +104,8 @@ def check_temperature(
 
     while (
         led_temp > sim.therm_resume_temp
-        and heatsink_temp > sim.therm_resume_temp
-        and cell_temp > sim.therm_resume_temp
+        or heatsink_temp > sim.therm_resume_temp
+        or cell_temp > sim.therm_resume_temp
     ):
         time.sleep(1)
         thermals = sim.check_thermals()

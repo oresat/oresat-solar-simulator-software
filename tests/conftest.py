@@ -1,6 +1,7 @@
 """Pytest configuration."""
 
 import sys
+import time
 from unittest.mock import MagicMock
 
 import pytest
@@ -38,3 +39,9 @@ def sim() -> MagicMock:
     sim.therm_resume_temp = 45
     sim.current_light_settings = {'v': 0, 'w': 0, 'c': 0, 'h': 0}
     return sim
+
+
+@pytest.fixture(autouse=True)
+def _no_cooldown_delay(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Run the thermal cooldown poll without waiting a second between readings."""
+    monkeypatch.setattr(time, "sleep", lambda _seconds: None)
