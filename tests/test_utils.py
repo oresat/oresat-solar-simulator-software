@@ -31,3 +31,10 @@ def test_check_for_interrupt_turns_off_the_lights_on_ctrl_c(
         utils.check_for_interrupt(sim)
 
     sim.set_leds.assert_called_once_with(0, 0, 0, 0)
+
+
+def test_check_temperature_raises_when_the_sensors_cannot_be_read(sim: MagicMock) -> None:
+    sim.check_thermals.return_value = []
+
+    with pytest.raises(utils.ThermalSensorError):
+        utils.check_temperature(sim, writer=lambda _message: None)

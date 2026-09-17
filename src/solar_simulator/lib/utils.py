@@ -13,6 +13,10 @@ except ImportError:
     Callable = None
 
 
+class ThermalSensorError(Exception):
+    """The thermistors could not be read, so the temperatures are unknown."""
+
+
 def calculate_light_intensity(factor: float) -> dict:
     """Return the `set_leds` settings for an intensity factor from 0 to 1."""
     if not (0 <= factor <= 1):
@@ -72,15 +76,14 @@ def check_temperature(
     turned off and before the cooldown wait blocks, so a caller can report the shutdown
     while it is still news.
 
-    Return True when it is safe to proceed, False when the sensors could not be read.
+    Raise ThermalSensorError when the thermistors cannot be read.
     """
     if not sim.enable_therm_monitoring:
         return True
 
     thermals = sim.check_thermals()
     if not thermals:
-        writer("Cannot read the temperature sensors")
-        return False
+        raise ThermalSensorError("Cannot read the temperature sensors")
 
     led_temp, heatsink_temp, cell_temp = thermals
     led_temp = led_temp or 0
@@ -109,16 +112,15 @@ def check_temperature(
     ):
         time.sleep(1)
         thermals = sim.check_thermals()
-        if thermals:
-            led_temp, heatsink_temp, cell_temp = thermals
-            led_temp = led_temp or 0
-            heatsink_temp = heatsink_temp or 0
-            cell_temp = cell_temp or 0
-            writer("Cooling down ...")
-            writer(f"LED: {led_temp}°C, Heatsink: {heatsink_temp}°C, Cell: {cell_temp}°C")
-        else:
-            writer("Cannot read the temperature sensors")
-            return False
+        if not thermals:
+            raise ThermalSensorError("Cannot read the temperature sensors")
+
+        led_temp, heatsink_temp, cell_temp = thermals
+        led_temp = led_temp or 0
+        heatsink_temp = heatsink_temp or 0
+        cell_temp = cell_temp or 0
+        writer("Cooling down ...")
+        writer(f"LED: {led_temp}°C, Heatsink: {heatsink_temp}°C, Cell: {cell_temp}°C")
 
     writer("Temperature back to safe levels. Resuming operation.")
     if previous_light_settings:

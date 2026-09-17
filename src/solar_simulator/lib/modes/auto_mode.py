@@ -6,6 +6,7 @@ from ulab import numpy as np
 
 from ..solar_simulator import SolarSimulator as Sim
 from ..utils import (
+    ThermalSensorError,
     calculate_light_intensity,
     check_for_interrupt,
     check_temperature,
@@ -55,24 +56,25 @@ class AutoMode:
             loop_start = time.monotonic()
 
             while True:
-                if check_temperature(self.sim):
-                    # Calculate current intensity factor
-                    intensity_factor = wave[level] * self.peak
+                check_temperature(self.sim)
 
-                    self.sim.set_leds(**calculate_light_intensity(intensity_factor))
-                    # Update level index for sine wave
-                    level = (level + 1) % len(wave)
+                # Calculate current intensity factor
+                intensity_factor = wave[level] * self.peak
 
-                    check_for_interrupt(self.sim)
-                    display_status(self.sim)
+                self.sim.set_leds(**calculate_light_intensity(intensity_factor))
+                # Update level index for sine wave
+                level = (level + 1) % len(wave)
 
-                    # Adjust current repetition's timing as needed by sleeping
-                    before_sleep = time.monotonic() - loop_start
-                    time.sleep(loop_time - before_sleep % loop_time)
-                else:
-                    print("Temperature too high! Lights turned off for safety.")
-                    break
+                check_for_interrupt(self.sim)
+                display_status(self.sim)
+
+                # Adjust current repetition's timing as needed by sleeping
+                before_sleep = time.monotonic() - loop_start
+                time.sleep(loop_time - before_sleep % loop_time)
 
         except KeyboardInterrupt:
             print("\nExiting Auto Mode.")
+            self.sim.set_leds(0, 0, 0, 0)
+        except ThermalSensorError as error:
+            print(f"\n{error}. Exiting Auto Mode.")
             self.sim.set_leds(0, 0, 0, 0)
