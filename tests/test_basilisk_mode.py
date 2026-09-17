@@ -77,3 +77,15 @@ def test_apply_line_reports_a_thermal_sensor_fault(
 
     assert capsys.readouterr().out == "ERR THERMAL Thermistor voltage out of range: 0.000V\n"
     assert sim.set_leds.call_args_list[-1].args == (0, 0, 0, 0)
+
+
+def test_apply_line_refuses_a_value_while_in_thermal_shutdown(
+    mode: BasiliskMode, sim: SolarSimulator, capsys: pytest.CaptureFixture[str]
+) -> None:
+    sim.check_thermals.return_value = [120.0, 25.0, 25.0]
+
+    mode.apply_line("50")
+
+    assert capsys.readouterr().out == "WARN THERMAL temperature too high, lights off for safety\n"
+    sim.set_leds.assert_not_called()
+    assert sim.mcp.channel_a.value == 0

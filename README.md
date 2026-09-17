@@ -76,8 +76,14 @@ produced to `settings.toml`, which the device reads at boot to decide how to run
 ### Headless protocol
 
 Headless mode is driven over the single USB console serial port. Send one intensity value per
-line — an integer from 0 to 100, newline terminated. Values outside that range, and lines
-that are not integers, are reported on the console and skipped.
+line, an integer from 0 to 100, newline terminated, and read exactly one response line back.
+Nothing on the device blocks, so a response always arrives.
+
+| Response                      | Meaning                                                           |
+| ----------------------------- | ----------------------------------------------------------------- |
+| `OK <intensity>`              | the value was applied                                             |
+| `ERR <CODE> <description>`    | the line was not acted on; branch on `CODE`                       |
+| `WARN THERMAL <description>`  | the value was **not** applied: the simulator is too hot, the lights are off, and it stays that way until it cools. Send the value again later. |
 
 ```sh
 printf '50\n' > /dev/ttyACM0
