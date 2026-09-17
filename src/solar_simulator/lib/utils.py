@@ -54,20 +54,6 @@ def display_status(sim: Sim) -> None:
     print(f"{temp_info} | {light_info}", end="\n")
 
 
-def read_temperatures(sim: Sim) -> tuple:
-    """Return the LED, heatsink, and cell temperatures in Celsius.
-
-    Raise ThermalSensorError when the thermistors cannot be read.
-    """
-    thermals = sim.check_thermals()
-    if not thermals:
-        raise ThermalSensorError("Cannot read the temperature sensors")
-
-    led_temp, heatsink_temp, cell_temp = thermals
-
-    return (led_temp or 0, heatsink_temp or 0, cell_temp or 0)
-
-
 def is_within_thermal_limits(sim: Sim, temperatures: tuple) -> bool:
     """Return whether every temperature is at or below its own shutdown limit."""
     limits = (sim.therm_led_shutdown, sim.therm_heatsink_shutdown, sim.therm_cell_shutdown)
@@ -94,7 +80,7 @@ def enforce_thermal_limits(sim: Sim, writer: "Callable[..., None]" = print) -> b
     if not sim.enable_therm_monitoring:
         return False
 
-    temperatures = read_temperatures(sim)
+    temperatures = sim.check_thermals()
     if is_within_thermal_limits(sim, temperatures):
         return False
 
@@ -104,7 +90,7 @@ def enforce_thermal_limits(sim: Sim, writer: "Callable[..., None]" = print) -> b
 
     while not has_cooled_down(sim, temperatures):
         time.sleep(1)
-        temperatures = read_temperatures(sim)
+        temperatures = sim.check_thermals()
         led_temp, heatsink_temp, cell_temp = temperatures
         writer("Cooling down ...")
         writer(f"LED: {led_temp}°C, Heatsink: {heatsink_temp}°C, Cell: {cell_temp}°C")

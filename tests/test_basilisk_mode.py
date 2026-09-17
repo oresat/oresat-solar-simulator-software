@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from solar_simulator.lib.modes.basilisk_mode import BasiliskMode
+from solar_simulator.lib.solar_simulator import ThermalSensorError
 
 
 @pytest.fixture
@@ -67,9 +68,9 @@ def test_apply_line_warns_while_hot_then_acknowledges_once_cooled(
 def test_apply_line_reports_a_thermal_sensor_fault(
     mode: BasiliskMode, sim: MagicMock, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    sim.check_thermals.return_value = []
+    sim.check_thermals.side_effect = ThermalSensorError("Thermistor voltage out of range: 0.000V")
 
     mode.apply_line("50")
 
-    assert capsys.readouterr().out == "ERR THERMAL Cannot read the temperature sensors\n"
+    assert capsys.readouterr().out == "ERR THERMAL Thermistor voltage out of range: 0.000V\n"
     assert sim.set_leds.call_args_list[-1].args == (0, 0, 0, 0)

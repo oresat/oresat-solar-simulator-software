@@ -35,9 +35,9 @@ def test_check_for_interrupt_turns_off_the_lights_on_ctrl_c(
 
 
 def test_enforce_thermal_limits_raises_when_the_sensors_cannot_be_read(sim: MagicMock) -> None:
-    sim.check_thermals.return_value = []
+    sim.check_thermals.side_effect = ThermalSensorError("Thermistor voltage out of range: 0.000V")
 
-    with pytest.raises(utils.ThermalSensorError):
+    with pytest.raises(ThermalSensorError):
         utils.enforce_thermal_limits(sim, writer=lambda _message: None)
 
 
