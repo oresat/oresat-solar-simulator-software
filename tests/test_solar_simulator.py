@@ -53,3 +53,17 @@ def test_restore_drives_the_recorded_setting_again() -> None:
 
     assert sim.mcp.channel_a.value == 1000
     assert sim.hal.duty_cycle == 4000
+
+
+def test_is_within_shutdown_limits_compares_each_part_to_its_own_threshold(
+    sim: SolarSimulator,
+) -> None:
+    # The heatsink shuts down at 60°C, well under the LED's 100°C, so the same
+    # temperature is fine on one and past the limit on the other.
+    assert sim.is_within_shutdown_limits([70.0, 55.0, 55.0]) is True
+    assert sim.is_within_shutdown_limits([55.0, 70.0, 55.0]) is False
+
+
+def test_is_within_resume_limit_shares_one_threshold(sim: SolarSimulator) -> None:
+    assert sim.is_within_resume_limit([44.0, 44.0, 44.0]) is True
+    assert sim.is_within_resume_limit([44.0, 44.0, 46.0]) is False

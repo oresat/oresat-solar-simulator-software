@@ -90,6 +90,27 @@ class SolarSimulator:
 
         return thermals
 
+    def is_within_shutdown_limits(self, temperatures: list) -> bool:
+        """Return whether every temperature is at or below its own shutdown limit.
+
+        Each part carries its own tolerance, so each is compared against its own
+        threshold. Its counterpart, `is_within_resume_limit`, deliberately shares one
+        threshold across all three: the question there is whether the enclosure as a
+        whole has settled, not whether each part is individually survivable.
+        """
+        led_temp, heatsink_temp, cell_temp = temperatures
+        within_limits = (
+            led_temp <= self.therm_led_shutdown,
+            heatsink_temp <= self.therm_heatsink_shutdown,
+            cell_temp <= self.therm_cell_shutdown,
+        )
+
+        return all(within_limits)
+
+    def is_within_resume_limit(self, temperatures: list) -> bool:
+        """Return whether every temperature is back at or below the shared resume limit."""
+        return all(temp <= self.therm_resume_temp for temp in temperatures)
+
     def _port_scan(self) -> list:
         """Print all available I2C devices."""
         self.i2c.try_lock()

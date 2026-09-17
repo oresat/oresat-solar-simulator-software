@@ -54,18 +54,6 @@ def display_status(sim: Sim) -> None:
     print(f"{temp_info} | {light_info}", end="\n")
 
 
-def is_within_thermal_limits(sim: Sim, temperatures: tuple) -> bool:
-    """Return whether every temperature is at or below its own shutdown limit."""
-    limits = (sim.therm_led_shutdown, sim.therm_heatsink_shutdown, sim.therm_cell_shutdown)
-
-    return all(temp <= limit for temp, limit in zip(temperatures, limits))
-
-
-def has_cooled_down(sim: Sim, temperatures: tuple) -> bool:
-    """Return whether every temperature is back at or below the resume limit."""
-    return all(temp <= sim.therm_resume_temp for temp in temperatures)
-
-
 def enforce_thermal_limits(sim: Sim, writer: "Callable[..., None]" = print) -> bool:
     """Hold the lights off until the simulator is back within its thermal limits.
 
@@ -81,13 +69,13 @@ def enforce_thermal_limits(sim: Sim, writer: "Callable[..., None]" = print) -> b
         return False
 
     temperatures = sim.check_thermals()
-    if is_within_thermal_limits(sim, temperatures):
+    if sim.is_within_shutdown_limits(temperatures):
         return False
 
     sim.blank()
     writer("Temperature too high! Turning off lights for safety.")
 
-    while not has_cooled_down(sim, temperatures):
+    while not sim.is_within_resume_limit(temperatures):
         time.sleep(1)
         temperatures = sim.check_thermals()
         led_temp, heatsink_temp, cell_temp = temperatures
