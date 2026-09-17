@@ -91,32 +91,26 @@ def has_cooled_down(sim: Sim, temperatures: tuple) -> bool:
     return all(temp <= sim.therm_resume_temp for temp in temperatures)
 
 
-def check_temperature(
-    sim: Sim,
-    writer: "Callable[..., None]" = print,
-    on_shutdown: "Callable[[], None]" = None,
-) -> bool:
-    """Check the temperature, and handle thermal shutdown and resume.
+def check_temperature(sim: Sim, writer: "Callable[..., None]" = print) -> bool:
+    """Hold the lights off until the simulator is back within its thermal limits.
 
-    Progress messages go to `writer`. `on_shutdown` is called once the lights have been
-    turned off and before the cooldown wait blocks, so a caller can report the shutdown
-    while it is still news.
+    Return whether a shutdown happened: True once the lights have been turned off,
+    waited out, and restored, False when nothing needed doing. Monitoring turned off
+    counts as nothing needing doing, since nothing was measured.
 
-    Raise ThermalSensorError when the thermistors cannot be read.
+    Progress messages go to `writer`. Raise ThermalSensorError when the thermistors
+    cannot be read.
     """
     if not sim.enable_therm_monitoring:
-        return True
+        return False
 
     temperatures = read_temperatures(sim)
     if is_within_thermal_limits(sim, temperatures):
-        return True
+        return False
 
     previous_light_settings = sim.current_light_settings
     sim.set_leds(0, 0, 0, 0)
     writer("Temperature too high! Turning off lights for safety.")
-
-    if on_shutdown:
-        on_shutdown()
 
     while not has_cooled_down(sim, temperatures):
         time.sleep(1)

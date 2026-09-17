@@ -12,7 +12,6 @@ class BasiliskMode:
     def __init__(self, sim: Sim) -> None:
         """Initialize basilisk mode."""
         self.sim = sim
-        self._warned = False
 
     def run(self) -> None:
         """Apply each line received on the console."""
@@ -25,8 +24,8 @@ class BasiliskMode:
         OK <intensity>              the value was applied
         ERR <CODE> <description>    the line could not be acted on; CODE is the token
                                     the caller branches on
-        WARN THERMAL <description>  the value is valid and is now the pending setpoint,
-                                    held off while thermal shutdown is active
+        WARN THERMAL <description>  the value was applied, but the simulator was too hot
+                                    to hold it; the lights were off until it cooled down
         """
         if not line:
             print("ERR EMPTY no intensity value received")
@@ -46,22 +45,14 @@ class BasiliskMode:
 
         # The console carries protocol lines only: the shared cooldown chatter is
         # dropped, and the shutdown it announces is answered as WARN instead.
-        self._warned = False
         try:
-            check_temperature(
-                self.sim,
-                writer=lambda _message: None,
-                on_shutdown=self._report_thermal_shutdown,
-            )
+            shut_down = check_temperature(self.sim, writer=lambda _message: None)
         except ThermalSensorError as error:
             self.sim.set_leds(0, 0, 0, 0)
             print(f"ERR THERMAL {error}")
             return
 
-        if not self._warned:
+        if shut_down:
+            print("WARN THERMAL temperature too high, lights off for safety")
+        else:
             print(f"OK {intensity}")
-
-    def _report_thermal_shutdown(self) -> None:
-        """Answer the line with a thermal warning."""
-        self._warned = True
-        print("WARN THERMAL temperature too high, lights off for safety")
