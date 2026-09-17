@@ -67,3 +67,13 @@ def test_is_within_shutdown_limits_compares_each_part_to_its_own_threshold(
 def test_is_within_resume_limit_shares_one_threshold(sim: SolarSimulator) -> None:
     assert sim.is_within_resume_limit([44.0, 44.0, 44.0]) is True
     assert sim.is_within_resume_limit([44.0, 44.0, 46.0]) is False
+
+
+@pytest.mark.parametrize("factor", [-0.1, 1.1])
+def test_set_intensity_rejects_a_factor_outside_the_range(
+    sim: SolarSimulator, factor: float
+) -> None:
+    with pytest.raises(ValueError, match="between 0 and 1"):
+        sim.set_intensity(factor)
+
+    sim.set_leds.assert_not_called()

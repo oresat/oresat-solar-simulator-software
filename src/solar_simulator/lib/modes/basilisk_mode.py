@@ -5,7 +5,6 @@ import sys
 from ..solar_simulator import SolarSimulator as Sim
 from ..solar_simulator import ThermalSensorError
 from ..thermal import enforce_thermal_limits
-from ..utils import calculate_light_intensity
 
 
 class BasiliskMode:
@@ -43,7 +42,7 @@ class BasiliskMode:
             print(f"ERR RANGE invalid intensity value received: {line}")
             return
 
-        self.sim.set_leds(**calculate_light_intensity(intensity / 100))
+        self.sim.set_intensity(intensity / 100)
 
         # The console carries protocol lines only: the shared cooldown chatter is
         # dropped, and the shutdown it announces is answered as WARN instead.

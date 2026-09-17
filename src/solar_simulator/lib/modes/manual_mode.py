@@ -8,7 +8,6 @@ import supervisor
 from ..console import check_for_interrupt, display_status
 from ..solar_simulator import SolarSimulator as Sim
 from ..thermal import enforce_thermal_limits
-from ..utils import calculate_light_intensity
 
 
 class ManualMode:
@@ -70,7 +69,7 @@ class ManualMode:
             except ValueError:
                 print("Invalid input. Please enter a numeric value.")
 
-            self.sim.set_leds(**calculate_light_intensity(intensity_input))
+            self.sim.set_intensity(intensity_input)
 
             print(f"\nCurrent intensity: {intensity_input:.2f}")
             print("Press 'Enter' to reset your LEDs...")

@@ -8,7 +8,6 @@ from ..console import check_for_interrupt, display_status
 from ..solar_simulator import SolarSimulator as Sim
 from ..solar_simulator import ThermalSensorError
 from ..thermal import enforce_thermal_limits
-from ..utils import calculate_light_intensity
 
 
 class AutoMode:
@@ -58,7 +57,7 @@ class AutoMode:
                 # Calculate current intensity factor
                 intensity_factor = wave[level] * self.peak
 
-                self.sim.set_leds(**calculate_light_intensity(intensity_factor))
+                self.sim.set_intensity(intensity_factor)
                 # Update level index for sine wave
                 level = (level + 1) % len(wave)
 

@@ -52,6 +52,13 @@ class SolarSimulator:
         self._drive(v, w, c, h)
         self.current_light_settings = {'v': v, 'w': w, 'c': c, 'h': h}
 
+    def set_intensity(self, factor: float) -> None:
+        """Set every channel to the brightness this instrument's calibration gives `factor`.
+
+        `factor` runs from 0, dark, to 1, the simulator's full rated output.
+        """
+        self.set_leds(**self._calc_channel_values(factor))
+
     def blank(self) -> None:
         """Drive every channel dark without forgetting what was asked for.
 
@@ -133,6 +140,35 @@ class SolarSimulator:
             therm_values.append([chan.value >> 4, chan.voltage, self._calc_temp(chan.voltage)])
 
         return therm_values
+
+    @staticmethod
+    def _calc_channel_values(factor: float) -> dict:
+        """Given an intensity factor from 0 to 1, return the `set_leds` value per channel.
+
+        The coefficients come from calibrating this instrument's four light sources against
+        a reference cell, so they describe this hardware rather than solar simulation in
+        general, and belong with the hardware they were measured from.
+        """
+        if not (0 <= factor <= 1):
+            raise ValueError("Scaling factor must be between 0 and 1.")
+
+        if factor == 0:
+            violet_intensity = 0
+            white_intensity = 0
+            cyan_intensity = 0
+            halogen_intensity = 0
+        else:
+            violet_intensity = -1.5066 * factor + 22.6663
+            white_intensity = 32.3521 * factor + 16.3331
+            cyan_intensity = 10.2647 * factor + 20.9998
+            halogen_intensity = 89.1446 * factor + 9.0003
+
+        return {
+            'v': int(violet_intensity * 655),
+            'w': int(white_intensity * 655),
+            'c': int(cyan_intensity * 655),
+            'h': int(halogen_intensity * 655),
+        }
 
     @staticmethod
     def _calc_temp(v_adc: float, vcc: float = 3.3, r_fixed: float = 10000.0) -> float:
