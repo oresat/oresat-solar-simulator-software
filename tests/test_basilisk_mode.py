@@ -6,20 +6,6 @@ from solar_simulator.lib.modes.basilisk_mode import BasiliskMode
 
 
 @pytest.fixture
-def sim() -> MagicMock:
-    """A simulator reporting safe temperatures, so thermal shutdown stays out of the way."""
-    sim = MagicMock()
-    sim.check_thermals.return_value = [25.0, 25.0, 25.0]
-    sim.enable_therm_monitoring = True
-    sim.therm_led_shutdown = 100
-    sim.therm_heatsink_shutdown = 60
-    sim.therm_cell_shutdown = 80
-    sim.therm_resume_temp = 45
-    sim.current_light_settings = {'v': 0, 'w': 0, 'c': 0, 'h': 0}
-    return sim
-
-
-@pytest.fixture
 def mode(sim: MagicMock) -> BasiliskMode:
     """Basilisk mode driving the stub simulator."""
     return BasiliskMode(sim)
