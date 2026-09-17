@@ -7,6 +7,7 @@ import supervisor
 
 from ..console import check_for_interrupt, display_status
 from ..solar_simulator import SolarSimulator as Sim
+from ..solar_simulator import ThermalSensorError
 from ..thermal import enforce_thermal_limits
 
 
@@ -34,16 +35,23 @@ class ManualMode:
                 break
             print("Invalid input. Please enter 1, 2, 3, 4, or 5.")
 
-        if choice == '1':
-            self.fixed_preset_mode()
-        elif choice == '2':
-            self.manual_light_adjustment()
-        elif choice == '3':
-            self.wave_mode()
-        elif choice == '4':
-            self.measurement_mode()
-        elif choice == '5':
-            self.fine_tuning_adjustment()
+        try:
+            if choice == '1':
+                self.fixed_preset_mode()
+            elif choice == '2':
+                self.manual_light_adjustment()
+            elif choice == '3':
+                self.wave_mode()
+            elif choice == '4':
+                self.measurement_mode()
+            elif choice == '5':
+                self.fine_tuning_adjustment()
+        except KeyboardInterrupt:
+            print("\nExiting Manual Mode.")
+            self.sim.set_leds(0, 0, 0, 0)
+        except ThermalSensorError as error:
+            print(f"\n{error}. Exiting Manual Mode.")
+            self.sim.set_leds(0, 0, 0, 0)
 
     def fixed_preset_mode(self) -> None:
         """Set Fixed Preset Mode."""
