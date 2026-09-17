@@ -71,6 +71,8 @@ def check_temperature(
     Progress messages go to `writer`. `on_shutdown` is called once the lights have been
     turned off and before the cooldown wait blocks, so a caller can report the shutdown
     while it is still news.
+
+    Return True when it is safe to proceed, False when the sensors could not be read.
     """
     if not sim.enable_therm_monitoring:
         return True
@@ -85,44 +87,47 @@ def check_temperature(
     heatsink_temp = heatsink_temp or 0
     cell_temp = cell_temp or 0
 
-    if (
-        led_temp > sim.therm_led_shutdown
-        or heatsink_temp > sim.therm_heatsink_shutdown
-        or cell_temp > sim.therm_cell_shutdown
-    ):
-        previous_light_settings = sim.current_light_settings
-        sim.set_leds(0, 0, 0, 0)
-        writer("Temperature too high! Turning off lights for safety.")
-        if on_shutdown:
-            on_shutdown()
-
-        while (
-            led_temp > sim.therm_resume_temp
-            and heatsink_temp > sim.therm_resume_temp
-            and cell_temp > sim.therm_resume_temp
-        ):
-            time.sleep(1)
-            thermals = sim.check_thermals()
-            if thermals:
-                led_temp, heatsink_temp, cell_temp = thermals
-                led_temp = led_temp or 0
-                heatsink_temp = heatsink_temp or 0
-                cell_temp = cell_temp or 0
-                writer("Cooling down ...")
-                writer(f"LED: {led_temp}°C, Heatsink: {heatsink_temp}°C, Cell: {cell_temp}°C")
-            else:
-                writer("Cannot read the temperature sensors")
-                return False
-
-        writer("Temperature back to safe levels. Resuming operation.")
-        if previous_light_settings:
-            sim.set_leds(
-                v=previous_light_settings['v'],
-                w=previous_light_settings['w'],
-                c=previous_light_settings['c'],
-                h=previous_light_settings['h'],
-            )
+    within_limits = (
+        led_temp <= sim.therm_led_shutdown,
+        heatsink_temp <= sim.therm_heatsink_shutdown,
+        cell_temp <= sim.therm_cell_shutdown,
+    )
+    if all(within_limits):
         return True
+
+    previous_light_settings = sim.current_light_settings
+    sim.set_leds(0, 0, 0, 0)
+    writer("Temperature too high! Turning off lights for safety.")
+
+    if on_shutdown:
+        on_shutdown()
+
+    while (
+        led_temp > sim.therm_resume_temp
+        and heatsink_temp > sim.therm_resume_temp
+        and cell_temp > sim.therm_resume_temp
+    ):
+        time.sleep(1)
+        thermals = sim.check_thermals()
+        if thermals:
+            led_temp, heatsink_temp, cell_temp = thermals
+            led_temp = led_temp or 0
+            heatsink_temp = heatsink_temp or 0
+            cell_temp = cell_temp or 0
+            writer("Cooling down ...")
+            writer(f"LED: {led_temp}°C, Heatsink: {heatsink_temp}°C, Cell: {cell_temp}°C")
+        else:
+            writer("Cannot read the temperature sensors")
+            return False
+
+    writer("Temperature back to safe levels. Resuming operation.")
+    if previous_light_settings:
+        sim.set_leds(
+            v=previous_light_settings['v'],
+            w=previous_light_settings['w'],
+            c=previous_light_settings['c'],
+            h=previous_light_settings['h'],
+        )
 
     return True
 
