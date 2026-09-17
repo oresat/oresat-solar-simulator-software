@@ -122,12 +122,7 @@ def check_temperature(
 
     writer("Temperature back to safe levels. Resuming operation.")
     if previous_light_settings:
-        sim.set_leds(
-            v=previous_light_settings['v'],
-            w=previous_light_settings['w'],
-            c=previous_light_settings['c'],
-            h=previous_light_settings['h'],
-        )
+        sim.set_leds(**previous_light_settings)
 
     return True
 
