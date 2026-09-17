@@ -5,18 +5,21 @@ from solar_simulator.lib import thermal
 from solar_simulator.lib.solar_simulator import ThermalSensorError
 
 
-def test_enforce_thermal_limits_waits_for_every_sensor_to_cool(sim: SolarSimulator) -> None:
-    # The LED runs hot on its own; the heatsink and cell are under the resume limit
-    # from the first reading, so a check that needs all three to be hot never waits.
+def test_enforce_thermal_limits_darkens_the_lights_and_puts_them_back(
+    sim: SolarSimulator,
+) -> None:
+    sim.set_intensity(1.0)
+    commanded = dict(sim.current_light_settings)
     sim.check_thermals.side_effect = [
-        [120.0, 25.0, 25.0],
-        [90.0, 25.0, 25.0],
-        [40.0, 25.0, 25.0],
+        [120.0, 25.0, 25.0],  # past the LED's shutdown limit
+        [40.0, 25.0, 25.0],  # under the resume limit, so the latch clears
     ]
 
-    thermal.enforce_thermal_limits(sim, writer=lambda _message: None)
+    assert thermal.enforce_thermal_limits(sim, writer=lambda _message: None) is True
 
-    assert sim.check_thermals.call_count == 3
+    assert sim.current_light_settings == commanded
+    assert sim.mcp.channel_a.value == commanded['v']
+    assert sim.hal.duty_cycle == commanded['h']
 
 
 def test_enforce_thermal_limits_raises_when_the_sensors_cannot_be_read(sim: SolarSimulator) -> None:

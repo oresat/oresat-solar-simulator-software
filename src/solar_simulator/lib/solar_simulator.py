@@ -35,7 +35,7 @@ class SolarSimulator:
         self.hal = PWMOut(
             board.GP28, frequency=self.PWM_FREQ, duty_cycle=0, variable_frequency=True
         )
-        self.therm_safe = True
+        self.therm_shutdown = False
         self.current_light_settings = {'v': 0, 'w': 0, 'c': 0, 'h': 0}
         self.enable_therm_monitoring = True
         self.therm_led_shutdown = 100
@@ -117,6 +117,29 @@ class SolarSimulator:
     def is_within_resume_limit(self, temperatures: list) -> bool:
         """Return whether every temperature is back at or below the shared resume limit."""
         return all(temp <= self.therm_resume_temp for temp in temperatures)
+
+    def in_thermal_shutdown(self) -> bool:
+        """Read the thermistors and return whether the simulator is held in shutdown.
+
+        The answer latches. It turns True when any part passes its own shutdown limit and
+        only falls back to False once every part is under the shared resume limit, so a
+        part hovering at its threshold cannot switch the lights on and off from one
+        reading to the next.
+
+        Return False without reading anything when thermal monitoring is disabled, which
+        is the setting to use when a thermistor is known bad. Raise ThermalSensorError
+        when the thermistors cannot be read.
+        """
+        if not self.enable_therm_monitoring:
+            return False
+
+        temperatures = self.check_thermals()
+        if self.therm_shutdown:
+            self.therm_shutdown = not self.is_within_resume_limit(temperatures)
+        else:
+            self.therm_shutdown = not self.is_within_shutdown_limits(temperatures)
+
+        return self.therm_shutdown
 
     def _port_scan(self) -> list:
         """Print all available I2C devices."""

@@ -26,20 +26,15 @@ def enforce_thermal_limits(sim: Sim, writer: "Callable[..., None]" = print) -> b
     Progress messages go to `writer`. Raise ThermalSensorError when the thermistors
     cannot be read.
     """
-    if not sim.enable_therm_monitoring:
-        return False
-
-    temperatures = sim.check_thermals()
-    if sim.is_within_shutdown_limits(temperatures):
+    if not sim.in_thermal_shutdown():
         return False
 
     sim.blank()
     writer("Temperature too high! Turning off lights for safety.")
 
-    while not sim.is_within_resume_limit(temperatures):
+    while sim.in_thermal_shutdown():
         time.sleep(1)
-        temperatures = sim.check_thermals()
-        led_temp, heatsink_temp, cell_temp = temperatures
+        led_temp, heatsink_temp, cell_temp = sim.check_thermals()
         writer("Cooling down ...")
         writer(f"LED: {led_temp}°C, Heatsink: {heatsink_temp}°C, Cell: {cell_temp}°C")
 

@@ -77,3 +77,27 @@ def test_set_intensity_rejects_a_factor_outside_the_range(
         sim.set_intensity(factor)
 
     sim.set_leds.assert_not_called()
+
+
+def test_in_thermal_shutdown_holds_until_every_sensor_cools(sim: SolarSimulator) -> None:
+    # The LED runs hot alone, so a check that released as soon as any one sensor sat
+    # under the resume limit would clear on the very first reading.
+    sim.check_thermals.return_value = [120.0, 25.0, 25.0]
+    assert sim.in_thermal_shutdown() is True
+
+    # Back under the LED's own 100°C shutdown limit, but still over the 45°C resume
+    # limit: the latch is what keeps the lights off across this gap.
+    sim.check_thermals.return_value = [90.0, 25.0, 25.0]
+    assert sim.in_thermal_shutdown() is True
+
+    sim.check_thermals.return_value = [40.0, 25.0, 25.0]
+    assert sim.in_thermal_shutdown() is False
+
+
+def test_in_thermal_shutdown_reads_nothing_when_monitoring_is_disabled(
+    sim: SolarSimulator,
+) -> None:
+    sim.enable_therm_monitoring = False
+    sim.check_thermals.side_effect = ThermalSensorError("Thermistor voltage out of range: 0.000V")
+
+    assert sim.in_thermal_shutdown() is False
