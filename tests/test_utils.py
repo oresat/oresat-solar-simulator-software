@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from solar_simulator.lib import utils
+from solar_simulator.lib.solar_simulator import ThermalSensorError
 
 
 def test_enforce_thermal_limits_waits_for_every_sensor_to_cool(sim: MagicMock) -> None:
@@ -38,3 +39,15 @@ def test_enforce_thermal_limits_raises_when_the_sensors_cannot_be_read(sim: Magi
 
     with pytest.raises(utils.ThermalSensorError):
         utils.enforce_thermal_limits(sim, writer=lambda _message: None)
+
+
+def test_display_status_reports_a_thermistor_fault(
+    sim: MagicMock, capsys: pytest.CaptureFixture[str]
+) -> None:
+    sim.check_thermals.side_effect = ThermalSensorError("Thermistor voltage out of range: 0.000V")
+
+    utils.display_status(sim)
+
+    printed = capsys.readouterr().out
+    assert "Thermistor voltage out of range: 0.000V" in printed
+    assert "VIOLET:0%" in printed

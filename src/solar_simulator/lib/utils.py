@@ -41,23 +41,15 @@ def calculate_light_intensity(factor: float) -> dict:
 def display_status(sim: Sim) -> None:
     """Display the current thermal and light status."""
     try:
-        thermals = sim.check_thermals()
-
-        if thermals:
-            led_temp, heatsink_temp, cell_temp = thermals
-            temp_info = (
-                f"LED: {led_temp:.1f}°C, Heatsink: {heatsink_temp:.1f}°C, Cell: {cell_temp:.1f}°C"
-            )
-        else:
-            temp_info = "Cannot read temperature data"
-    except Exception:  # noqa: BLE001
-        temp_info = "Temperature data unavailable"
+        led_temp, heatsink_temp, cell_temp = sim.check_thermals()
+        temp_info = (
+            f"LED: {led_temp:.1f}°C, Heatsink: {heatsink_temp:.1f}°C, Cell: {cell_temp:.1f}°C"
+        )
+    except ThermalSensorError as error:
+        temp_info = str(error)
 
     current_settings = sim.current_light_settings
-    try:
-        light_info = f"VIOLET:{current_settings['v'] // 655}% WHITE:{current_settings['w'] // 655}% CYAN:{current_settings['c'] // 655}%  HAL:{current_settings['h'] // 655}%"  # noqa: E501
-    except Exception:  # noqa: BLE001
-        light_info = "Light data unavailable"
+    light_info = f"VIOLET:{current_settings['v'] // 655}% WHITE:{current_settings['w'] // 655}% CYAN:{current_settings['c'] // 655}%  HAL:{current_settings['h'] // 655}%"  # noqa: E501
 
     print(f"{temp_info} | {light_info}", end="\n")
 
