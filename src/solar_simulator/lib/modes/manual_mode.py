@@ -9,8 +9,8 @@ from ..solar_simulator import SolarSimulator as Sim
 from ..utils import (
     calculate_light_intensity,
     check_for_interrupt,
-    check_temperature,
     display_status,
+    enforce_thermal_limits,
 )
 
 
@@ -83,7 +83,7 @@ class ManualMode:
 
             while True:
                 check_for_interrupt(self.sim)
-                check_temperature(self.sim)
+                enforce_thermal_limits(self.sim)
                 display_status(self.sim)
 
                 # Non-blocking user input detection
@@ -147,7 +147,7 @@ class ManualMode:
 
                 while True:
                     check_for_interrupt(self.sim)
-                    check_temperature(self.sim)
+                    enforce_thermal_limits(self.sim)
                     display_status(self.sim)
 
                     if supervisor.runtime.serial_bytes_available:

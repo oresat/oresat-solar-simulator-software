@@ -9,8 +9,8 @@ from ..utils import (
     ThermalSensorError,
     calculate_light_intensity,
     check_for_interrupt,
-    check_temperature,
     display_status,
+    enforce_thermal_limits,
 )
 
 
@@ -56,7 +56,7 @@ class AutoMode:
             loop_start = time.monotonic()
 
             while True:
-                check_temperature(self.sim)
+                enforce_thermal_limits(self.sim)
 
                 # Calculate current intensity factor
                 intensity_factor = wave[level] * self.peak

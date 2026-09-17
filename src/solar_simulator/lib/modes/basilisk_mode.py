@@ -3,7 +3,7 @@
 import sys
 
 from ..solar_simulator import SolarSimulator as Sim
-from ..utils import ThermalSensorError, calculate_light_intensity, check_temperature
+from ..utils import ThermalSensorError, calculate_light_intensity, enforce_thermal_limits
 
 
 class BasiliskMode:
@@ -46,7 +46,7 @@ class BasiliskMode:
         # The console carries protocol lines only: the shared cooldown chatter is
         # dropped, and the shutdown it announces is answered as WARN instead.
         try:
-            shut_down = check_temperature(self.sim, writer=lambda _message: None)
+            shut_down = enforce_thermal_limits(self.sim, writer=lambda _message: None)
         except ThermalSensorError as error:
             self.sim.set_leds(0, 0, 0, 0)
             print(f"ERR THERMAL {error}")

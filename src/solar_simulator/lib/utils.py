@@ -91,7 +91,7 @@ def has_cooled_down(sim: Sim, temperatures: tuple) -> bool:
     return all(temp <= sim.therm_resume_temp for temp in temperatures)
 
 
-def check_temperature(sim: Sim, writer: "Callable[..., None]" = print) -> bool:
+def enforce_thermal_limits(sim: Sim, writer: "Callable[..., None]" = print) -> bool:
     """Hold the lights off until the simulator is back within its thermal limits.
 
     Return whether a shutdown happened: True once the lights have been turned off,
