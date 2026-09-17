@@ -7,7 +7,8 @@ from ulab import numpy as np
 from ..console import check_for_interrupt, display_status
 from ..solar_simulator import SolarSimulator as Sim
 from ..solar_simulator import ThermalSensorError
-from ..utils import calculate_light_intensity, enforce_thermal_limits
+from ..thermal import enforce_thermal_limits
+from ..utils import calculate_light_intensity
 
 
 class AutoMode:

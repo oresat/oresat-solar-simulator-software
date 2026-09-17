@@ -1,7 +1,7 @@
 import pytest
 
 from solar_simulator import SolarSimulator
-from solar_simulator.lib import utils
+from solar_simulator.lib import thermal
 from solar_simulator.lib.solar_simulator import ThermalSensorError
 
 
@@ -14,7 +14,7 @@ def test_enforce_thermal_limits_waits_for_every_sensor_to_cool(sim: SolarSimulat
         [40.0, 25.0, 25.0],
     ]
 
-    utils.enforce_thermal_limits(sim, writer=lambda _message: None)
+    thermal.enforce_thermal_limits(sim, writer=lambda _message: None)
 
     assert sim.check_thermals.call_count == 3
 
@@ -23,4 +23,4 @@ def test_enforce_thermal_limits_raises_when_the_sensors_cannot_be_read(sim: Sola
     sim.check_thermals.side_effect = ThermalSensorError("Thermistor voltage out of range: 0.000V")
 
     with pytest.raises(ThermalSensorError):
-        utils.enforce_thermal_limits(sim, writer=lambda _message: None)
+        thermal.enforce_thermal_limits(sim, writer=lambda _message: None)
