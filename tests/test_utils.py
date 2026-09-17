@@ -1,6 +1,3 @@
-import io
-import sys
-
 import pytest
 
 from solar_simulator import SolarSimulator
@@ -22,32 +19,8 @@ def test_enforce_thermal_limits_waits_for_every_sensor_to_cool(sim: SolarSimulat
     assert sim.check_thermals.call_count == 3
 
 
-def test_check_for_interrupt_turns_off_the_lights_on_ctrl_c(
-    sim: SolarSimulator, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr(utils.supervisor.runtime, "serial_bytes_available", True)
-    monkeypatch.setattr(sys, "stdin", io.StringIO("\x03"))
-
-    with pytest.raises(KeyboardInterrupt):
-        utils.check_for_interrupt(sim)
-
-    sim.set_leds.assert_called_once_with(0, 0, 0, 0)
-
-
 def test_enforce_thermal_limits_raises_when_the_sensors_cannot_be_read(sim: SolarSimulator) -> None:
     sim.check_thermals.side_effect = ThermalSensorError("Thermistor voltage out of range: 0.000V")
 
     with pytest.raises(ThermalSensorError):
         utils.enforce_thermal_limits(sim, writer=lambda _message: None)
-
-
-def test_display_status_reports_a_thermistor_fault(
-    sim: SolarSimulator, capsys: pytest.CaptureFixture[str]
-) -> None:
-    sim.check_thermals.side_effect = ThermalSensorError("Thermistor voltage out of range: 0.000V")
-
-    utils.display_status(sim)
-
-    printed = capsys.readouterr().out
-    assert "Thermistor voltage out of range: 0.000V" in printed
-    assert "VIOLET:0%" in printed

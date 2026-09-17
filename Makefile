@@ -9,7 +9,7 @@ LIB_SRCS         := solar_simulator.py utils.py
 MODE_SRCS        := basilisk_mode.py
 
 # Sources shipped only by the `complete` build (the interactive menu).
-CLI_LIB_SRCS     := cli.py
+CLI_LIB_SRCS     := cli.py console.py
 CLI_MODE_SRCS    := auto_mode.py manual_mode.py
 
 # External package dependencies.
