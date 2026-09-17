@@ -94,9 +94,10 @@ def has_cooled_down(sim: Sim, temperatures: tuple) -> bool:
 def enforce_thermal_limits(sim: Sim, writer: "Callable[..., None]" = print) -> bool:
     """Hold the lights off until the simulator is back within its thermal limits.
 
-    Return whether a shutdown happened: True once the lights have been turned off,
-    waited out, and restored, False when nothing needed doing. Monitoring turned off
-    counts as nothing needing doing, since nothing was measured.
+    Return whether a shutdown happened:
+        - True once the lights have been turned off, waited out, and restored.
+        - False when nothing needed doing.
+        - False when monitoring is off, since nothing was measured.
 
     Progress messages go to `writer`. Raise ThermalSensorError when the thermistors
     cannot be read.
