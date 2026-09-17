@@ -31,3 +31,25 @@ def test_calc_temp_rejects_a_thermistor_at_the_rails(v_adc: float) -> None:
 
 def test_calc_temp_reads_a_healthy_thermistor() -> None:
     assert SolarSimulator._calc_temp(1.65) == pytest.approx(25.0, abs=0.01)
+
+
+def test_blank_darkens_the_lights_without_forgetting_the_setting() -> None:
+    sim = SolarSimulator()
+    sim.set_leds(v=1000, w=2000, c=3000, h=4000)
+
+    sim.blank()
+
+    assert sim.mcp.channel_a.value == 0
+    assert sim.hal.duty_cycle == 0
+    assert sim.current_light_settings == {'v': 1000, 'w': 2000, 'c': 3000, 'h': 4000}
+
+
+def test_restore_drives_the_recorded_setting_again() -> None:
+    sim = SolarSimulator()
+    sim.set_leds(v=1000, w=2000, c=3000, h=4000)
+    sim.blank()
+
+    sim.restore()
+
+    assert sim.mcp.channel_a.value == 1000
+    assert sim.hal.duty_cycle == 4000

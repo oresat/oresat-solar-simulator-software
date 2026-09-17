@@ -84,8 +84,7 @@ def enforce_thermal_limits(sim: Sim, writer: "Callable[..., None]" = print) -> b
     if is_within_thermal_limits(sim, temperatures):
         return False
 
-    previous_light_settings = sim.current_light_settings
-    sim.set_leds(0, 0, 0, 0)
+    sim.blank()
     writer("Temperature too high! Turning off lights for safety.")
 
     while not has_cooled_down(sim, temperatures):
@@ -96,8 +95,7 @@ def enforce_thermal_limits(sim: Sim, writer: "Callable[..., None]" = print) -> b
         writer(f"LED: {led_temp}°C, Heatsink: {heatsink_temp}°C, Cell: {cell_temp}°C")
 
     writer("Temperature back to safe levels. Resuming operation.")
-    if previous_light_settings:
-        sim.set_leds(**previous_light_settings)
+    sim.restore()
 
     return True
 

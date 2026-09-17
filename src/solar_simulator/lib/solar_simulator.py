@@ -49,11 +49,28 @@ class SolarSimulator:
         The input values are 16-bit unsigned integers and use a default value of 0, so if
         nothing is entered into any of the arguments, it will turn off that channel.
         """
+        self._drive(v, w, c, h)
+        self.current_light_settings = {'v': v, 'w': w, 'c': c, 'h': h}
+
+    def blank(self) -> None:
+        """Drive every channel dark without forgetting what was asked for.
+
+        Use it for a pause the simulator will come back from, such as waiting out a
+        thermal shutdown. `set_leds(0, 0, 0, 0)` is the one to use when the lights should
+        stay off, since it makes darkness the setting rather than an interruption of one.
+        """
+        self._drive(0, 0, 0, 0)
+
+    def restore(self) -> None:
+        """Drive the channels back to the setting recorded by the last `set_leds`."""
+        self._drive(**self.current_light_settings)
+
+    def _drive(self, v: int, w: int, c: int, h: int) -> None:
+        """Write brightness levels to the hardware without recording them as the setting."""
         self.mcp.channel_a.value = v
         self.mcp.channel_b.value = w
         self.mcp.channel_c.value = c
         self.hal.duty_cycle = h
-        self.current_light_settings = {'v': v, 'w': w, 'c': c, 'h': h}
 
     def check_thermals(self) -> list:
         """Return a list of thermal values per thermistor channel in Celsius.
