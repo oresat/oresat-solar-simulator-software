@@ -55,15 +55,15 @@ class SolarSimulator:
     def set_intensity(self, factor: float) -> None:
         """Set every channel to the brightness this instrument's calibration gives `factor`.
 
-        `factor` runs from 0, dark, to 1, the simulator's full rated output.
+        `factor` runs from 0 (dark/off), to 1 (the simulator's full rated output).
         """
         self.set_leds(**self._calc_channel_values(factor))
 
-    def blank(self) -> None:
-        """Drive every channel dark without forgetting what was asked for.
+    def blank_out(self) -> None:
+        """Drive every channel dark (off) without forgetting what was asked for.
 
-        Use it for a pause the simulator will come back from, such as waiting out a
-        thermal shutdown. `set_leds(0, 0, 0, 0)` is the one to use when the lights should
+        Use it for a pause that the simulator will come back from, such as waiting out a
+        thermal shutdown. `set_leds(0, 0, 0, 0)` should be used instead when the lights should
         stay off, since it makes darkness the setting rather than an interruption of one.
         """
         self._drive(0, 0, 0, 0)
@@ -100,9 +100,9 @@ class SolarSimulator:
     def is_within_shutdown_limits(self, temperatures: list) -> bool:
         """Return whether every temperature is at or below its own shutdown limit.
 
-        Each part carries its own tolerance, so each is compared against its own
-        threshold. Its counterpart, `is_within_resume_limit`, deliberately shares one
-        threshold across all three: the question there is whether the enclosure as a
+        Each light source carries its own tolerance, so each is compared against its own
+        threshold. This method's counterpart, `is_within_resume_limit`, deliberately shares
+        one threshold across all three: the question there is whether the enclosure as a
         whole has settled, not whether each part is individually survivable.
         """
         led_temp, heatsink_temp, cell_temp = temperatures
@@ -127,7 +127,7 @@ class SolarSimulator:
         reading to the next.
 
         Return False without reading anything when thermal monitoring is disabled, which
-        is the setting to use when a thermistor is known bad. Raise ThermalSensorError
+        is the setting to use when a thermistor is faulty. Raise ThermalSensorError
         when the thermistors cannot be read.
         """
         if not self.enable_therm_monitoring:
@@ -140,14 +140,6 @@ class SolarSimulator:
             self.therm_shutdown = not self.is_within_shutdown_limits(temperatures)
 
         return self.therm_shutdown
-
-    def _port_scan(self) -> list:
-        """Print all available I2C devices."""
-        self.i2c.try_lock()
-        found = self.i2c.scan()
-        self.i2c.unlock()
-
-        return [hex(i) for i in found]
 
     def _read_thermistors(self) -> list:
         """Read all of the thermistors and return a nested list of data for each channel.
@@ -168,9 +160,8 @@ class SolarSimulator:
     def _calc_channel_values(factor: float) -> dict:
         """Given an intensity factor from 0 to 1, return the `set_leds` value per channel.
 
-        The coefficients come from calibrating this instrument's four light sources against
-        a reference cell, so they describe this hardware rather than solar simulation in
-        general, and belong with the hardware they were measured from.
+        The coefficients are presumably from calculations made on the solar simulator hardware,
+        but this has not been confirmed.
         """
         if not (0 <= factor <= 1):
             raise ValueError("Scaling factor must be between 0 and 1.")

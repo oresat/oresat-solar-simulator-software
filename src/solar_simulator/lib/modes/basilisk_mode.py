@@ -55,7 +55,7 @@ class BasiliskMode:
             return
 
         if too_hot:
-            self.sim.blank()
+            self.sim.blank_out()
             print("WARN THERMAL temperature too high, lights off for safety")
             return
 

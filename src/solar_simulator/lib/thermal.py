@@ -29,7 +29,7 @@ def enforce_thermal_limits(sim: Sim, writer: "Callable[..., None]" = print) -> b
     if not sim.in_thermal_shutdown():
         return False
 
-    sim.blank()
+    sim.blank_out()
     writer("Temperature too high! Turning off lights for safety.")
 
     while sim.in_thermal_shutdown():
