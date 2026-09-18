@@ -27,7 +27,6 @@ graph TD
 
 ## Libraries
 
-- [CircuitPython ulab](https://docs.circuitpython.org/en/latest/shared-bindings/ulab/index.html) - Numpy on a microcontroller
 - [CircuitPython pwmio](https://docs.circuitpython.org/en/latest/shared-bindings/pwmio/index.html) - Controls the halogen bulb
 - [Adafruit Python MCP4728](https://github.com/adafruit/Adafruit_CircuitPython_MCP4728) - Controls each of the LED light channels
 - [Adafruit Python ADS1X15](https://github.com/Ayush2309/Adafruit_ADS) - Reads all of the onboard thermocouples and photodiode on the simulator
@@ -87,6 +86,12 @@ python scripts/simctl.py                            # prompt for intensities, on
 python scripts/simctl.py ramp                       # step through a few, to see a board answer
 python scripts/simctl.py sweep --peak 0.5 --period 60  # repeat a sunrise-to-sunset sweep
 ```
+
+Intensity is the only knob, because it is the only one the protocol carries. Per-channel
+LED levels and the thermal shutdown thresholds are not settable from here: the thresholds
+are the defaults in `SolarSimulator.__init__`, and changing one means editing the source and
+rebuilding. Temperatures are not readable either, so a board that is too hot reports
+`WARN THERMAL` rather than degrees.
 
 ## Write
 
