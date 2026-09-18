@@ -21,6 +21,8 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Host-side scripts are not a package, so tests reach them from here rather than an install.
+pythonpath = ["scripts"]
 
 [tool.ruff]
 line-length = 100

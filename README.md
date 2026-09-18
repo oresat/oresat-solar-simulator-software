@@ -89,11 +89,16 @@ Nothing on the device blocks, so a response always arrives.
 printf '50\n' > /dev/ttyACM0
 ```
 
-To see a board respond, ramp one flashed with the `headless` build through its intensity
-range using the simple headless smoke-test script.
+### Driving a board from the host
+
+Everything interactive lives in `scripts/simctl.py`, which speaks the protocol above over
+pyserial. Pass `--port` if the board is not on `/dev/ttyACM0`. Every command leaves the
+lights off on its way out.
 
 ```sh
-python scripts/headless_smoke.py
+python scripts/simctl.py                            # prompt for intensities, one at a time
+python scripts/simctl.py ramp                       # step through a few, to see a board answer
+python scripts/simctl.py sweep --peak 0.5 --period 60  # repeat a sunrise-to-sunset sweep
 ```
 
 ## Write
