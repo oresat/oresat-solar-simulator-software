@@ -1,6 +1,6 @@
 """Entrypoint for the solar simulator."""
 
-from lib.modes.basilisk_mode import BasiliskMode
+from lib.basilisk_mode import BasiliskMode
 from lib.solar_simulator import SolarSimulator
 
 

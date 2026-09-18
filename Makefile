@@ -2,11 +2,10 @@ CP_MAJOR_VERSION := 10
 SRC_ROOT         := src/solar_simulator
 LIB_ROOT         := $(SRC_ROOT)/lib
 BUILD_ROOT       := build
-COPY_SRCS        := $(SRC_ROOT)/boot.py $(SRC_ROOT)/code.py $(SRC_ROOT)/__init__.py $(wildcard $(LIB_ROOT)/__init__.py $(LIB_ROOT)/modes/__init__.py)
+COPY_SRCS        := $(SRC_ROOT)/boot.py $(SRC_ROOT)/code.py $(SRC_ROOT)/__init__.py $(wildcard $(LIB_ROOT)/__init__.py)
 
 # Device sources.
-LIB_SRCS         := solar_simulator.py
-MODE_SRCS        := basilisk_mode.py
+LIB_SRCS         := solar_simulator.py basilisk_mode.py
 
 # External package dependencies.
 SITE_PACKAGES    := $(shell python3 -c "import sysconfig; print(sysconfig.get_paths()['purelib'])")
@@ -16,7 +15,7 @@ ADS1X15_MPY      := $(patsubst $(ADS1X15_PKG)/%.py, $(BUILD_ROOT)/lib/adafruit_a
 MCP4728_PY       := $(SITE_PACKAGES)/adafruit_mcp4728.py
 MCP4728_MPY      := $(BUILD_ROOT)/lib/adafruit_mcp4728.mpy
 
-MPYFILES         := $(addprefix $(BUILD_ROOT)/lib/, $(LIB_SRCS:.py=.mpy)) $(addprefix $(BUILD_ROOT)/lib/modes/, $(MODE_SRCS:.py=.mpy)) $(ADS1X15_MPY) $(MCP4728_MPY)
+MPYFILES         := $(addprefix $(BUILD_ROOT)/lib/, $(LIB_SRCS:.py=.mpy)) $(ADS1X15_MPY) $(MCP4728_MPY)
 PYFILES          := $(patsubst $(SRC_ROOT)/%, build/%, $(COPY_SRCS))
 
 vpath %.py $(SRC_ROOT):$(SRC_ROOT)/lib
@@ -27,10 +26,6 @@ vpath %.py $(SRC_ROOT):$(SRC_ROOT)/lib
 build: $(PYFILES) $(MPYFILES)
 
 $(BUILD_ROOT)/%.mpy: %.py
-	@mkdir -p $(dir $@)
-	circuitpython-mpy-cross --circuitpython-version 10.x -o $@ $^
-
-$(BUILD_ROOT)/modes/%.mpy: %.py
 	@mkdir -p $(dir $@)
 	circuitpython-mpy-cross --circuitpython-version 10.x -o $@ $^
 

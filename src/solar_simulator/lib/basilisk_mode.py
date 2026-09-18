@@ -2,8 +2,8 @@
 
 import sys
 
-from ..solar_simulator import SolarSimulator as Sim
-from ..solar_simulator import ThermalSensorError
+from .solar_simulator import SolarSimulator as Sim
+from .solar_simulator import ThermalSensorError
 
 
 class BasiliskMode:

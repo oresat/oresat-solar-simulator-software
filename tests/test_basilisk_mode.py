@@ -1,7 +1,7 @@
 import pytest
 
 from solar_simulator import SolarSimulator
-from solar_simulator.lib.modes.basilisk_mode import BasiliskMode
+from solar_simulator.lib.basilisk_mode import BasiliskMode
 from solar_simulator.lib.solar_simulator import ThermalSensorError
 
 
