@@ -12,8 +12,6 @@ from busio import I2C
 from micropython import const
 from pwmio import PWMOut
 
-MAX_VALUE = const(65535)
-
 
 class SolarSimulator:
     """Simulates solar intensity through light device brightness.

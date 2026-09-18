@@ -3,6 +3,6 @@
 Docs: https://learn.adafruit.com/circuitpython-essentials/circuitpython-storage
 """
 
-import usb_cdc
+import supervisor
 
-usb_cdc.enable(console=True, data=True)
+supervisor.status_bar.console = False
