@@ -1,7 +1,6 @@
 """Pytest configuration."""
 
 import sys
-import time
 from unittest.mock import MagicMock
 
 import pytest
@@ -14,10 +13,7 @@ CIRCUITPYTHON_MODULES = {
     "board",
     "busio",
     "micropython",
-    "pdb",
     "pwmio",
-    "supervisor",
-    "ulab",
 }
 
 
@@ -44,9 +40,3 @@ def sim() -> SolarSimulator:
     sim.set_leds = MagicMock(wraps=sim.set_leds)
 
     return sim
-
-
-@pytest.fixture(autouse=True)
-def _no_cooldown_delay(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Run the thermal cooldown poll without waiting a second between readings."""
-    monkeypatch.setattr(time, "sleep", lambda _seconds: None)
