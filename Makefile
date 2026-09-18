@@ -20,7 +20,7 @@ PYFILES          := $(patsubst $(SRC_ROOT)/%, build/%, $(COPY_SRCS))
 
 vpath %.py $(SRC_ROOT):$(SRC_ROOT)/lib
 
-.PHONY: build deploy clean test test-ci
+.PHONY: build write clean distclean
 
 # The device runs unattended, driven over serial by FlatHILS.
 build: $(PYFILES) $(MPYFILES)
