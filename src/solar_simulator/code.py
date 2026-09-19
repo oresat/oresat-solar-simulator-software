@@ -18,7 +18,7 @@ def main() -> None:
         mcp = MCP4728(i2c)
         hal = PWMOut(board.GP28, frequency=5000, duty_cycle=0, variable_frequency=True)
     except (OSError, RuntimeError, ValueError) as err:
-        # A board with no solar simulator attached has no pull-ups on the I2C
+        # An RP2040 with no solar simulator attached has no pull-ups on the I2C
         # lines and nothing on the bus, so assume this is a regular RP2040 device
         # for testing purposes.
         print(f"WARN HARDWARE {err}; running on stub hardware")
