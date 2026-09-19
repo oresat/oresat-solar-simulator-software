@@ -1,14 +1,14 @@
 """Solar Simulator Application.
 
-The app is headless and speaks the following protocol over serial:
-
-TODO: Document the solar sim app protocol.
+The app is headless and uses a protocol that is simple for both humans and machines
+to understand. See the README for protocol documentation.
 """
 
 import sys
 
 from .solar_simulator import SolarSimulator as Sim
-from .utils import calculate_light_intensity
+from .solar_simulator import ThermalSensorError
+from .utils import calculate_light_intensity, enforce_thermal_limits
 
 
 class SolarSimulatorApp:
@@ -26,13 +26,7 @@ class SolarSimulatorApp:
 
 
     def parse(self, req: str) -> None:
-        """Parse a given request (0 - 100) and print the response.
-
-        OK <intensity>
-        WARN THERMAL <description>
-        ERR <CODE> <description>
-        ERR THERMAL <description>
-        """
+        """Parse a given request (0 - 100) and print the response."""
         if not req:
             print("ERR EMPTY no intensity value received")
             return
@@ -47,15 +41,16 @@ class SolarSimulatorApp:
             print(f"ERR RANGE intensity value out of range: {req}")
             return
 
-        # TODO: ERR THERMAL
+        self.sim.set_leds(**calculate_light_intensity(intensity / 100))
 
-        # TODO: WARN THERMAL temperature too high, lights off for safety
+        try:
+            shut_down = enforce_thermal_limits(self.sim)
+        except ThermalSensorError as error:
+            self.sim.set_leds(0, 0, 0, 0)
+            print(f"ERR THERMAL {error}")
+            return
 
-        levels = calculate_light_intensity(intensity / 100)
-        self.sim.set_leds(
-            v=int(levels["Violet"] * 655),
-            w=int(levels["White"] * 655),
-            c=int(levels["Cyan"] * 655),
-            h=int(levels["Halogen"] * 655),
-        )
-        print(f"OK {intensity}")
+        if shut_down:
+            print("WARN THERMAL temperature too high, lights off for safety")
+        else:
+            print(f"OK {intensity}")

@@ -1,4 +1,4 @@
-"""Utility class for Solar Simulator."""
+"""Utility functions for Solar Simulator."""
 
 import sys
 import time
@@ -6,6 +6,7 @@ import time
 import supervisor
 
 from .solar_simulator import SolarSimulator as Sim
+from .solar_simulator import ThermalSensorError
 
 
 def calculate_light_intensity(factor: float) -> dict:
@@ -25,10 +26,10 @@ def calculate_light_intensity(factor: float) -> dict:
         halogen_intensity = 89.1446 * factor + 9.0003
 
     return {
-        "Violet": violet_intensity,
-        "White": white_intensity,
-        "Cyan": cyan_intensity,
-        "Halogen": halogen_intensity,
+        "v": int(violet_intensity * 655),
+        "w": int(white_intensity * 655),
+        "c": int(cyan_intensity * 655),
+        "h": int(halogen_intensity * 655),
     }
 
 
@@ -56,90 +57,94 @@ def display_status(sim: Sim) -> None:
     print(f"{temp_info} | {light_info}", end="\n")
 
 
-def input_with_default(
-    prompt: str, default_value: str, valid_values: None, value_type: str
-) -> None:
-    """Get user input with a default value and optional validation."""
-    while True:
-        user_input = input(prompt).strip().lower()
+# def input_with_default(
+#     prompt: str, default_value: str, valid_values: None, value_type: str
+# ) -> None:
+#     """Get user input with a default value and optional validation."""
+#     while True:
+#         user_input = input(prompt).strip().lower()
 
-        if user_input == "":
-            return default_value
-        try:
-            value = value_type(user_input)
-            if valid_values and value not in valid_values:
-                raise ValueError  # noqa: TRY301
-            return value  # noqa: TRY300
-        except ValueError:
-            print("Invalid input. Please enter one of the following:")
-            print(f"\t{valid_values} or press Enter for default.")
-        except NameError:
-            print(f"Please enter a valid {value_type.__name__} value or press Enter for default.")
+#         if user_input == "":
+#             return default_value
+#         try:
+#             value = value_type(user_input)
+#             if valid_values and value not in valid_values:
+#                 raise ValueError  # noqa: TRY301
+#             return value  # noqa: TRY300
+#         except ValueError:
+#             print("Invalid input. Please enter one of the following:")
+#             print(f"\t{valid_values} or press Enter for default.")
+#         except NameError:
+#             print(f"Please enter a valid {value_type.__name__} value or press Enter for default.")
 
 
-def check_temperature(sim: Sim) -> bool:
-    """Check the temperature and handle thermal shutdown and resume."""
-    if not sim.enable_therm_monitoring:
-        return True
+def read_temperatures(sim: Sim) -> tuple:
+    """Return the LED, heatsink, and cell temperatures in Celsius.
 
+    Raise ThermalSensorError when the thermistors cannot be read.
+    """
     thermals = sim.check_thermals()
     if not thermals:
-        print("Cannot read the temperature sensors")
-        return False
+        raise ThermalSensorError("Cannot read the temperature sensors")
 
     led_temp, heatsink_temp, cell_temp = thermals
-    led_temp = led_temp or 0
-    heatsink_temp = heatsink_temp or 0
-    cell_temp = cell_temp or 0
 
-    if (
-        led_temp > sim.therm_led_shutdown
-        or heatsink_temp > sim.therm_heatsink_shutdown
-        or cell_temp > sim.therm_cell_shutdown
-    ):
-        previous_light_settings = sim.current_light_settings
-        sim.set_leds(0, 0, 0, 0)
-        print("Temperature too high! Turning off lights for safety.")
+    # TODO: Don't default to freezing temperatures :shivers:
+    return (led_temp or 0, heatsink_temp or 0, cell_temp or 0)
 
-        while (
-            led_temp > sim.therm_resume_temp
-            and heatsink_temp > sim.therm_resume_temp
-            and cell_temp > sim.therm_resume_temp
-        ):
-            time.sleep(1)
-            thermals = sim.check_thermals()
-            if thermals:
-                led_temp, heatsink_temp, cell_temp = thermals
-                led_temp = led_temp or 0
-                heatsink_temp = heatsink_temp or 0
-                cell_temp = cell_temp or 0
-                print("Cooling down ...")
-                print(f"LED: {led_temp}°C, Heatsink: {heatsink_temp}°C, Cell: {cell_temp}°C")
-            else:
-                print("Cannot read the temperature sensors")
-                return False
 
-        print("Temperature back to safe levels. Resuming operation.")
-        if previous_light_settings:
-            sim.set_leds(
-                v=previous_light_settings['v'],
-                w=previous_light_settings['w'],
-                c=previous_light_settings['c'],
-                h=previous_light_settings['h'],
-            )
-        return True
+def is_within_thermal_limits(sim: Sim, temperatures: tuple) -> bool:
+    """Return whether every temperature is at or below its own shutdown limit."""
+    limits = (sim.therm_led_shutdown, sim.therm_heatsink_shutdown, sim.therm_cell_shutdown)
+    return all(temp <= limit for temp, limit in zip(temperatures, limits))
+
+
+def has_cooled_down(sim: Sim, temperatures: tuple) -> bool:
+    """Return whether every temperature is back at or below the resume limit."""
+    return all(temp <= sim.therm_resume_temp for temp in temperatures)
+
+
+def enforce_thermal_limits(sim: Sim) -> bool:
+    """Read the temperatures and change the state of the Solar Sim accordingly.
+
+    True: Lights were turned off
+    False: Nothing needed doing
+    """
+    if not sim.enable_therm_monitoring:
+        return False
+
+    temperatures = read_temperatures(sim)
+    if is_within_thermal_limits(sim, temperatures):
+        return False
+
+    # TODO: do we need to store current_light_settings or can we just pick up wherever the stream is at when temps have cooled?
+    previous_light_settings = sim.current_light_settings
+    sim.set_leds(0, 0, 0, 0)
+    print("Temperature too high! Turning off lights for safety.")
+
+    while not has_cooled_down(sim, temperatures):
+        # TODO: don't bother sleeping, just return cooling down message when a message is received during a thermal shutdown event.
+        time.sleep(1)
+        temperatures = read_temperatures(sim)
+        led_temp, heatsink_temp, cell_temp = temperatures
+        print("Cooling down ...")
+        print(f"LED: {led_temp}°C, Heatsink: {heatsink_temp}°C, Cell: {cell_temp}°C")
+
+    print("Temperature back to safe levels. Resuming operation.")
+    if previous_light_settings:
+        sim.set_leds(**previous_light_settings)
 
     return True
 
 
-def check_for_interrupt() -> None:
-    """Listen for keyboard interrupts."""
-    if supervisor.runtime.serial_bytes_available:
-        input_char = sys.stdin.read(1)
+# def check_for_interrupt() -> None:
+#     """Listen for keyboard interrupts."""
+#     if supervisor.runtime.serial_bytes_available:
+#         input_char = sys.stdin.read(1)
 
-        if input_char == '\x03':  # Ctrl-C (ASCII 3)
-            print("\nCtrl-C detected. Turning off LEDs...")
-            Sim.set_leds(0, 0, 0, 0)
-            raise KeyboardInterrupt
+#         if input_char == '\x03':  # Ctrl-C (ASCII 3)
+#             print("\nCtrl-C detected. Turning off LEDs...")
+#             Sim.set_leds(0, 0, 0, 0)
+#             raise KeyboardInterrupt
 
-        print(f"Ignored input: {repr(input_char)}")  # noqa: RUF010
+#         print(f"Ignored input: {repr(input_char)}")  # noqa: RUF010

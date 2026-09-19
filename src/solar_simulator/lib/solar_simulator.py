@@ -7,6 +7,10 @@ import math
 from adafruit_ads1x15.analog_in import AnalogIn
 
 
+class ThermalSensorError(Exception):
+    """Raised when the thermistors cannot be read."""
+
+
 class SolarSimulator:
     """Simulates solar intensity through light device brightness.
 

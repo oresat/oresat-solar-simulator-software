@@ -8,7 +8,7 @@ from ..solar_simulator import SolarSimulator as Sim
 from ..utils import (
     calculate_light_intensity,
     check_for_interrupt,
-    check_temperature,
+    enforce_thermal_limits,
     display_status,
 )
 
@@ -55,7 +55,7 @@ class AutoMode:
             loop_start = time.monotonic()
 
             while True:
-                if check_temperature(self.sim):
+                if enforce_thermal_limits(self.sim):
                     # Calculate current intensity factor
                     intensity_factor = wave[level] * self.peak
 

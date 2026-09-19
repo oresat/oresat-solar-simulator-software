@@ -12,6 +12,10 @@ class StubI2C:
 
 class StubADS1015:
     """Stand-in for `adafruit_ads1x15.ads1015`."""
+
+    gain = 1
+    bits = 12
+
     def read(self, _pin: int) -> int:
         """Return a room temperature reading."""
         return 13200
