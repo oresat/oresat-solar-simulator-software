@@ -18,12 +18,10 @@ class SolarSimulatorApp:
         """Initialize the solar simulator application."""
         self.sim = sim
 
-
     def run(self) -> None:
         """Listen for requests coming in through the console and parse each."""
         for req in sys.stdin:
             self.parse(req.rstrip("\n"))
-
 
     def parse(self, req: str) -> None:
         """Parse a given request (0 - 100) and print the response."""
