@@ -73,7 +73,7 @@ import serial
 
 with serial.Serial("/dev/ttyACM0", baudrate=115200, timeout=1) as conn:
     conn.write(b"50\n")
-    print(conn.readline().decode().rstrip())  # OK 50
+    print(conn.readline().decode())  # OK 50
 ```
 
 ## Libraries

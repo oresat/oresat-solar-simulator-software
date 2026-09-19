@@ -11,6 +11,10 @@ class ThermalSensorError(Exception):
     """Raised when the thermistors cannot be read."""
 
 
+class ThermalValueError(Exception):
+    """Raised when a thermal value is invalid."""
+
+
 class SolarSimulator:
     """Simulates solar intensity through light device brightness.
 
