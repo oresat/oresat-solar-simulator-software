@@ -5,7 +5,10 @@ The app is headless and speaks the following protocol over serial:
 TODO: Document the solar sim app protocol.
 """
 
+import sys
+
 from .solar_simulator import SolarSimulator as Sim
+from .utils import calculate_light_intensity
 
 
 class SolarSimulatorApp:
@@ -48,6 +51,11 @@ class SolarSimulatorApp:
 
         # TODO: WARN THERMAL temperature too high, lights off for safety
 
-        # TODO: Call set_leds
-        self.sim.set_intensity(intensity / 100)
+        levels = calculate_light_intensity(intensity / 100)
+        self.sim.set_leds(
+            v=int(levels["Violet"] * 655),
+            w=int(levels["White"] * 655),
+            c=int(levels["Cyan"] * 655),
+            h=int(levels["Halogen"] * 655),
+        )
         print(f"OK {intensity}")

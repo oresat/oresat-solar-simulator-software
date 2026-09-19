@@ -4,13 +4,7 @@ from __future__ import annotations
 
 import math
 
-import adafruit_ads1x15.ads1015 as ads  # 4-channel ADC
-import adafruit_mcp4728 as mcp  # 12-bit DAC
-import board
 from adafruit_ads1x15.analog_in import AnalogIn
-from busio import I2C
-from micropython import const
-from pwmio import PWMOut
 
 
 class SolarSimulator:
@@ -19,16 +13,13 @@ class SolarSimulator:
     This class abstracts hardware control for the solar simulator lab device.
     """
 
-    def __init__(self, pwm_freq: int = 5000) -> None:
+    def __init__(self, ads, hal, i2c, mcp) -> None:  # noqa: ANN001
         """Initialize the SolarSimulator."""
-        self.PWM_FREQ = pwm_freq
         self.peak = 0.3
-        self.i2c = I2C(board.GP27, board.GP26)
-        self.ads = ads.ADS1015(self.i2c)
-        self.mcp = mcp.MCP4728(self.i2c)
-        self.hal = PWMOut(
-            board.GP28, frequency=self.PWM_FREQ, duty_cycle=0, variable_frequency=True
-        )
+        self.i2c = i2c
+        self.ads = ads
+        self.mcp = mcp
+        self.hal = hal
         self.therm_safe = True
         self.current_light_settings = {'v': 0, 'w': 0, 'c': 0, 'h': 0}
         self.enable_therm_monitoring = True
@@ -64,14 +55,6 @@ class SolarSimulator:
             thermals.append(chan[2])
 
         return thermals
-
-    def _port_scan(self) -> list:
-        """Print all available I2C devices."""
-        self.i2c.try_lock()
-        found = self.i2c.scan()
-        self.i2c.unlock()
-
-        return [hex(i) for i in found]
 
     def _read_thermistors(self) -> list:
         """Read all of the thermistors and return a nested list of data for each channel.
