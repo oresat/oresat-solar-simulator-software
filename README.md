@@ -65,7 +65,6 @@ Resume threshold (all three): 45°C.
 ### Known Limitations
 
 - Only a single 0 to 100 intensity value can be set per request; there's no way to drive one light channel independently of the others.
-- `scripts/cli.py`'s Manual Mode currently accepts values on a 0 to 1 scale instead of 0 to 100, which is inconsistent with the protocol above.
 
 ### Example
 
