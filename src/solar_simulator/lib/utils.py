@@ -81,11 +81,7 @@ def has_cooled_down(sim: Sim, temperatures: tuple) -> bool:
 
 
 def enforce_thermal_limits(sim: Sim) -> bool:
-    """Read the temperatures and change the state of the Solar Sim accordingly.
-
-    True: Lights were turned off
-    False: Nothing needed doing
-    """
+    """Read the temperatures and change the state of the Solar Sim accordingly."""
     if not sim.enable_therm_monitoring:
         return False
 
