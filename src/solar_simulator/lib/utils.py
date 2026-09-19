@@ -55,18 +55,17 @@ def display_status(sim: Sim) -> None:
 
 
 def read_temperatures(sim: Sim) -> tuple:
-    """Return the LED, heatsink, and cell temperatures in Celsius.
-
-    Raise ThermalSensorError when the thermistors cannot be read.
-    """
+    """Return the LED, heatsink, and cell temperatures in Celsius."""
     thermals = sim.check_thermals()
     if not thermals:
         raise ThermalSensorError("Cannot read the temperature sensors")
 
     led_temp, heatsink_temp, cell_temp = thermals
 
-    # TODO: Don't default to freezing temperatures :shivers:
-    return (led_temp or 0, heatsink_temp or 0, cell_temp or 0)
+    if not all(led_temp, heatsink_temp, cell_temp):
+        raise ThermalSensorError("Invalid temperature sensor reading")
+
+    return (led_temp, heatsink_temp, cell_temp)
 
 
 def is_within_thermal_limits(sim: Sim, temperatures: tuple) -> bool:
