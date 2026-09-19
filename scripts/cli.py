@@ -64,8 +64,12 @@ class AutoMode:
         print(f"Maximum light intensity set to: {peak}")
 
         try:
-            period = int(input(f"Please enter desired period of sinusoid "
-                               f"(at least {self.MIN_PERIOD}, in seconds): "))
+            period = int(
+                input(
+                    f"Please enter desired period of sinusoid "
+                    f"(at least {self.MIN_PERIOD}, in seconds): "
+                )
+            )
         except ValueError:
             print("Invalid input. Please enter a whole number of seconds.")
             return
