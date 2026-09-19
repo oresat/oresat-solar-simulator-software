@@ -1,117 +1,54 @@
-"""Solar Simulator Application."""
+"""Solar Simulator Application.
 
-from .modes.auto_mode import AutoMode
-from .modes.basilisk_mode import BasiliskMode
-from .modes.manual_mode import ManualMode
+The app is headless and uses a protocol that is simple for both humans and machines
+to understand. See the README for protocol documentation.
+"""
+
+import sys
+
 from .solar_simulator import SolarSimulator as Sim
-from .utils import input_with_default
+from .solar_simulator import ThermalSensorError
+from .utils import calculate_light_intensity, enforce_thermal_limits
 
 
 class SolarSimulatorApp:
-    """Main application class for the Solar Simulator."""
+    """The Solar Simulator Application."""
 
     def __init__(self, sim: Sim) -> None:
-        """Initialize Solar Simulator App."""
+        """Initialize the solar simulator application."""
         self.sim = sim
 
     def run(self) -> None:
-        """Run the Solar Simulator App."""
-        self.mode_selection()
+        """Listen for requests coming in through the console and parse each."""
+        for req in sys.stdin:
+            self.parse(req.rstrip("\n"))
 
-    def setup(self) -> None:
-        """Set up the cli menu options."""
-        default_settings_summary = (
-            "\nDefault settings are:\n"
-            "  - Thermal Monitoring: "
-            + ("Enabled" if self.sim.enable_therm_monitoring else "Disabled")
-            + "\n"
-            + "  - LED Shutdown Temperature: "
-            + str(self.sim.therm_led_shutdown)
-            + "°C\n"
-            + "  - Heatsink Shutdown Temperature: "
-            + str(self.sim.therm_heatsink_shutdown)
-            + "°C\n"
-            + "  - Cell Shutdown Temperature: "
-            + str(self.sim.therm_cell_shutdown)
-            + "°C\n"
-            + "  - Resume Operation Temperature: "
-            + str(self.sim.therm_resume_temp)
-            + "°C\n"
-        )
+    def parse(self, req: str) -> None:
+        """Parse a given request (0 - 100) and print the response."""
+        if not req:
+            print("ERR EMPTY no intensity value received")
+            return
 
-        change_settings = input_with_default(
-            f"Would you like to change the default settings? (yes/no, default is no): {default_settings_summary}",  # noqa: E501
-            default_value="no",
-            valid_values=["yes", "no"],
-        )
+        try:
+            intensity = int(req)
+        except ValueError:
+            print(f"ERR PARSE invalid intensity value received: {req}")
+            return
 
-        if change_settings == "yes":
-            # Thermal monitoring setting
-            enable_therm_monitoring_input = input_with_default(
-                "Would you like to enable thermal monitoring? (yes/no, default is yes): ",
-                default_value="yes",
-                valid_values=["yes", "no"],
-            )
-            self.sim.enable_therm_monitoring = enable_therm_monitoring_input == "yes"
+        if not 0 <= intensity <= 100:
+            print(f"ERR RANGE intensity value out of range: {req}")
+            return
 
-            # Thermal shutdown temperatures
-            self.sim.therm_led_shutdown = input_with_default(
-                "Set LED shutdown temperature (default is 100°C): ",
-                default_value=100,
-                value_type=int,
-            )
-            self.sim.therm_heatsink_shutdown = input_with_default(
-                "Set Heatsink shutdown temperature (default is 60°C): ",
-                default_value=60,
-                value_type=int,
-            )
-            self.sim.therm_cell_shutdown = input_with_default(
-                "Set Cell shutdown temperature (default is 80°C): ",
-                default_value=80,
-                value_type=int,
-            )
-            self.sim.therm_resume_temp = input_with_default(
-                "Set temperature to resume operation (default is 45°C): ",
-                default_value=45,
-                value_type=int,
-            )
+        self.sim.set_leds(**calculate_light_intensity(intensity / 100))
+
+        try:
+            shut_down = enforce_thermal_limits(self.sim)
+        except ThermalSensorError as error:
+            self.sim.set_leds(0, 0, 0, 0)
+            print(f"ERR THERMAL {error}")
+            return
+
+        if shut_down:
+            print("WARN THERMAL temperature too high, lights off for safety")
         else:
-            print("Using default settings. No changes were made.")
-
-    def mode_selection(self) -> None:
-        """Mode selection menu."""
-        print("Please choose your mode")
-        print("1. Auto Mode")
-        print("2. Manual Mode")
-        print("3. Basilisk Mode")
-        print("4. Thermal setup, if you need")
-
-        while True:
-            mode = input("Your mode (input 1, 2, 3 or 4 if you need change default): ")
-
-            if mode in ["1", "2", "3", "4"]:
-                mode = int(mode)
-            else:
-                print("Invalid input. Please enter 1, 2, or 3.")
-
-            if mode == 1:
-                auto_mode = AutoMode(self.sim)
-                auto_mode.run()
-                break
-
-            if mode == 2:
-                manual_mode = ManualMode(self.sim)
-                manual_mode.run()
-                break
-
-            if mode == 3:
-                basilisk_mode = BasiliskMode(self.sim)
-                basilisk_mode.run()
-                break
-
-            if mode == 4:
-                self.setup()
-                print("Thermal setup completed. Returning to mode selection.\n")
-                continue
-        else:
-            print("Invalid selection, please restart the program and choose 1, 2, or 3.")
+            print(f"OK {intensity}")

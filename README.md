@@ -25,6 +25,57 @@ graph TD
     F -->|B| L[Blue]
 ```
 
+## Serial Protocol
+
+The solar simulator is controlled over a single USB CDC serial connection (e.g. `/dev/ttyACM0`) at 115200 baud. The protocol is plain ASCII text, one message per line, and newline (`\n`) terminated. Every line is a self-contained request.
+
+### Request
+
+Send a single request containing an integer from 0 to 100 (the desired light intensity as a percentage of the simulator's peak output):
+
+```
+50
+```
+
+### Response
+
+The solar simulator replies with exactly one line per request, in one of the following forms:
+
+| Response | Meaning |
+| --- | --- |
+| `OK <intensity>` | The intensity was applied. `<intensity>` echoes the value that was set. |
+| `ERR EMPTY no intensity value received` | An empty line was sent. |
+| `ERR PARSE invalid intensity value received: <input>` | The line could not be parsed as an integer. |
+| `ERR RANGE intensity value out of range: <input>` | The value parsed but was outside 0 to 100. |
+| `ERR THERMAL <message>` | A thermistor could not be read. The lights are forced off. |
+| `WARN THERMAL temperature too high, lights off for safety` | A shutdown threshold was hit (see Thermal Limits). The lights are switched off, the requested intensity is *not* applied, and the board blocks until it cools down before replying. |
+
+### Thermal Limits
+
+Every request also checks the onboard thermistors before it returns. If any reading is above its shutdown threshold, the lights are turned off and the board waits for all readings to fall back to the resume temperature before restoring the previous light levels:
+
+| Thermistor | Shutdown Threshold |
+| --- | --- |
+| LED | 100°C |
+| Heatsink | 60°C |
+| Solar cell | 80°C |
+
+Resume threshold (all three): 45°C.
+
+### Known Limitations
+
+- Only a single 0 to 100 intensity value can be set per request; there's no way to drive one light channel independently of the others.
+
+### Example
+
+```python
+import serial
+
+with serial.Serial("/dev/ttyACM0", baudrate=115200, timeout=1) as conn:
+    conn.write(b"50\n")
+    print(conn.readline().decode())  # OK 50
+```
+
 ## Libraries
 
 - [CircuitPython ulab](https://docs.circuitpython.org/en/latest/shared-bindings/ulab/index.html) - Numpy on a microcontroller
@@ -72,7 +123,7 @@ and follow the instructions under "Learn how to install CircuitPython on this bo
 This project uses [pytest](https://docs.pytest.org/en/stable/). To run the test suite, simply run:
 
 ```sh
-pytest
+pytest tests
 ```
 
 ## Acknowledgements
