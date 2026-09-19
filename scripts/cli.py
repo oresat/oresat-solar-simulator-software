@@ -2,6 +2,8 @@
 
 """Interactive cli for driving the solar simulator from the host over serial."""
 
+from __future__ import annotations
+
 import math
 import time
 
@@ -15,7 +17,7 @@ def main() -> None:
 
         try:
             while True:
-                print("")
+                print()
                 print("1. Auto Mode")
                 print("2. Manual Mode")
                 print("q. Quit")
@@ -72,7 +74,7 @@ class AutoMode:
             print(f"Invalid input. Please enter a number of at least {self.MIN_PERIOD}.")
             return
 
-        wave = self.build_wave(self, self.WAVE_SAMPLES)
+        wave = self.build_wave(self.WAVE_SAMPLES)
         loop_time = period / self.WAVE_SAMPLES
         level = 0
 
@@ -98,7 +100,7 @@ class AutoMode:
             print("\nExiting Auto Mode.")
 
     @staticmethod
-    def build_wave(self, samples: int) -> list:
+    def build_wave(samples: int) -> list:
         """Return one period of an inverted cosine, clamped at zero, scaled 0 to 1."""
         return [max(0.0, -math.cos(2 * math.pi * i / (samples - 1))) for i in range(samples)]
 
@@ -133,9 +135,11 @@ class ManualMode:
     @staticmethod
     def parse_intensity(entry: str) -> int | None:
         """Return the entry as an intensity from 0 to 100, or None."""
-        # TODO: The original 'Manual Mode' takes intensity vals 0-1, which is odd, because it breaks the pattern we expect everywhere else (an integer 0-100). Fix.
+        # TODO: The original 'Manual Mode' takes intensity vals 0-1, which is odd, because it
+        # breaks the pattern we expect everywhere else (an integer 0-100). Fix.
 
-        # TODO: Manual Mode should be able to manually adjust individual light intensities, but that's not something the protocol can handle as implemented. Fix.
+        # TODO: Manual Mode should be able to manually adjust individual light intensities, but
+        # that's not something the protocol can handle as implemented. Fix.
         try:
             intensity = int(entry)
         except ValueError:

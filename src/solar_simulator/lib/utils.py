@@ -1,9 +1,6 @@
 """Utility functions for Solar Simulator."""
 
-import sys
 import time
-
-import supervisor
 
 from .solar_simulator import SolarSimulator as Sim
 from .solar_simulator import ThermalSensorError
@@ -96,13 +93,15 @@ def enforce_thermal_limits(sim: Sim) -> bool:
     if is_within_thermal_limits(sim, temperatures):
         return False
 
-    # TODO: do we need to store current_light_settings or can we just pick up wherever the stream is at when temps have cooled?
+    # TODO: do we need to store current_light_settings or can we just pick up wherever the
+    # stream is at when temps have cooled?
     previous_light_settings = sim.current_light_settings
     sim.set_leds(0, 0, 0, 0)
     print("Temperature too high! Turning off lights for safety.")
 
     while not has_cooled_down(sim, temperatures):
-        # TODO: don't bother sleeping, just return cooling down message when a message is received during a thermal shutdown event.
+        # TODO: don't bother sleeping, just return cooling down message when a message is
+        # received during a thermal shutdown event.
         time.sleep(1)
         temperatures = read_temperatures(sim)
         led_temp, heatsink_temp, cell_temp = temperatures
