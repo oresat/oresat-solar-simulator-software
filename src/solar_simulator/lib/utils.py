@@ -57,27 +57,6 @@ def display_status(sim: Sim) -> None:
     print(f"{temp_info} | {light_info}", end="\n")
 
 
-# def input_with_default(
-#     prompt: str, default_value: str, valid_values: None, value_type: str
-# ) -> None:
-#     """Get user input with a default value and optional validation."""
-#     while True:
-#         user_input = input(prompt).strip().lower()
-
-#         if user_input == "":
-#             return default_value
-#         try:
-#             value = value_type(user_input)
-#             if valid_values and value not in valid_values:
-#                 raise ValueError  # noqa: TRY301
-#             return value  # noqa: TRY300
-#         except ValueError:
-#             print("Invalid input. Please enter one of the following:")
-#             print(f"\t{valid_values} or press Enter for default.")
-#         except NameError:
-#             print(f"Please enter a valid {value_type.__name__} value or press Enter for default.")
-
-
 def read_temperatures(sim: Sim) -> tuple:
     """Return the LED, heatsink, and cell temperatures in Celsius.
 
@@ -135,16 +114,3 @@ def enforce_thermal_limits(sim: Sim) -> bool:
         sim.set_leds(**previous_light_settings)
 
     return True
-
-
-# def check_for_interrupt() -> None:
-#     """Listen for keyboard interrupts."""
-#     if supervisor.runtime.serial_bytes_available:
-#         input_char = sys.stdin.read(1)
-
-#         if input_char == '\x03':  # Ctrl-C (ASCII 3)
-#             print("\nCtrl-C detected. Turning off LEDs...")
-#             Sim.set_leds(0, 0, 0, 0)
-#             raise KeyboardInterrupt
-
-#         print(f"Ignored input: {repr(input_char)}")  # noqa: RUF010
