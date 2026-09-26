@@ -14,6 +14,9 @@ from pwmio import PWMOut
 
 MAX_VALUE = const(65535)
 
+SCL_PIN = board.D5
+SDA_PIN = board.D4
+PWM_PIN = board.D2
 
 class SolarSimulator:
     """Simulates solar intensity through light device brightness.
@@ -25,11 +28,11 @@ class SolarSimulator:
         """Initialize the SolarSimulator."""
         self.PWM_FREQ = pwm_freq
         self.peak = 0.3
-        self.i2c = I2C(board.GP27, board.GP26)
+        self.i2c = I2C(SCL_PIN, SDA_PIN)
         self.ads = ads.ADS1015(self.i2c)
         self.mcp = mcp.MCP4728(self.i2c)
         self.hal = PWMOut(
-            board.GP28,
+            PWM_PIN,
             frequency=self.PWM_FREQ,
             duty_cycle=0,
             variable_frequency=True
