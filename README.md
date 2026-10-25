@@ -25,13 +25,6 @@ graph TD
     F -->|B| L[Blue]
 ```
 
-## Libraries
-
-- [CircuitPython ulab](https://docs.circuitpython.org/en/latest/shared-bindings/ulab/index.html) - Numpy on a microcontroller
-- [CircuitPython pwmio](https://docs.circuitpython.org/en/latest/shared-bindings/pwmio/index.html) - Controls the halogen bulb
-- [Adafruit Python MCP4728](https://github.com/adafruit/Adafruit_CircuitPython_MCP4728) - Controls each of the LED light channels
-- [Adafruit Python ADS1X15](https://github.com/Ayush2309/Adafruit_ADS) - Reads all of the onboard thermocouples and photodiode on the simulator
-
 ## Pre-Installation
 
 Flashing the CircuitPython firmware onto the Raspberry Pi Pico is a well documented exercise.
@@ -51,21 +44,33 @@ and follow the instructions under "Learn how to install CircuitPython on this bo
     pip install --group dev -e .
     ```
 
-## Build
-
-1.  Cross-compile and build the distribution.
-
-    ```sh
-    make build
-    ```
-
-## Write
-
-1.  Write to the Raspberry Pi Pico board attached via USB to your machine.
+3. Write the firmware to a Solar Simulator board attached via USB to your machine.
 
     ```sh
     make write
     ```
+
+## Interact
+
+The scripts in `scripts` should be used to interact with the simulator.
+ - auto.py cycles through a sinusoidal BBQ cycle.
+ - manual.py gives various ways of setting a fixed intensity.
+
+## Protocol
+
+The solar simulator is controlled via a USB CDC serial link (typically `/dev/ttyACM0`). Messages
+are plain ASCII lines.
+
+### Requests
+
+- A single floating point intensity value between 0 and 1, for example `0.75`. This scales the lights to be as close to the sun spectrum as it can at the given intensity
+
+- Four integers between 0 and 65535, setting the violet, white, cyan, and halogen values respectively. For example `10000 0 0 0`.
+
+### Responses
+
+- A successful request is acknowledged with `OK` and then the values set. `OK 0.75`
+- Errors are reported with `ERR` and then a subtype and a short description. `ERR THERM thermal overheat`
 
 ## Testing
 

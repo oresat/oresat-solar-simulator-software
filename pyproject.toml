@@ -4,10 +4,14 @@ description = "Software for the PSAS Solar Simulator used for testing OreSat."
 version = "0.1.0"
 requires-python = ">=3.12"
 license = { text = "GPL-3.0" }
+
+# Remember to add any new python dependencies to the Makefile as well
 dependencies = [
     "adafruit-circuitpython-ads1x15",
+    "adafruit-circuitpython-asyncio",
     "adafruit-circuitpython-mcp4728",
     "circuitpython-build-tools",
+    "pyserial",
 ]
 
 [dependency-groups]
@@ -18,9 +22,6 @@ dev = [
     "ruff",
 ]
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-
 [tool.ruff]
 line-length = 100
 target-version = "py37"
@@ -28,34 +29,48 @@ target-version = "py37"
 [tool.ruff.format]
 quote-style = "preserve"
 
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
     # See https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
-    "Q000",     # bad-quotes-inline-string
-    "Q002",     # bad-quotes-docstring
-    "D300",     # triple-single-quotes
-    "COM812",   # prohibited-trailing-comma
-    "ISC001",   # single-line-implicit-string-concatenation
-    "D102",     # undocumented-public-method
-    "D105",     # undocumented-magic-method
-    "D203",     # one-blank-line-before-class
-    "D213",     # multi-line-summary-second-line
+    "W191",   # tab-indentation
+    "E111",   # indentation-with-invalid-multiple
+    "E114",   # indentation-with-invalid-multiple-comment
+    "E117",   # over-indented
+    "D203",   # incorrect-blank-line-before-class
+    "D206",   # docstring-tab-indentation
+    "D300",   # triple-single-quotes
+    "Q000",   # bad-quotes-inline-string
+    "Q001",   # bad-quotes-multiline-string
+    "Q002",   # bad-quotes-docstring
+    "Q003",   # avoidable-escaped-quote
+    "Q004",   # unnecessary-escaped-quote
+    "COM812", # missing-trailing-comma
+    "COM819", # prohibited-trailing-comma
+
+    # Stylistic choices
     "FIX",      # flake8-fixme
-    "T201",     # print statements are acceptable
-    "TC001",    # typing-only-first-party-import
     "TD001",    # invalid-todo-tag
     "TD002",    # missing-todo-author
     "TD003",    # missing-todo-link
     "TD004",    # missing-todo-colon
+
+    "TC001",    # typing-only-first-party-import
+    "TC002",    # typing-only-third-party-import
+    "T201",     # print statements are acceptable
     "TID252",   # relative imports are fine
     "EM101",    # raw-string-in-exception
     "EM102",    # f-string-in-exception
-    "D413",     # blank-line-after-last-section
     "TRY003",   # raise-vanilla-args
     "PLR2004",  # magic value used in comparison
     "PLR0911",  # too many return statements
     "CPY001",   # missing-copyright-notice
+
+    "D",
+    "ERA001",
 ]
 
 [tool.ruff.lint.per-file-ignores]

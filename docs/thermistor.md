@@ -1,6 +1,6 @@
 # Thermistor Temperature Measurement
 
-The OreSat live / DxWiFi Card has an NTC thermistor on it. How do we use that? In this guide, you'll learn the math behind reading temperature from thermocouples.
+The Solar Simulator has three NTC thermistors on it. How do we use that? In this guide, you'll learn the math behind reading temperature from thermocouples.
 
 ## The Sensor
 
@@ -28,7 +28,7 @@ $V_{OUT} = (10000{\Omega} / (R_{TH} + 10000{\Omega})) * 3.3V$
 
 $R_{TH} = V_{OUT} * R / (V_{IN} - V_{OUT})$
 
-$R_{TH} = V_{ADC} * 10000{\Omega} / (1.8V - V_{ADC}) [1]$
+$R_{TH} = V_{ADC} * 10000{\Omega} / (3.3V - V_{ADC}) [1]$
 
 That last equation is all we really need, and implementing it should be pretty straight forward. The outcome is the resistance in ohms.
 
